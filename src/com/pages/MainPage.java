@@ -156,7 +156,6 @@ public class MainPage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = ((LinkButton)oComp).getLink();
-                        System.out.println("link URL: "+url);
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);

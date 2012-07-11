@@ -53,10 +53,6 @@ public class ArticlePage extends BasePage {
         cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
         
         m_vArticleStack = new Vector();
-        String[] toAdd = new String[2];
-        toAdd[0] = _sTitle;
-        toAdd[1] = "0";
-        m_vArticleStack.addElement(toAdd);
         
         if(!m_bIsLoaded) {
             //TODO: make error dialog.
@@ -73,6 +69,10 @@ public class ArticlePage extends BasePage {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
                     if(m_oData == null) {
+                        String[] toAdd = new String[2];
+                        toAdd[0] = m_sTitle;
+                        toAdd[1] = "0";
+                        m_vArticleStack.addElement(toAdd);
                         NetworkController.getInstance().performSearch(m_sTitle,  "0");
                     }else {
                         addData(m_oData);
@@ -150,7 +150,6 @@ public class ArticlePage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = ((LinkButton)oComp).getLink();
-                        System.out.println("link URL: "+url);
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);                            
@@ -180,14 +179,11 @@ public class ArticlePage extends BasePage {
                                 for(int i = 0; i < arrayLevel + 1; i++) {
                                     m_sCurrentSections += "|" + m_iToRequest[i];
                                 }
-                                if(m_vArticleStack.size() > 0) {
-                                    m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
-                                }
+                                
                                 String[] toAdd = new String[2];
                                 toAdd[0] = m_sTitle;
                                 toAdd[1] = m_sCurrentSections;
                                 m_vArticleStack.addElement(toAdd);
-                                m_vArticleStack.addElement(section);
                                 NetworkController.getInstance().performSearch(m_sTitle,  m_sCurrentSections);
                             }
                         }//end if(section instanceof SectionComponentItem)
