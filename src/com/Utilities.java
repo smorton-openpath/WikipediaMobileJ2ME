@@ -46,10 +46,12 @@ public class Utilities {
     }//end replace(String needle, String replacement, String haystack)
     
     public static String stripSlash(String _sHaystack) {
+        System.out.println("   ---   stripping from " + _sHaystack);
         String result = "";
         int index = _sHaystack.indexOf('\\');
         while(index > 0 && index + 1 < _sHaystack.length()) {
             String temp = _sHaystack.substring(0, index);
+            boolean foundU = false;
             switch((char)_sHaystack.charAt(index+1)) {
                 case '\"':
                     temp += '\"';
@@ -72,10 +74,20 @@ public class Utilities {
                 case '/':
                     temp += '/';
                     break;
+                case 'u':
+                    foundU = true;
+                    break;
             }
-            temp += _sHaystack.substring(index + 2);
-            _sHaystack = temp;
-            index = _sHaystack.indexOf('\\');
+            if(index > 0) {
+                if(foundU) {
+                    temp += com.sun.lwuit.html.HTMLUtils.convertHTMLCharEntity("#x" + _sHaystack.substring(index + 2, index + 6));
+                    temp += _sHaystack.substring(index + 6);
+                } else {
+                    temp += _sHaystack.substring(index + 2);
+                }
+                _sHaystack = temp;
+                index = _sHaystack.indexOf('\\');
+            }
         }
         return _sHaystack;
     }//end replace(String needle, String replacement, String haystack)
