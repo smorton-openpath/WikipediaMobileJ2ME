@@ -29,6 +29,10 @@ public class ArticlePage extends BasePage {
     //private final int Command_Privacy = Command_Terms + 1;
     private final int COMMAND_HOME = COMMAND_BOOKMARK + 1;
     
+    private Vector m_vArticleStack;
+    
+    private Label cTitleLabel;
+    
     //Lwuit Commands:   
     JsonObject m_oData = null;
     String m_sTitle = "";
@@ -36,8 +40,23 @@ public class ArticlePage extends BasePage {
     TextField searchTextField = null;
     
     Hashtable m_oComponentList = new Hashtable();
+    
+    private int[] m_iToRequest = new int[6];
+    
+    public int[] getRequestInts() {
+        return m_iToRequest;
+    }
+    
     public ArticlePage(String _sTitle, JsonObject _oData) {
         super("ArticlePageForm", PAGE_MAIN);
+        
+        cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
+        
+        m_vArticleStack = new Vector();
+        String[] toAdd = new String[2];
+        toAdd[0] = _sTitle;
+        toAdd[1] = "0";
+        m_vArticleStack.addElement(toAdd);
         
         if(!m_bIsLoaded) {
             //TODO: make error dialog.
@@ -48,11 +67,7 @@ public class ArticlePage extends BasePage {
         m_sTitle = _sTitle;
         try {
             //Create dynamic components here.
-            Label cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
-            if(cTitleLabel != null) {
-                String realTitle = _sTitle.replace('_', ' ');
-                cTitleLabel.setText(realTitle);
-            }
+            
             
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
@@ -74,12 +89,9 @@ public class ArticlePage extends BasePage {
     
     public void updateSoftkeys() {
         int i = 0;
-        if(true){
-            return;
-        }
         m_cForm.removeAllCommands();
         String  str = "";
-        str = mainMIDlet.getString("ExitSK");
+        str = mainMIDlet.getString("BackSK");
         m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         str = mainMIDlet.getString("SearchSK");
         m_cForm.addCommand(new Command(str, COMMAND_SEARCH), i++);
@@ -113,7 +125,13 @@ public class ArticlePage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
-                    mainMIDlet.pageBack();
+                    if(m_vArticleStack != null && m_vArticleStack.size() > 0) {
+                        String[] titleAndSections = (String[])m_vArticleStack.lastElement();
+                        NetworkController.getInstance().performSearch(titleAndSections[0], titleAndSections[1]);
+                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
+                    } else {
+                        mainMIDlet.setCurrentPage(new MainPage());
+                    }
                 break;
             case COMMAND_SEARCH:
                     mainMIDlet.setCurrentPage(new SearchPage());
@@ -138,14 +156,21 @@ public class ArticlePage extends BasePage {
                             {
                                 sectionItem.setActive(false);
                             }else {
-                                if(sectionItem.getParentID().length() <= 0 
-                                        || m_sCurrentSections.indexOf(sectionItem.getParentID()) <= -1) 
-                                {
-                                    
-                                    //TODO: This does not take into account closing siblings.
-                                    m_sCurrentSections = "0";
+                                int arrayLevel = Integer.parseInt(sectionItem.getTag()) - 1;
+                                m_iToRequest[arrayLevel] = Integer.parseInt(sID);
+                                m_sCurrentSections = "0";
+                                
+                                for(int i = 0; i < arrayLevel + 1; i++) {
+                                    m_sCurrentSections += "|" + m_iToRequest[i];
                                 }
-                                m_sCurrentSections += "|"+sID;
+                                if(m_vArticleStack.size() > 0) {
+                                    m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
+                                }
+                                String[] toAdd = new String[2];
+                                toAdd[0] = m_sTitle;
+                                toAdd[1] = m_sCurrentSections;
+                                m_vArticleStack.addElement(toAdd);
+                                m_vArticleStack.addElement(section);
                                 NetworkController.getInstance().performSearch(m_sTitle,  m_sCurrentSections);
                             }
                         }//end if(section instanceof SectionComponentItem)
@@ -176,18 +201,34 @@ public class ArticlePage extends BasePage {
     public void addData(Object _results) {
         if(_results == null) {
             //We have nothing, make the data call.
+            String[] toAdd = new String[2];
+            toAdd[0] = m_sTitle;
+            toAdd[1] = m_sCurrentSections;
+            m_vArticleStack.addElement(toAdd);
             NetworkController.getInstance().performSearch(m_sTitle, m_sCurrentSections);
         }
+        
+        m_sTitle = Utilities.getNormalizedTitleFromJSON((JsonObject)_results);
+        System.out.println("   ---   in addData, title is " + m_sTitle);
+        if(cTitleLabel != null) {
+            String realTitle = m_sTitle.replace('_', ' ');
+            cTitleLabel.setText(realTitle);
+        }
+
         Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
+        Integer highestTocSoFar = new Integer(1);
         if(m_cContentContainer != null && sections != null && sections.size() > 0)
         {
             m_cContentContainer.removeAll();
             //Deal with the main article text first.
-            
+           
             Object oTextItem = sections.firstElement();
             if(oTextItem instanceof JsonObject) {
                 String sText = (String)((JsonObject)oTextItem).get("text");
                 sText = Utilities.stripSlash(sText);
+                
+                
+                
                 HTMLComponentItem oHTMLItem = new HTMLComponentItem(sText);
                 HTMLComponent cTextComp = (HTMLComponent)oHTMLItem.getComponent();
                 if(cTextComp != null) {
@@ -200,7 +241,8 @@ public class ArticlePage extends BasePage {
                             int wikiIdx = url.indexOf("/wiki/");
                             if(wikiIdx >= 0) {
                                 String title = url.substring(wikiIdx + 6);
-                                mainMIDlet.setCurrentPage(new ArticlePage(title, null));
+                                NetworkController.getInstance().performSearch(title, "0");
+                                //mainMIDlet.setCurrentPage(new ArticlePage(title, null));
                             }
                             return false;
                         }
@@ -209,19 +251,22 @@ public class ArticlePage extends BasePage {
                     m_cContentContainer.addComponent(cTextComp);
                 }
             }//end if(oTextItem instanceof JsonObject)
-            
+           
             //Add in the other sections
             //Since we can cascade through sub-sections, we are using an Array to denote which level should get the child.
             //TODO: There must be a better way to do this.
             SectionComponentItem[] aSections = new SectionComponentItem[6];
             for(int i = 1; i < sections.size(); i++) {
+                //System.out.println(sections.elementAt(i));
                 JsonObject oSection = (JsonObject)sections.elementAt(i);
                 String sTitle = (String)oSection.get("line");
                 String sText = (String)oSection.get("text");
                 boolean bActive = false;
-                if(sText != null && sText.length() > 0) {
+                
+                if(sText != null) {
                     bActive = true;
                 }
+                
                 String sTocLevel = oSection.getString("toclevel");
                 String sNumber = oSection.getString("number");
                 //String sLevel = oSection.getString("level");
@@ -231,7 +276,7 @@ public class ArticlePage extends BasePage {
                 if(arrayLevel == 0 || (arrayLevel > 0 && aSections[arrayLevel - 1] != null 
                         && aSections[arrayLevel - 1].isActive())) 
                 {
-                    SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sNumber);
+                    SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sTocLevel);
                     Component cSectionComp = sectionItem.createComponent(sTitle, bActive, Integer.parseInt(sTocLevel));
                     if(cSectionComp != null) {
                         m_oComponentList.put(new Integer(40 + i), sectionItem);
@@ -242,6 +287,14 @@ public class ArticlePage extends BasePage {
                         }
                         //set this item into the array and set it to the child of the parent.
                         aSections[arrayLevel] = sectionItem;
+
+                        //System.out.println(sText);
+                        
+                        if(sText != null && !(sText.length() < 1)) {
+                            //TODO: Need to strip out the <h2> tag at the beginning
+                            sectionItem.addText(sText);
+                        }
+                        
                         if(arrayLevel == 0) {
                             m_cContentContainer.addComponent(cSectionComp);
                         }else {
