@@ -10,6 +10,8 @@ import com.sun.lwuit.events.*;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.html.DefaultHTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
+import com.sun.lwuit.html.HTMLParser;
+import com.sun.lwuit.html.HTMLUtils;
 
 
 import java.util.Vector;

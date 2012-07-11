@@ -127,7 +127,7 @@ public class BasePage implements ActionListener {
     }//end addData(Object _results)
     
     public void failedNetwork(int _iResponse) {
-        //System.out.println("showing Failure");
+        //System.out.println("   ---   showing Failure");
         try {
             String netErrorTitle = mainMIDlet.getString("NetErrorTitle");
             m_cFailDialog = new Dialog(netErrorTitle);
@@ -143,14 +143,26 @@ public class BasePage implements ActionListener {
 
                 String netErrorText = mainMIDlet.getString("NetErrorText");
                 TextArea text = new TextArea(netErrorText);
-                //text.setUIID("LabelClear");
+                text.setUIID("Label");
                 text.setEditable(false);
                 m_cFailDialog.addComponent(text);
                 
                 /*if(mainMIDlet.phoneType == mainMIDlet.TYPE_S60) {
                     m_cFailDialog.show(195, 196, 55, 56, false, true);
                 }else*/
-                    m_cFailDialog.show(10, 10, 10, 10, false);
+              //      m_cFailDialog.show(10, 10, 10, 10, false);
+                    
+                int width = Display.getInstance().getDisplayWidth();
+                int height = Display.getInstance().getDisplayHeight();
+                // Devices with very small screens should use showmodeless instead
+                if(height < 130) {
+                        m_cFailDialog.showModeless();
+                } else {
+                        m_cFailDialog.show(height/5, height/5, width/16, width/16, false, false);
+                }
+                
+                    
+                
             }
             //throw new RuntimeException("base failed");
         } catch (Exception e ) {

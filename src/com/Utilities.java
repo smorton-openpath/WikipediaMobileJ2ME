@@ -46,7 +46,6 @@ public class Utilities {
     }//end replace(String needle, String replacement, String haystack)
     
     public static String stripSlash(String _sHaystack) {
-        System.out.println("   ---   stripping from " + _sHaystack);
         String result = "";
         int index = _sHaystack.indexOf('\\');
         while(index > 0 && index + 1 < _sHaystack.length()) {
