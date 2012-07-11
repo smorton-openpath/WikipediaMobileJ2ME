@@ -26,13 +26,14 @@ public class LinkButton extends Button {
         super();
         
     }
+    
     public LinkButton(String _sText, String _sLink) {
         super(_sText);
         setCommand(_sText);
         m_sLink = _sLink;
     }
     public void setCommand(String _sText) {
-        Command test = new Command(_sText, -1);
+        Command test = new Command(_sText, com.pages.BasePage.COMMAND_LINK);
         this.setCommand(test);
     }
     

@@ -18,6 +18,7 @@ import com.NetworkController;
 import com.HTMLComponentItem;
 import com.Utilities;
 import com.JsonObject;
+import com.LinkButton;
 /**
  *
  * @author caxthelm
@@ -42,7 +43,7 @@ public class MainPage extends BasePage {
         }
         try {
             //Create dynamic components here.
-            
+                     
             m_cSearchTextField = (TextField)mainMIDlet.getBuilder().findByName("SearchTextField", m_cHeaderContainer);
             m_cSearchButton = (Button)mainMIDlet.getBuilder().findByName("SearchIconButton", m_cHeaderContainer);            
             if(m_cSearchButton != null) {
@@ -89,11 +90,7 @@ public class MainPage extends BasePage {
     }//end SearchPage()
     
     public void updateSoftkeys() {
-        int i = 0;
-        if(true){
-            return;
-        }
-        m_cForm.removeAllCommands();
+        int i = 0;m_cForm.removeAllCommands();
         String  str = "";
         /*if(!mainMIDlet.isTouchEnabled()) {
             str = mainMIDlet.getString("SearchSK");
@@ -154,6 +151,19 @@ public class MainPage extends BasePage {
                     }
                 }
                 break;
+            case COMMAND_LINK: //internal links
+                {
+                    Component oComp = ae.getComponent();
+                    if(oComp instanceof LinkButton) {
+                        String url = ((LinkButton)oComp).getLink();
+                        System.out.println("link URL: "+url);
+                        int wikiIdx = url.indexOf("/wiki/");
+                        if(wikiIdx >= 0) {
+                            String title = url.substring(wikiIdx + 6);
+                            mainMIDlet.setCurrentPage(new ArticlePage(title, null));
+                        }
+                    }
+                }
             default://dealing with the dynamic events
                 {
                 }
@@ -193,24 +203,10 @@ public class MainPage extends BasePage {
             if(oTextItem instanceof JsonObject) {
                 String sText = (String)((JsonObject)oTextItem).get("text");
                 sText = Utilities.stripSlash(sText);
-                HTMLComponentItem oHTMLItem = new HTMLComponentItem(sText);
-                Container cTextComp = (Container)oHTMLItem.getComponent();
+                HTMLComponentItem oHTMLItem = new HTMLComponentItem();
+                
+                Component cTextComp = oHTMLItem.createComponent(sText);
                 if(cTextComp != null) {
-                    //cTextComp.setPageUIID("Label");
-                    /*cTextComp.setHTMLCallback(new DefaultHTMLCallback()
-                    {
-                        public boolean linkClicked(HTMLComponent htmlC, java.lang.String url) 
-                        {
-                            System.out.println("link: "+url);
-                            int wikiIdx = url.indexOf("/wiki/");
-                            if(wikiIdx >= 0) {
-                                String title = url.substring(wikiIdx + 6);
-                                mainMIDlet.setCurrentPage(new ArticlePage(title, null));
-                            }
-                            return false;
-                        }
-
-                    });*/
                     articleCont.addComponent(cTextComp);
                 }
             }

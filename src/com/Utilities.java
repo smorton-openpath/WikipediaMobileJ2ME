@@ -12,6 +12,7 @@ import com.sun.lwuit.Button;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Component;
+import com.sun.lwuit.events.ActionListener;
 /**
  *
  * @author caxthelm
@@ -86,10 +87,10 @@ public class Utilities {
         boolean isBold = false;
         boolean isItalic = false;
         boolean isHeader = false;
-        boolean isLink = false;
         boolean hasLeadingSpace = false;
         int iListOrder = -1; //-1 for no list, 0 for unordered list
         Container cCurrentCont = null;
+        String sCurrentLink = null;
         while( _sText.length() > 0) {
             String word = "";
             int nextIdx = 0;
@@ -127,9 +128,17 @@ public class Utilities {
                 }
                 if(tag.equalsIgnoreCase("a")) { //images & links
                     if(isEndTag) {
-                        isLink = false;
+                        sCurrentLink = null;
                     }else {
-                        isLink = true;
+                        int startImgIdx = _sText.indexOf("title=\"")+7;
+                        int endImgIdx = _sText.indexOf("\"", startImgIdx);
+                        String titleText = _sText.substring(startImgIdx, endImgIdx);
+
+                        startImgIdx = _sText.indexOf("href=\"")+6;
+                        endImgIdx = _sText.indexOf("\"", startImgIdx);
+                        String linkText = _sText.substring(startImgIdx, endImgIdx);
+
+                        sCurrentLink = linkText;
                     }
                 } else if(tag.equalsIgnoreCase("b")) { //divs we don't need.
                     if(isEndTag) {
@@ -148,8 +157,7 @@ public class Utilities {
                     String srcText = _sText.substring(startImgIdx, endImgIdx);
                     
                     LinkButton newLink = new LinkButton(altText, srcText);
-                    newLink.setUIID("SoftButton");
-                    System.out.println("style: "+newLink.getUIID());
+                    newLink.setUIID("LabelButtonLink");
                     if(cCurrentCont != null) {
                         cCurrentCont.addComponent(newLink);
                     }else {
@@ -217,10 +225,10 @@ public class Utilities {
                 //text = text.trim();
                 //text = "\n"+com.sun.lwuit.html.HTMLUtils.encodeString(text);
                 Component newComp = null;
-                if(isLink) {
-                    LinkButton newLink = new LinkButton(text, "");
+                if(sCurrentLink != null && sCurrentLink.length() > 0) {
+                    LinkButton newLink = new LinkButton(text, sCurrentLink);
+                    newLink.setUIID("LabelButtonLink");
                     newComp = newLink;
-                    newLink.setUIID("SoftButton");
                 }else {
                     Label newLabel = new Label(text);
                     newLabel.setUIID("No_Margins");
@@ -259,5 +267,9 @@ public class Utilities {
             }
         }
         return vReturnVec;
+    }
+    
+    public static String getNormalizedTitleFromJSON(JsonObject _oJson) {
+        return ((JsonObject)((JsonObject)_oJson).get("mobileview")).getString("normalizedtitle");
     }
 }
