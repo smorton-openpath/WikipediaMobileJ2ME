@@ -151,6 +151,18 @@ public class MainPage extends BasePage {
                     }
                 }
                 break;
+            case COMMAND_IMAGE:
+                {
+                    Component oComp = ae.getComponent();
+                    if(oComp instanceof LinkButton) {
+                        String url = "http:"+((LinkButton)oComp).getLink();
+                        int sizeIdx = url.indexOf("px");//TODO: make this work better without giving errors.
+                        
+                        System.out.println("url: "+url);
+                        mainMIDlet.setCurrentPage(new ImageDialog(((LinkButton)oComp).getOtherInfo(), url));
+                    }
+                }
+                break;
             case COMMAND_LINK: //internal links
                 {
                     Component oComp = ae.getComponent();

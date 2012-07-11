@@ -145,6 +145,16 @@ public class ArticlePage extends BasePage {
             case COMMAND_HOME:
                     mainMIDlet.setCurrentPage(new MainPage(), true);
                 break;
+            case COMMAND_IMAGE:
+                {
+                    Component oComp = ae.getComponent();
+                    if(oComp instanceof LinkButton) {
+                        String url = "http:"+((LinkButton)oComp).getLink();
+                        System.out.println("url: "+url);
+                        mainMIDlet.setCurrentPage(new ImageDialog(((LinkButton)oComp).getOtherInfo(), url));
+                    }
+                }
+                break;
             case COMMAND_LINK: //internal links
                 {
                     Component oComp = ae.getComponent();
@@ -152,7 +162,8 @@ public class ArticlePage extends BasePage {
                         String url = ((LinkButton)oComp).getLink();
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
-                            String title = url.substring(wikiIdx + 6);                            
+                            String title = url.substring(wikiIdx + 6);
+                            System.out.println("linkTitle: "+title);
                             String[] toAdd = new String[2];
                             toAdd[0] = title;
                             toAdd[1] = "0";
@@ -219,6 +230,7 @@ public class ArticlePage extends BasePage {
             toAdd[1] = m_sCurrentSections;
             m_vArticleStack.addElement(toAdd);
             NetworkController.getInstance().performSearch(m_sTitle, m_sCurrentSections);
+            return;
         }
         
         m_sTitle = Utilities.getNormalizedTitleFromJSON((JsonObject)_results);

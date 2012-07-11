@@ -4,13 +4,14 @@
  */
 package com;
 
-import java.util.Vector;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.events.ActionListener;
+
+import java.util.Vector;
 import java.util.Stack;
 
 /**
@@ -42,7 +43,7 @@ public class HTMLComponentItem extends ComponentItem {
     
     
     
-    public static Vector chopHTMLString(String _sText) {
+    private static Vector chopHTMLString(String _sText) {
         Vector vOutput = new Vector();
         Stack stLastTags = new Stack();
         char[] breakItems = {' ', '\n', '\t', '<'};
@@ -120,8 +121,8 @@ public class HTMLComponentItem extends ComponentItem {
                     endImgIdx = _sText.indexOf("\"", startImgIdx);
                     String srcText = _sText.substring(startImgIdx, endImgIdx);
                     
-                    LinkButton newLink = new LinkButton(altText, srcText);
-                    newLink.setUIID("LabelButtonLink");
+                    ImageButton newLink = new ImageButton(altText, srcText);
+                    //newLink.setUIID("LabelButtonLink");
                     if(cCurrentCont != null) {
                         cCurrentCont.addComponent(newLink);
                     }else {
@@ -229,8 +230,8 @@ public class HTMLComponentItem extends ComponentItem {
             }
             _sText = _sText.substring(nextIdx);
             //_sText = _sText.trim();
-        }
+        }//end while( _sText.length() > 0)
         return vOutput;
-    }
+    }//end chopHTMLString(String _sText)
 }
 

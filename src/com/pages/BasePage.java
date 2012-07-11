@@ -35,6 +35,7 @@ public class BasePage implements ActionListener {
     public static final int COMMAND_LEFT = 2;
     public static final int COMMAND_OK = -1;
     public static final int COMMAND_LINK = -2;
+    public static final int COMMAND_IMAGE = -3;
     //commands 10 through 29 are reserved for common IDs
     public static final int COMMAND_SEARCHBUTTON = 20;
     //Commands 30+ are dynamic commands.
