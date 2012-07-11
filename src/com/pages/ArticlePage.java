@@ -95,9 +95,9 @@ public class ArticlePage extends BasePage {
         m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         str = mainMIDlet.getString("SearchSK");
         m_cForm.addCommand(new Command(str, COMMAND_SEARCH), i++);
-        str = mainMIDlet.getString("SavePageSK");
+        str = mainMIDlet.getString("SavepageSK");
         m_cForm.addCommand(new Command(str, COMMAND_SAVEPAGE), i++);
-        str = mainMIDlet.getString("BookMarkSK");
+        str = mainMIDlet.getString("BookmarkSK");
         m_cForm.addCommand(new Command(str, COMMAND_BOOKMARK), i++);
         //str = mainMIDlet.getString("PrivacySK");
         //mForm.addCommand(new Command(str, Command_Privacy), Command_Privacy);
