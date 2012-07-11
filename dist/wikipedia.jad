@@ -1,6 +1,10 @@
 MIDlet-1: Wikipedia,/icon_32x.png,com.mainMIDlet
 MIDlet-Data-Size: 26500
+<<<<<<< HEAD
 MIDlet-Jar-Size: 966343
+=======
+MIDlet-Jar-Size: 966234
+>>>>>>> faccfae7d65aeb97d83f40ef0946ac6f0b475803
 MIDlet-Jar-URL: wikipedia.jar
 MIDlet-Name: Wikipedia
 MIDlet-Permissions: javax.microedition.io.Connector.http
