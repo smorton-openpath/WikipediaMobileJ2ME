@@ -194,10 +194,10 @@ public class MainPage extends BasePage {
                 String sText = (String)((JsonObject)oTextItem).get("text");
                 sText = Utilities.stripSlash(sText);
                 HTMLComponentItem oHTMLItem = new HTMLComponentItem(sText);
-                HTMLComponent cTextComp = (HTMLComponent)oHTMLItem.getComponent();
+                Container cTextComp = (Container)oHTMLItem.getComponent();
                 if(cTextComp != null) {
-                    cTextComp.setPageUIID("Label");
-                    cTextComp.setHTMLCallback(new DefaultHTMLCallback()
+                    //cTextComp.setPageUIID("Label");
+                    /*cTextComp.setHTMLCallback(new DefaultHTMLCallback()
                     {
                         public boolean linkClicked(HTMLComponent htmlC, java.lang.String url) 
                         {
@@ -210,7 +210,7 @@ public class MainPage extends BasePage {
                             return false;
                         }
 
-                    });
+                    });*/
                     articleCont.addComponent(cTextComp);
                 }
             }
