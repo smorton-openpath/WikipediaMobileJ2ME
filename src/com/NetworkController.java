@@ -4,6 +4,7 @@ import com.sun.lwuit.Display;
 
 
 import javax.microedition.io.HttpConnection;
+import javax.microedition.lcdui.Screen;
 
 /**
  * @author caxthelm
@@ -44,10 +45,14 @@ public class NetworkController {
         try
         {
             if(m_cLoadingDialog != null && !m_cLoadingDialog.isVisible()) {
-                /*if(mainMIDlet.phoneType == mainMIDlet.TYPE_S60) {
-                    m_cLoadingDialog.show(195, 196, 55, 56, false, false);
-                }else*/
+                int width = Display.getInstance().getDisplayWidth();
+                int height = Display.getInstance().getDisplayHeight();
+                // Devices with very small screens should use showmodeless instead
+                if(height < 130) {
                     m_cLoadingDialog.showModeless();
+                } else {
+                    m_cLoadingDialog.show(height/3, height/3, width/4, width/4, false, false);
+                }
                 Thread.yield();
             }
         }catch(Exception e) {

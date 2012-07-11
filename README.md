@@ -11,7 +11,9 @@ NetBeans: 7.1.1
 LWUIT: 1.5
 Platform: Nokia SDK 1.1
 CLDC: 1.1
-MIDP: 2.1 
+MIDP: 2.1
+
+Care must be taken when branching ./res/WikiResource.res.  It is a binary file which cannot be merged like a text file; thus, any conflicts cannot be resolved.  If you need to work in this file, be sure that you have the most recent version, and commit and push to master as soon as possible when you are done.
 
 -----------
 
@@ -37,8 +39,9 @@ distribution.
 
 CONTRIBUTORS
 
-Christopher Axthelm (original creator)
-William Knight
+Christopher Axthelm (original creator),
+William Knight,
+Eric Honour
 
 ------------
 
