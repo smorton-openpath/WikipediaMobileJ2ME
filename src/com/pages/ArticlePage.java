@@ -53,10 +53,6 @@ public class ArticlePage extends BasePage {
         cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
         
         m_vArticleStack = new Vector();
-        String[] toAdd = new String[2];
-        toAdd[0] = _sTitle;
-        toAdd[1] = "0";
-        m_vArticleStack.addElement(toAdd);
         
         if(!m_bIsLoaded) {
             //TODO: make error dialog.
@@ -73,6 +69,10 @@ public class ArticlePage extends BasePage {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
                     if(m_oData == null) {
+                        String[] toAdd = new String[2];
+                        toAdd[0] = m_sTitle;
+                        toAdd[1] = "0";
+                        m_vArticleStack.addElement(toAdd);
                         NetworkController.getInstance().performSearch(m_sTitle,  "0");
                     }else {
                         addData(m_oData);
@@ -125,6 +125,7 @@ public class ArticlePage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
+                    System.out.println("   ---   command back received... article stack size is " + m_vArticleStack.size());
                     if(m_vArticleStack != null && m_vArticleStack.size() > 0) {
                         String[] titleAndSections = (String[])m_vArticleStack.lastElement();
                         NetworkController.getInstance().performSearch(titleAndSections[0], titleAndSections[1]);
@@ -132,6 +133,7 @@ public class ArticlePage extends BasePage {
                     } else {
                         mainMIDlet.setCurrentPage(new MainPage());
                     }
+                    System.out.println("   ---   command back handler end! article stack size is " + m_vArticleStack.size());
                 break;
             case COMMAND_SEARCH:
                     mainMIDlet.setCurrentPage(new SearchPage());
@@ -163,14 +165,11 @@ public class ArticlePage extends BasePage {
                                 for(int i = 0; i < arrayLevel + 1; i++) {
                                     m_sCurrentSections += "|" + m_iToRequest[i];
                                 }
-                                if(m_vArticleStack.size() > 0) {
-                                    m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
-                                }
+                                
                                 String[] toAdd = new String[2];
                                 toAdd[0] = m_sTitle;
                                 toAdd[1] = m_sCurrentSections;
                                 m_vArticleStack.addElement(toAdd);
-                                m_vArticleStack.addElement(section);
                                 NetworkController.getInstance().performSearch(m_sTitle,  m_sCurrentSections);
                             }
                         }//end if(section instanceof SectionComponentItem)
