@@ -225,9 +225,6 @@ public class ArticlePage extends BasePage {
     }//end checkRefresh()
     
     public void addData(Object _results) {
-        System.out.println("   ---   article page is " + this.toString());
-        System.out.println("         ... and the article stack size is " + m_vArticleStack.size());
-        System.out.println("         ... and the topmost article is " + m_vArticleStack.lastElement().toString());
         if(_results == null) {
             //We have nothing, make the data call.
             String[] toAdd = new String[2];
@@ -249,6 +246,13 @@ public class ArticlePage extends BasePage {
         if(m_cContentContainer != null && sections != null && sections.size() > 0)
         {
             m_cContentContainer.removeAll();
+            m_cContentContainer.invalidate();
+            m_cContentContainer.repaint();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             //Deal with the main article text first.
            
             Object oTextItem = sections.firstElement();
