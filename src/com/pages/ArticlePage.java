@@ -249,6 +249,13 @@ public class ArticlePage extends BasePage {
         if(m_cContentContainer != null && sections != null && sections.size() > 0)
         {
             m_cContentContainer.removeAll();
+            m_cContentContainer.invalidate();
+            m_cContentContainer.repaint();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             //Deal with the main article text first.
            
             Object oTextItem = sections.firstElement();
