@@ -307,6 +307,7 @@ public class ArticlePage extends BasePage {
                         
                         if(sText != null && !(sText.length() < 1)) {
                             //TODO: Need to strip out the <h2> tag at the beginning
+                            sText = Utilities.stripSlash(sText);
                             sectionItem.addText(sText);
                         }
                         
