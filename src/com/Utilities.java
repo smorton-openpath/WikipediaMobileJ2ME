@@ -104,9 +104,24 @@ public class Utilities {
             }
         }
         return vReturnVec;
-    }
+    }//end getSectionsFromJSON(JsonObject _oJson)
+    
+    public static Vector getQueryResultsFromJSON(JsonObject _oJson) {
+        Vector vReturnVec = null;
+        if(_oJson == null)
+            return null;
+        
+        Object oQuery = _oJson.get("query");
+        if(oQuery != null && oQuery instanceof JsonObject) {
+            Object oSearch = ((JsonObject)oQuery).get("search");
+            if(oSearch != null && oSearch instanceof Vector) {
+                vReturnVec = (Vector)oSearch;
+            }
+        }
+        return vReturnVec;
+    }//end getQueryResultsFromJSON(JsonObject _oJson)
     
     public static String getNormalizedTitleFromJSON(JsonObject _oJson) {
         return ((JsonObject)((JsonObject)_oJson).get("mobileview")).getString("normalizedtitle");
-    }
+    }//end getNormalizedTitleFromJSON(JsonObject _oJson)
 }

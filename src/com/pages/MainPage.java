@@ -78,7 +78,7 @@ public class MainPage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
-                    NetworkController.getInstance().performSearch("Main_Page",  "0");
+                    NetworkController.getInstance().fetchArticle("Main_Page", "0");
                 }
             });
             updateSoftkeys();
@@ -147,7 +147,7 @@ public class MainPage extends BasePage {
                         text = m_cSearchTextField.getText();
                     }
                     if(text.length() > 0) {
-                        mainMIDlet.setCurrentPage(new ArticlePage(text, null));
+                        mainMIDlet.setCurrentPage(new ArticlePage(text, true));
                     }
                 }
                 break;
@@ -171,7 +171,7 @@ public class MainPage extends BasePage {
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
-                            mainMIDlet.setCurrentPage(new ArticlePage(title, null));
+                            mainMIDlet.setCurrentPage(new ArticlePage(title, false));
                         }
                     }
                 }
@@ -194,13 +194,13 @@ public class MainPage extends BasePage {
     
     private void checkRefresh() {
         NetworkController.hideLoadingDialog();
-        addData(null);
+        addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
         super.refreshPage();
     }//end checkRefresh()
     
-    public void addData(Object _results) {
+    public void addData(Object _results, int _iResultType) {
         
         Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
         if(m_cContentContainer != null && sections != null && sections.size() > 0)

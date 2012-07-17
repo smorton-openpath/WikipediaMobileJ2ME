@@ -16,11 +16,11 @@ import com.sun.lwuit.io.services.ImageDownloadService;
  */
 
 
-public class ComponentItem 
-{    
+public class ComponentItem{    
     //Component Types;
     public static final int COMP_SECTION = 0;
     public static final int COMP_HTMLTEXT = 1;
+    public static final int COMP_LIST = 2;
     
     Component m_cComponent = null;
     int m_iCompType = -1;

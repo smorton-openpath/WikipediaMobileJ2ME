@@ -49,7 +49,7 @@ public class SettingsPage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
-                    addData(null);
+                    addData(null, NetworkController.PARSE_SEARCH);
                 }
             });
             updateSoftkeys();
@@ -104,13 +104,13 @@ public class SettingsPage extends BasePage {
     
     private void checkRefresh() {
         NetworkController.hideLoadingDialog();
-        addData(null);
+        addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
         super.refreshPage();
     }//end checkRefresh()
     
-    public void addData(Object _results) {
+    public void addData(Object _results, int _iResultType) {
         m_cForm.repaint();
     }//end addData(Object _results)
     

@@ -97,7 +97,7 @@ public class NetworkThread implements Runnable {
             }
         }else {
             if(mainMIDlet.getCurrentPage() != null) {
-                mainMIDlet.getCurrentPage().addData(m_oResponseJSON);
+                mainMIDlet.getCurrentPage().addData(m_oResponseJSON, m_iParseStyle);
             }
             NetworkController.hideLoadingDialog();
         }

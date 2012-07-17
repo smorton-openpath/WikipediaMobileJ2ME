@@ -33,10 +33,10 @@ public class ArticlePage extends BasePage {
     
     private Vector m_vArticleStack;
     
-    private Label cTitleLabel;
+    private Label m_cTitleLabel;
     
-    //Lwuit Commands:   
-    JsonObject m_oData = null;
+    //Lwuit Commands:
+    boolean m_bStartWithSearch = false;
     String m_sTitle = "";
     String m_sCurrentSections = "0";
     TextField searchTextField = null;
@@ -49,10 +49,9 @@ public class ArticlePage extends BasePage {
         return m_iToRequest;
     }
     
-    public ArticlePage(String _sTitle, JsonObject _oData) {
+    public ArticlePage(String _sTitle, boolean _bPerformSearch) {
         super("ArticlePageForm", PAGE_MAIN);
         
-        cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
         
         m_vArticleStack = new Vector();
         
@@ -61,8 +60,13 @@ public class ArticlePage extends BasePage {
             System.err.println("We failed to load");
             return;
         }
-        m_oData = _oData;
+        m_bStartWithSearch = _bPerformSearch;
         m_sTitle = _sTitle;
+        m_cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
+        if(m_cTitleLabel != null) {
+            String realTitle = m_sTitle.replace('_', ' ');
+            m_cTitleLabel.setText(realTitle);
+        }
         try {
             //Create dynamic components here.
             
@@ -70,14 +74,11 @@ public class ArticlePage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
-                    if(m_oData == null) {
-                        String[] toAdd = new String[2];
-                        toAdd[0] = m_sTitle;
-                        toAdd[1] = "0";
-                        m_vArticleStack.addElement(toAdd);
-                        NetworkController.getInstance().performSearch(m_sTitle,  "0");
+                    if(m_bStartWithSearch) {                        
+                        //addData(m_oData, NetworkController.PARSE_SEARCH);
+                        NetworkController.getInstance().performSearch(m_sTitle, 0);
                     }else {
-                        addData(m_oData);
+                        NetworkController.getInstance().fetchArticle(m_sTitle, "0");
                     }
                 }
             });
@@ -93,8 +94,8 @@ public class ArticlePage extends BasePage {
         int i = 0;
         m_cForm.removeAllCommands();
         String  str = "";
-        str = mainMIDlet.getString("BackSK");
-        m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
+        str = mainMIDlet.getString("HomeSK");
+        m_cForm.addCommand(new Command(str, COMMAND_HOME), i++);
         str = mainMIDlet.getString("SearchSK");
         m_cForm.addCommand(new Command(str, COMMAND_SEARCH), i++);
         str = mainMIDlet.getString("SavepageSK");
@@ -103,8 +104,8 @@ public class ArticlePage extends BasePage {
         m_cForm.addCommand(new Command(str, COMMAND_BOOKMARK), i++);
         //str = mainMIDlet.getString("PrivacySK");
         //mForm.addCommand(new Command(str, Command_Privacy), Command_Privacy);
-        str = mainMIDlet.getString("HomeSK");
-        m_cForm.addCommand(new Command(str, COMMAND_HOME), i++);
+        str = mainMIDlet.getString("BackSK");
+        m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         
     }//end updateSoftkeys()
     
@@ -129,7 +130,7 @@ public class ArticlePage extends BasePage {
             case COMMAND_BACK:
                     if(m_vArticleStack != null && m_vArticleStack.size() > 0) {
                         String[] titleAndSections = (String[])m_vArticleStack.lastElement();
-                        NetworkController.getInstance().performSearch(titleAndSections[0], titleAndSections[1]);
+                        NetworkController.getInstance().fetchArticle(titleAndSections[0], titleAndSections[1]);
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
                     } else {
                         mainMIDlet.setCurrentPage(new MainPage());
@@ -170,7 +171,7 @@ public class ArticlePage extends BasePage {
                             toAdd[0] = title;
                             toAdd[1] = "0";
                             m_vArticleStack.addElement(toAdd);
-                            NetworkController.getInstance().performSearch(toAdd[0],  toAdd[1]);
+                            NetworkController.getInstance().fetchArticle(toAdd[0],  toAdd[1]);
                         }
                     }
                 }
@@ -197,7 +198,7 @@ public class ArticlePage extends BasePage {
                                 toAdd[0] = m_sTitle;
                                 toAdd[1] = m_sCurrentSections;
                                 m_vArticleStack.addElement(toAdd);
-                                NetworkController.getInstance().performSearch(m_sTitle,  m_sCurrentSections);
+                                NetworkController.getInstance().fetchArticle(m_sTitle,  m_sCurrentSections);
                             }
                         }//end if(section instanceof SectionComponentItem)
                     }//end if(commandId > 40)
@@ -218,27 +219,45 @@ public class ArticlePage extends BasePage {
     
     private void checkRefresh() {
         NetworkController.hideLoadingDialog();
-        addData(null);
+        //addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
         super.refreshPage();
     }//end checkRefresh()
     
-    public void addData(Object _results) {
+    public void addData(Object _results, int _iResultType) {
+        System.out.println("results: "+_iResultType);//+", "+_results);
         if(_results == null) {
             //We have nothing, make the data call.
-            String[] toAdd = new String[2];
-            toAdd[0] = m_sTitle;
-            toAdd[1] = m_sCurrentSections;
-            m_vArticleStack.addElement(toAdd);
-            NetworkController.getInstance().performSearch(m_sTitle, m_sCurrentSections);
-            return;
+            if(_iResultType == NetworkController.PARSE_SEARCH) {
+                NetworkController.getInstance().performSearch(m_sTitle, 0);
+            }else if(_iResultType == NetworkController.FETCH_ARTICLE) {
+                String[] toAdd = new String[2];
+                toAdd[0] = m_sTitle;
+                toAdd[1] = m_sCurrentSections;
+                m_vArticleStack.addElement(toAdd);
+                NetworkController.getInstance().fetchArticle(m_sTitle, m_sCurrentSections);
+            }
+        }else {
+            if(_iResultType == NetworkController.PARSE_SEARCH) {
+                parseSearch(_results);
+            }else if(_iResultType == NetworkController.FETCH_ARTICLE) {
+                parseArticle(_results);
+            }
         }
+    }//end addData(Object _results, int _iResultType) 
+    
+    public void parseSearch(Object _results) {
+        String realTitle = m_sTitle.replace('_', ' ');
+        mainMIDlet.setCurrentPage(new ListDialog(realTitle, _results, 0));
+    }//end parseSearch(Object _results)
+    
+    public void parseArticle(Object _results) {
         
         m_sTitle = Utilities.getNormalizedTitleFromJSON((JsonObject)_results);
-        if(cTitleLabel != null) {
+        if(m_cTitleLabel != null) {
             String realTitle = m_sTitle.replace('_', ' ');
-            cTitleLabel.setText(realTitle);
+            m_cTitleLabel.setText(realTitle);
         }
         
 
@@ -294,6 +313,10 @@ public class ArticlePage extends BasePage {
                     SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sTocLevel);
                     Component cSectionComp = sectionItem.createComponent(sTitle, bActive, Integer.parseInt(sTocLevel));
                     if(cSectionComp != null) {
+                        if(bActive) {
+                            cSectionComp.requestFocus();
+                            cSectionComp.setFocus(true);
+                        }
                         m_oComponentList.put(new Integer(40 + i), sectionItem);
                             //Whatever level we are at we shouldn't have any more sub-levels yet.
                         for(int j = arrayLevel; j < 5; j++)
@@ -319,9 +342,17 @@ public class ArticlePage extends BasePage {
                     }//end if(cSectionComp != null)
                 }
             }//end for(int i = 1; i > sections.size(); i++)
+            if(m_sCurrentSections.equalsIgnoreCase("0")) {            
+                Component first = m_cContentContainer.findFirstFocusable();
+                if(first != null)
+                {
+                    first.setFocus(true);
+                    first.requestFocus();
+                }
+            }
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.repaint();
-    }//end addData(Object _results)
+    }//end parseArticle(Object _results)
     
     
 }

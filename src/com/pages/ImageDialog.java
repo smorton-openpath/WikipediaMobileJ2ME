@@ -43,7 +43,7 @@ public class ImageDialog extends BasePage
             
             if(_sURL != null && _sURL.length() > 0 && _sURL.indexOf("http://") > -1) {
                 Label newLabel = new Label();
-                newLabel.setUIID("LabelCenterAligned");
+                newLabel.setUIID("no_MarginsTransparent");
                 ImageDownloadService img = new ImageDownloadService(_sURL, newLabel);
                 NetworkManager.getInstance().addToQueue(img);
                 m_cDialog.addComponent(BorderLayout.CENTER, newLabel);
@@ -91,6 +91,6 @@ public class ImageDialog extends BasePage
     }//end actionPerformed(ActionEvent ae)
     
     
-    public void addData(Object _results) {
+    public void addData(Object _results, int _iResultType) {
     }//end addData()
 }

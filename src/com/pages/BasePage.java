@@ -29,7 +29,7 @@ public class BasePage implements ActionListener {
     public static final int DIALOG_SEARCHRESULT = -2;
     
     //Common Command Ids ;
-    //Note: commands 0 through 9 are reserved for softkeys.
+    //Note: commands -10 through 9 are reserved for softkeys.
     public static final int COMMAND_RIGHT = 0;
     public static final int COMMAND_CENTER = 1;
     public static final int COMMAND_LEFT = 2;
@@ -38,6 +38,8 @@ public class BasePage implements ActionListener {
     public static final int COMMAND_IMAGE = -3;
     //commands 10 through 29 are reserved for common IDs
     public static final int COMMAND_SEARCHBUTTON = 20;
+    public static final int COMMAND_NEXT = 21;
+    public static final int COMMAND_PREV = 22;
     //Commands 30+ are dynamic commands.
     
     int m_iPageType = PAGE_SPLASH;
@@ -124,7 +126,7 @@ public class BasePage implements ActionListener {
     public void updateSoftkeys() {
     }//end updateSoftkeys()
     
-    public void addData(Object _oResults) {        
+    public void addData(Object _oResults, int _iResultType) {        
     }//end addData(Object _results)
     
     public void failedNetwork(int _iResponse) {

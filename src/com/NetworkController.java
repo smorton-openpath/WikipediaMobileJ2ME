@@ -19,8 +19,10 @@ public class NetworkController {
     private static NetworkController m_oInstance = null;
     private static Dialog m_cLoadingDialog = null;
     private static NetworkThread m_tNetThread = null;
+    public static final int SEARCH_LIMIT = 10;
     
     public static final int PARSE_SEARCH = 0;
+    public static final int FETCH_ARTICLE = 1;
     
     
     Label labelAttempt;
@@ -73,14 +75,50 @@ public class NetworkController {
 
     /****Search ************************************************/
       
-    public void performSearch(String _sURL) {
+    public void performSearch(String _sSearchTerm, int _iOffset) {
+        //http://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch=ted&srprop=hasrelated&srlimit=10
+        
+        StringBuffer url = new StringBuffer();
+        url.append(WEBAPI +"?");
+        
+        //adding common items: action, props, format
+        url.append("action=query");
+        url.append("&");
+        url.append("list=search");
+        url.append("&");
+        url.append("format=json");
+        url.append("&");
+        url.append("srprop=hasrelated");
+        url.append("&");
+        url.append("srlimit=");
+        url.append(SEARCH_LIMIT);
+        
+        if(_iOffset > 0) {
+            url.append("&");
+            url.append("sroffset=");
+            url.append(_iOffset);
+        }
+        
+        String sKeyword = _sSearchTerm.trim();
+        if (sKeyword != null && sKeyword.length() > 0) {
+            url.append("&");
+            url.append("srsearch=");           
+            sKeyword = sKeyword.replace(' ', '_');
+            // We append an underscore to the end of the keyword to ensure
+            // that we get back a normalized title.
+            url.append(HtmlEncode(sKeyword));
+            //url.append("");
+        }
+        
+        
         NetworkController.showLoadingDialog();
         //System.out.println("search Url: "+url.toString());
-        networkNexus(_sURL, "", HttpConnection.GET, PARSE_SEARCH);
+        networkNexus(BASE_URL+url.toString(), "", HttpConnection.GET, PARSE_SEARCH);
         //return results;
     }//end performSearch(String url)
     
-    public void performSearch(String _sSearchTerm, String _sSection) {
+    
+    public void fetchArticle(String _sSearchTerm, String _sSection) {
         //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections
         /*if (_sSearchTerm != null && _sSearchTerm.length() == 0) {
             mainMIDlet.previousSearchQuery = _sSearchTerm;
@@ -99,7 +137,7 @@ public class NetworkController {
         url.append("&");
         url.append("sectionprop=toclevel%7Cline%7Cnumber");
 
-        //http://rest.annunci.ebay.it/columbus-api/ads?categoryId=16842752&locationId=-1&q=rft&page=0&size=25&extension[histogram]=category&_ver=1.10
+        
         if(_sSection == null || _sSection.length() == 0) {
             _sSection = "0";
         }
@@ -111,8 +149,7 @@ public class NetworkController {
         
         
         String sKeyword = _sSearchTerm.trim();
-        if (sKeyword != null && sKeyword.length() > 0)
-        {
+        if (sKeyword != null && sKeyword.length() > 0) {
             url.append("&");
             sKeyword = sKeyword.replace(' ', '_');
             url.append("page=");           
@@ -124,7 +161,10 @@ public class NetworkController {
         
         url.append("&noheadings=");
         
-        performSearch(BASE_URL+url.toString());
+        //performSearch(BASE_URL+url.toString());
+        NetworkController.showLoadingDialog();
+        //System.out.println("search Url: "+url.toString());
+        networkNexus(BASE_URL+url.toString(), "", HttpConnection.GET, FETCH_ARTICLE);
     }//end performSearch
     
     /****Network Methods ******************************************************/
