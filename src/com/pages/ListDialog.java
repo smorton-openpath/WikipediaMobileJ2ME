@@ -4,8 +4,6 @@
  */
 package com.pages;
 
-import com.ComponentItem;
-import com.JsonObject;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.*;
 import com.sun.lwuit.util.*;
@@ -17,10 +15,12 @@ import com.sun.lwuit.Display;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import com.mainMIDlet;
-import com.NetworkController;
 import com.Utilities;
-import com.ListComponentItem;
+import com.mainMIDlet;
+import com.JsonObject;
+import com.NetworkController;
+import com.components.ComponentItem;
+import com.components.ListComponentItem;
 /**
  *
  * @author caxthelm

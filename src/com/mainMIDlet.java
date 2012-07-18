@@ -17,7 +17,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
 import javax.microedition.midlet.MIDlet;
-import javax.microedition.rms.RecordStore;
 
 public class mainMIDlet extends MIDlet
 {
@@ -30,8 +29,8 @@ public class mainMIDlet extends MIDlet
     
     
     private static Vector m_vScreenStack = null;
-    private static Vector m_vSavedPages = null;
-    private static Vector m_vSavedBookmarks = null;
+    private static DeviceStorage m_oSavedPages = null;
+    private static DeviceStorage m_oSavedBookmarks = null;
     
     private static String m_sPreviousSearchQuery = "";
     private static String RMS_SAVEDPAGES = "SavedPages";
@@ -222,60 +221,6 @@ public class mainMIDlet extends MIDlet
         //System.out.println("checkSize: "+screenStack.size());
     }//end dialogBack()
     
-    public static Vector loadSavedPages() {
-        if(m_vSavedPages == null) {
-            m_vSavedPages = new Vector();
-        }
-        Vector vSavedPages = new Vector();
-        RecordStore recordStore = null;
-        try {
-            //RecordStore.deleteRecordStore(recordStoreWatchList);
-            recordStore = RecordStore.openRecordStore(RMS_SAVEDPAGES, true);            
-            //System.out.println("loading watch: "+recordStore.getNumRecords());
-            for(int i = 0; i < recordStore.getNumRecords(); i++) {
-                String temp = new String(recordStore.getRecord(i+1));
-                m_vSavedPages.addElement(temp);                
-            }
-            
-            recordStore.closeRecordStore();
-        }catch(Exception e) {
-            if(recordStore != null) {
-                try {
-                    recordStore.closeRecordStore();
-                }catch(Exception er) {
-                }
-            }
-            e.printStackTrace();
-        }
-        
-        return m_vSavedPages;
-    }//end loadSavedPages()
-    
-    public static void saveWatchList() {
-        if(m_vSavedPages == null) {            
-            m_vSavedPages = new Vector();
-        }
-        RecordStore recordStore = null;
-        try {
-            RecordStore.deleteRecordStore(RMS_SAVEDPAGES);
-            recordStore = RecordStore.openRecordStore(RMS_SAVEDPAGES, true);
-            //System.out.println("saving watch: "+watchListItems.size());
-            for(int i = 0; i < m_vSavedPages.size(); i++) {                
-                //recordStore.addRecord(((ResultItem)(m_vSavedPages.elementAt(i))).getSelfLink().getBytes(), 0, ((ResultItem)(m_vSavedPages.elementAt(i))).getSelfLink().getBytes().length);
-            }            
-            recordStore.closeRecordStore();
-        }catch(Exception e) {
-            //System.out.println("failed saving watchlist");
-            e.printStackTrace();
-            if(recordStore != null) {
-                try {
-                    recordStore.closeRecordStore();
-                }catch(Exception er) {
-                }
-            }
-        }
-    }//end saveWatchList()
-    
     public static void showAboutDialog() {
         try  {
             Dialog about = (Dialog)getBuilder().createContainer(getResources(), "AboutDialog");
@@ -297,4 +242,14 @@ public class mainMIDlet extends MIDlet
                 e.printStackTrace();
         }
     }//end showAboutDialog()
+    
+    public static DeviceStorage getBookmarks() {
+        if(m_oSavedBookmarks == null) {
+            m_oSavedBookmarks = new DeviceStorage(RMS_BOOKMARKS);
+        }
+        return m_oSavedBookmarks;
+    }
+    
+    
+    
 }

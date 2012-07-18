@@ -2,14 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com;
+package com.components;
 
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Label;
-import com.sun.lwuit.Button;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.sun.lwuit.events.ActionListener;
 
 import java.util.Vector;
 import java.util.Stack;

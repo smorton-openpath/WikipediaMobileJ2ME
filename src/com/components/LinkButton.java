@@ -2,14 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com;
+package com.components;
 
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
-import com.sun.lwuit.events.ActionEvent;
-import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.html.HTMLCallback;
-import com.sun.lwuit.html.HTMLComponent;
 
 /**
  *

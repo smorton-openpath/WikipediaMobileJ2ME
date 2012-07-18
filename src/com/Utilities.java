@@ -4,9 +4,10 @@
  */
 package com;
 
+import com.components.LinkButton;
+
 import java.util.Vector;
 import java.util.Stack;
-import com.LinkButton;
 
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Label;

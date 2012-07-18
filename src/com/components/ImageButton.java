@@ -3,14 +3,12 @@
  * and open the template in the editor.
  */
 
-package com;
+package com.components;
 
 
 import com.sun.lwuit.Container;
-import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Label;
-import com.sun.lwuit.events.ActionListener;
 /**
  *
  * @author caxthelm

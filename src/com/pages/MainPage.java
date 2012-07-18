@@ -7,18 +7,16 @@ package com.pages;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.*;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.html.DefaultHTMLCallback;
-import com.sun.lwuit.html.HTMLComponent;
 
 
 import java.util.Vector;
 
 import com.mainMIDlet;
 import com.NetworkController;
-import com.HTMLComponentItem;
+import com.components.HTMLComponentItem;
 import com.Utilities;
 import com.JsonObject;
-import com.LinkButton;
+import com.components.LinkButton;
 /**
  *
  * @author caxthelm
@@ -83,6 +81,7 @@ public class MainPage extends BasePage {
             });
             updateSoftkeys();
             m_cForm.addCommandListener(this);
+            mainMIDlet.getBuilder().setHomeForm("MainPageForm");
             //mForm.repaint();
         }catch(Exception e) {
             e.printStackTrace();

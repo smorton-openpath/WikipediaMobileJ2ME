@@ -2,10 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com;
+package com.components;
+
+import com.mainMIDlet;
+import com.Utilities;
 
 import com.sun.lwuit.*;
-import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.*;
 
 import java.util.Vector;
@@ -119,7 +121,7 @@ public class SectionComponentItem extends ComponentItem {
                 Label cTitle = (Label)mainMIDlet.getBuilder().findByName("SectionTitleLabel", cCont);
                 if(cTitle != null) {
                     cTitle.setText(_sTitle);
-                }            
+                }
             }
         }
         m_cComponent = (Component)cCont;

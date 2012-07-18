@@ -4,19 +4,13 @@
  */
 package com.pages;
 
-import com.ComponentItem;
 import com.sun.lwuit.*;
-import com.sun.lwuit.events.*;
-import com.sun.lwuit.util.*;
-import com.sun.lwuit.plaf.*;
 import com.sun.lwuit.io.*;
-import com.sun.lwuit.io.ui.*;
-import com.sun.lwuit.Display;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.io.services.ImageDownloadService;
 
 import com.mainMIDlet;
-import com.NetworkController;
-import com.sun.lwuit.io.services.ImageDownloadService;
-import com.sun.lwuit.layouts.BorderLayout;
 /**
  *
  * @author caxthelm

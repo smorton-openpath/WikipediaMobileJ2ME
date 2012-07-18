@@ -26,6 +26,7 @@ public class SearchPage extends BasePage {
     
     TextField m_cSearchTextField = null;
     Button m_cSearchButton = null;
+    int m_iFirstBookmarkNum = 0;
     public SearchPage() {
         super("SearchPageForm", PAGE_SEARCH);
         try {
@@ -93,6 +94,7 @@ public class SearchPage extends BasePage {
             });
             updateSoftkeys();
             m_cForm.addCommandListener(this);
+            mainMIDlet.getBuilder().setHomeForm("SearchPageForm");
             //mForm.repaint();
         }catch(Exception e) {
             e.printStackTrace();
@@ -148,6 +150,15 @@ public class SearchPage extends BasePage {
                     }
                 }
                 break;
+            default:
+                if(commandId >= m_iFirstBookmarkNum){
+                    //Bookmarks
+                    Button bookmarkComp = (Button)ae.getComponent();
+                    mainMIDlet.setCurrentPage(new ArticlePage(bookmarkComp.getText(), false));
+                }else {
+                    //Saved Pages
+                }
+                break;
         }
     }//end actionPerformed(ActionEvent ae)
     
@@ -163,13 +174,56 @@ public class SearchPage extends BasePage {
     
     private void checkRefresh() {
         NetworkController.hideLoadingDialog();
-        addData(null, NetworkController.PARSE_SEARCH);
+        //addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
         super.refreshPage();
     }//end checkRefresh()
     
     public void addData(Object _results, int _iResultType) {
+        //Create Saved Pages section.
+        if(m_cContentContainer == null) {
+            return;//TODO: display error.
+        }
+        int itemCounter = 40;
+        String midletSavedPages = mainMIDlet.getMIDlet().getAppProperty("AllowSavePages");
+        int numSavePagesAllowed = 0;
+        if(midletSavedPages != null && midletSavedPages.length() > 0) {
+            numSavePagesAllowed = Integer.parseInt(midletSavedPages);
+        }
+        if(numSavePagesAllowed > 0) {
+            Container cCont = mainMIDlet.getBuilder().createContainer(mainMIDlet.getResources(), "SubjectTitleItem");
+            if(cCont != null) {
+                Label cTitle = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", cCont);
+                if(cTitle != null) {
+                    cTitle.setText(mainMIDlet.getString("SavedPagesTitle"));
+                }
+            }
+            m_cContentContainer.addComponent(cCont);
+        }
+        
+        //Create Bookmark section.
+        Container cCont = mainMIDlet.getBuilder().createContainer(mainMIDlet.getResources(), "SubjectTitleItem");
+        if(cCont != null) {
+            Label cTitle = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", cCont);
+            if(cTitle != null) {
+                cTitle.setText(mainMIDlet.getString("BookmarksTitle"));
+            }
+        }
+        m_cContentContainer.addComponent(cCont);
+        Vector vBookmarks = mainMIDlet.getBookmarks().loadRecords();
+        itemCounter++;
+        m_iFirstBookmarkNum = itemCounter;
+        for(int i = 0; i < vBookmarks.size(); itemCounter++, i++) {
+            String bookmark = vBookmarks.elementAt(i).toString();
+            bookmark = bookmark.replace('_', ' ');
+            Button newButton = new Button();
+            newButton.setUIID("LabelButtonLink");
+            newButton.setCommand(new Command(bookmark, itemCounter));
+            m_cContentContainer.addComponent(newButton);
+            
+        }
+        
         m_cForm.repaint();
     }//end addData(Object _results)
     

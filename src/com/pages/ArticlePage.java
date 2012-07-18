@@ -5,13 +5,14 @@
 package com.pages;
 
 import com.*;
+import com.components.LinkButton;
+import com.components.ImageButton;
+import com.components.HTMLComponentItem;
+import com.components.SectionComponentItem;
+
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.*;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.html.DefaultHTMLCallback;
-import com.sun.lwuit.html.HTMLComponent;
-import com.sun.lwuit.html.HTMLParser;
-import com.sun.lwuit.html.HTMLUtils;
 
 
 import java.util.Vector;
@@ -28,8 +29,9 @@ public class ArticlePage extends BasePage {
     private final int COMMAND_SEARCH = COMMAND_CENTER;
     private final int COMMAND_SAVEPAGE = COMMAND_LEFT;
     private final int COMMAND_BOOKMARK = COMMAND_SAVEPAGE + 1;
+    private final int COMMAND_DELETEBOOKMARK = COMMAND_BOOKMARK + 1;
     //private final int Command_Privacy = Command_Terms + 1;
-    private final int COMMAND_HOME = COMMAND_BOOKMARK + 1;
+    private final int COMMAND_HOME = COMMAND_DELETEBOOKMARK + 1;
     
     private Vector m_vArticleStack;
     
@@ -100,8 +102,13 @@ public class ArticlePage extends BasePage {
         m_cForm.addCommand(new Command(str, COMMAND_SEARCH), i++);
         str = mainMIDlet.getString("SavepageSK");
         m_cForm.addCommand(new Command(str, COMMAND_SAVEPAGE), i++);
-        str = mainMIDlet.getString("BookmarkSK");
-        m_cForm.addCommand(new Command(str, COMMAND_BOOKMARK), i++);
+        if(mainMIDlet.getBookmarks().recordExists(m_sTitle)){
+            str = mainMIDlet.getString("DeleteBookmarkSK");
+            m_cForm.addCommand(new Command(str, COMMAND_DELETEBOOKMARK), i++);
+        }else {
+            str = mainMIDlet.getString("BookmarkSK");
+            m_cForm.addCommand(new Command(str, COMMAND_BOOKMARK), i++);
+        }
         //str = mainMIDlet.getString("PrivacySK");
         //mForm.addCommand(new Command(str, Command_Privacy), Command_Privacy);
         str = mainMIDlet.getString("BackSK");
@@ -133,7 +140,7 @@ public class ArticlePage extends BasePage {
                         NetworkController.getInstance().fetchArticle(titleAndSections[0], titleAndSections[1]);
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
                     } else {
-                        mainMIDlet.setCurrentPage(new MainPage());
+                        mainMIDlet.pageBack();
                     }
                 break;
             case COMMAND_SEARCH:
@@ -143,7 +150,14 @@ public class ArticlePage extends BasePage {
                     //mainMIDlet.setCurrentPage(new SearchPage());
                 break;
             case COMMAND_BOOKMARK:
-                //mainMIDlet.setCurrentPage(new WebViewDialog("TermsUrl"));
+                if(!mainMIDlet.getBookmarks().recordExists(m_sTitle)) {
+                    mainMIDlet.getBookmarks().saveRecord(m_sTitle);
+                }
+                break;
+            case COMMAND_DELETEBOOKMARK:
+                if(mainMIDlet.getBookmarks().recordExists(m_sTitle)) {
+                    mainMIDlet.getBookmarks().deleteRecord(m_sTitle);
+                }
                 break;
             case COMMAND_HOME:
                     mainMIDlet.setCurrentPage(new MainPage(), true);
