@@ -20,6 +20,7 @@ import com.NetworkController;
 public class SettingsPage extends BasePage {
     //Common Command Ids ;
     private final int COMMAND_BACK = COMMAND_RIGHT;
+    private final int COMMAND_ABOUT = 25;
     
     //Lwuit Commands:   
     
@@ -88,6 +89,9 @@ public class SettingsPage extends BasePage {
             //Softkeys
             case COMMAND_BACK:
                 mainMIDlet.pageBack();
+                break;
+            case COMMAND_ABOUT:
+                mainMIDlet.showAboutDialog();
                 break;
         }
     } //end actionPerformed(ActionEvent ae)

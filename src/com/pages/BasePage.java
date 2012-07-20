@@ -27,6 +27,7 @@ public class BasePage implements ActionListener {
     
     public static final int DIALOG_IMAGE = -1;
     public static final int DIALOG_SEARCHRESULT = -2;
+    public static final int DIALOG_LANGUAGE = -3;
     
     //Common Command Ids ;
     //Note: commands -10 through 9 are reserved for softkeys.
@@ -37,6 +38,7 @@ public class BasePage implements ActionListener {
     public static final int COMMAND_LINK = -2;
     public static final int COMMAND_IMAGE = -3;
     //commands 10 through 29 are reserved for common IDs
+    public static final int COMMAND_LANGUAGE = 10;
     public static final int COMMAND_SEARCHBUTTON = 20;
     public static final int COMMAND_NEXT = 21;
     public static final int COMMAND_PREV = 22;

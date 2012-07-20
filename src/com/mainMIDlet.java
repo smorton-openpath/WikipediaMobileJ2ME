@@ -27,6 +27,8 @@ public class mainMIDlet extends MIDlet
     private static mainMIDlet m_oInstance;
     private static boolean m_bHasTouch = false;
     
+    private static String m_sLanguage = "en";
+    
     
     private static Vector m_vScreenStack = null;
     private static DeviceStorage m_oSavedPages = null;
@@ -145,6 +147,7 @@ public class mainMIDlet extends MIDlet
                 }else {
                     m_hMainLocale = getResources().getL10N("WikiLoc", "it");
                 }
+                m_sLanguage = defaultLocale;
             }catch(Exception e) {
                 m_hMainLocale = getResources().getL10N("WikiLoc","en");
             }
@@ -160,6 +163,10 @@ public class mainMIDlet extends MIDlet
         }
         return text;
     }//end getString(String _sKey)
+    
+    public static String getLanguage() {
+        return m_sLanguage;
+    }
     
     public static void setCurrentPage(BasePage _oPage, boolean _bResetStack) {
         //System.out.println("pageLoaded: "+page.isLoaded);
@@ -233,13 +240,15 @@ public class mainMIDlet extends MIDlet
             String text = mainMIDlet.getString("CopyrightText");
             String supportText = mainMIDlet.getString("SupportText");
             String version = mainMIDlet.getMIDlet().getAppProperty("MIDlet-Version");
-            String finalText = title+"\n"+text+"\n"+supportText+"\n\nver: "+version + ", Rev "+mainMIDlet.getMIDlet().getAppProperty("MIDlet-Revision");
+            String finalText = ""+title+"\n"+text+"\n"+supportText+"\n\nver: "+version + ", Rev "+mainMIDlet.getMIDlet().getAppProperty("MIDlet-Revision");
             if(textArea != null && about != null) {
                 textArea.setText(finalText);
                 about.show(10, 10, 10, 10, false);
+            }else{
+                System.out.println("failed: "+textArea+", "+about);
             }
         }catch (Exception e ) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
     }//end showAboutDialog()
     

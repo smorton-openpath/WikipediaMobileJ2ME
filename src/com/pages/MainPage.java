@@ -76,7 +76,7 @@ public class MainPage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
-                    NetworkController.getInstance().fetchArticle("Main_Page", "0");
+                    NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), "Main_Page", "0");
                 }
             });
             updateSoftkeys();
@@ -158,7 +158,8 @@ public class MainPage extends BasePage {
                         int sizeIdx = url.indexOf("px");//TODO: make this work better without giving errors.
                         
                         System.out.println("url: "+url);
-                        mainMIDlet.setCurrentPage(new ImageDialog(((LinkButton)oComp).getOtherInfo(), url));
+                        mainMIDlet.setCurrentPage(new ImageDialog(
+                                ((LinkButton)oComp).getOtherInfo(), ((LinkButton)oComp).getText(), url));
                     }
                 }
                 break;
@@ -203,12 +204,13 @@ public class MainPage extends BasePage {
         
         Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
         if(m_cContentContainer != null && sections != null && sections.size() > 0)
-        { 
+        {
             Container articleCont = (Container)mainMIDlet.getBuilder().findByName("ArticleBodyTextItem", m_cContentContainer);
             if(articleCont == null) {
                 //TODO: Add in error message here.
                 return;
             }
+            articleCont.removeAll();
             Object oTextItem = sections.firstElement();
             if(oTextItem instanceof JsonObject) {
                 String sText = (String)((JsonObject)oTextItem).get("text");

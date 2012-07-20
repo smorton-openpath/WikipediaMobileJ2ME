@@ -78,9 +78,9 @@ public class ArticlePage extends BasePage {
                     m_cForm.removeShowListener(this);
                     if(m_bStartWithSearch) {                        
                         //addData(m_oData, NetworkController.PARSE_SEARCH);
-                        NetworkController.getInstance().performSearch(m_sTitle, 0);
+                        NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
                     }else {
-                        NetworkController.getInstance().fetchArticle(m_sTitle, "0");
+                        NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, "0");
                     }
                 }
             });
@@ -135,13 +135,20 @@ public class ArticlePage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
-                    if(m_vArticleStack != null && m_vArticleStack.size() > 0) {
+                    if(m_vArticleStack != null && m_vArticleStack.size() > 1) {
+                        //Axthelm: removing the top of the stack (it is the current page).
+                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1); 
                         String[] titleAndSections = (String[])m_vArticleStack.lastElement();
-                        NetworkController.getInstance().fetchArticle(titleAndSections[0], titleAndSections[1]);
-                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
+                        System.out.println("popping: "+titleAndSections[0]);
+                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);                    
+                        NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), titleAndSections[0], titleAndSections[1]);
+                        
                     } else {
                         mainMIDlet.pageBack();
                     }
+                break;
+            case COMMAND_LANGUAGE:
+                NetworkController.getInstance().searchArticleLanguages(mainMIDlet.getLanguage(), m_sTitle, null);
                 break;
             case COMMAND_SEARCH:
                     mainMIDlet.setCurrentPage(new SearchPage());
@@ -168,7 +175,8 @@ public class ArticlePage extends BasePage {
                     if(oComp instanceof LinkButton) {
                         String url = "http:"+((LinkButton)oComp).getLink();
                         System.out.println("url: "+url);
-                        mainMIDlet.setCurrentPage(new ImageDialog(((LinkButton)oComp).getOtherInfo(), url));
+                        mainMIDlet.setCurrentPage(new ImageDialog(
+                                ((LinkButton)oComp).getOtherInfo(), ((LinkButton)oComp).getText(), url));
                     }
                 }
                 break;
@@ -181,11 +189,7 @@ public class ArticlePage extends BasePage {
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
                             System.out.println("linkTitle: "+title);
-                            String[] toAdd = new String[2];
-                            toAdd[0] = title;
-                            toAdd[1] = "0";
-                            m_vArticleStack.addElement(toAdd);
-                            NetworkController.getInstance().fetchArticle(toAdd[0],  toAdd[1]);
+                            NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), title,  "0");
                         }
                     }
                 }
@@ -212,7 +216,7 @@ public class ArticlePage extends BasePage {
                                 toAdd[0] = m_sTitle;
                                 toAdd[1] = m_sCurrentSections;
                                 m_vArticleStack.addElement(toAdd);
-                                NetworkController.getInstance().fetchArticle(m_sTitle,  m_sCurrentSections);
+                                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
                             }
                         }//end if(section instanceof SectionComponentItem)
                     }//end if(commandId > 40)
@@ -240,24 +244,42 @@ public class ArticlePage extends BasePage {
     }//end checkRefresh()
     
     public void addData(Object _results, int _iResultType) {
-        System.out.println("results: "+_iResultType);//+", "+_results);
+        //System.out.println("results: "+_iResultType +", "+_results);
         if(_results == null) {
             //We have nothing, make the data call.
             if(_iResultType == NetworkController.PARSE_SEARCH) {
-                NetworkController.getInstance().performSearch(m_sTitle, 0);
-            }else if(_iResultType == NetworkController.FETCH_ARTICLE) {
-                String[] toAdd = new String[2];
-                toAdd[0] = m_sTitle;
-                toAdd[1] = m_sCurrentSections;
-                m_vArticleStack.addElement(toAdd);
-                NetworkController.getInstance().fetchArticle(m_sTitle, m_sCurrentSections);
+                NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
+            }else if(_iResultType == NetworkController.FETCH_ARTICLE) {                
+                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
             }
         }else {
-            if(_iResultType == NetworkController.PARSE_SEARCH) {
-                parseSearch(_results);
-            }else if(_iResultType == NetworkController.FETCH_ARTICLE) {
-                parseArticle(_results);
+            switch(_iResultType) { 
+                case NetworkController.PARSE_SEARCH:
+                    parseSearch(_results);
+                    break;
+                case NetworkController.FETCH_ARTICLE:
+                    String[] titleAndSections = null;
+                    parseArticle(_results);
+                    if(!m_vArticleStack.isEmpty()) {
+                        titleAndSections = (String[])m_vArticleStack.lastElement();
+                    }
+                    //if we already have this article on the stack, don't add it.
+                    if(titleAndSections == null || !titleAndSections[0].equalsIgnoreCase(m_sTitle))
+                    {
+                        String[] toAdd = new String[2];
+                        toAdd[0] = m_sTitle;
+                        toAdd[1] = m_sCurrentSections;
+                        m_vArticleStack.addElement(toAdd);
+                        System.out.println("pushing: "+toAdd[0]);
+                    }else if (titleAndSections[0].equalsIgnoreCase(m_sTitle)) {
+                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
+                    }
+                    break;
+                case NetworkController.SEARCH_LANGUAGES:
+                    parseLanguage(_results);
+                    break;
             }
+            
         }
     }//end addData(Object _results, int _iResultType) 
     
@@ -367,6 +389,11 @@ public class ArticlePage extends BasePage {
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.repaint();
     }//end parseArticle(Object _results)
+    
+    public void parseLanguage(Object _results) {
+        String realTitle = m_sTitle.replace('_', ' ');
+        mainMIDlet.setCurrentPage(new LanguageDialog(realTitle, _results, 0));
+    }//end parseSearch(Object _results)
     
     
 }

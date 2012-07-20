@@ -119,6 +119,11 @@ public class HTMLComponentItem extends ComponentItem {
                     endImgIdx = _sText.indexOf("\"", startImgIdx);
                     String srcText = _sText.substring(startImgIdx, endImgIdx);
                     
+                    if(altText.length() <= 0) {
+                        altText = srcText.substring(srcText.lastIndexOf('/') + 1);
+                        altText = altText.replace('_', ' ');
+                    }
+                    
                     ImageButton newLink = new ImageButton(altText, srcText);
                     //newLink.setUIID("LabelButtonLink");
                     if(cCurrentCont != null) {

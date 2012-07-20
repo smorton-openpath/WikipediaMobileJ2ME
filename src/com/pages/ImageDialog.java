@@ -23,7 +23,7 @@ public class ImageDialog extends BasePage
     //Lwuit Commands:
     String m_sURL = null;
     
-    public ImageDialog(String _sTitle, String _sURL) {
+    public ImageDialog(String _sTitle, String _sText, String _sURL) {
         super("ImageDialog", DIALOG_IMAGE);
         try {
             m_sURL = _sURL;
@@ -34,6 +34,10 @@ public class ImageDialog extends BasePage
                 return;
             }
             m_cDialog.setTitle(_sTitle);
+            /*TextArea cTitle = (TextArea)mainMIDlet.getBuilder().findByName("SubjectTitleText", (Container)m_cDialog);
+            if(cTitle != null) {
+                cTitle.setText(_sTitle);
+            }*/
             
             if(_sURL != null && _sURL.length() > 0 && _sURL.indexOf("http://") > -1) {
                 Label newLabel = new Label();
@@ -42,6 +46,7 @@ public class ImageDialog extends BasePage
                 NetworkManager.getInstance().addToQueue(img);
                 m_cDialog.addComponent(BorderLayout.CENTER, newLabel);
             }
+            
             String  str = mainMIDlet.getString("BackSK");
             //mForm.addCommand(new Command(str, Command_Back), Command_Back);
             m_cDialog.addCommand(new Command(str, COMMAND_BACK));
@@ -49,7 +54,7 @@ public class ImageDialog extends BasePage
             m_cDialog.addCommandListener(this);
             new Thread(new Runnable()  {
                 public void run()  {
-                    m_cDialog.show(10, 10, 10, 10, false);
+                    m_cDialog.show(1, 1, 1, 1, false);
                 }
             }).start();
         }catch(Exception e) {

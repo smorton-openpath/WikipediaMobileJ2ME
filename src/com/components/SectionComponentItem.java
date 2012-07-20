@@ -114,13 +114,14 @@ public class SectionComponentItem extends ComponentItem {
             if(m_iSectionLevel > 1) {
                 Button cTitle = (Button)mainMIDlet.getBuilder().findByName("SectionTitleLabel", cCont);
                 if(cTitle != null) {
-                    Command newCommand = new Command(_sTitle, m_iActionId);
+                    Command newCommand = new Command(_sTitle, m_iActionId);//Utilities.stripHTML(_sTitle), m_iActionId);
                     cTitle.setCommand(newCommand);
                 }
             } else {
                 Label cTitle = (Label)mainMIDlet.getBuilder().findByName("SectionTitleLabel", cCont);
                 if(cTitle != null) {
-                    cTitle.setText(_sTitle);
+                   
+                    cTitle.setText(_sTitle);//Utilities.stripHTML(_sTitle));
                 }
             }
         }

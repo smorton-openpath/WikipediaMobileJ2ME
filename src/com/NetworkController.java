@@ -4,7 +4,6 @@ import com.sun.lwuit.Display;
 
 
 import javax.microedition.io.HttpConnection;
-import javax.microedition.lcdui.Screen;
 
 /**
  * @author caxthelm
@@ -23,10 +22,9 @@ public class NetworkController {
     
     public static final int PARSE_SEARCH = 0;
     public static final int FETCH_ARTICLE = 1;
+    public static final int SEARCH_LANGUAGES = 2;
     
-    
-    Label labelAttempt;
-
+    private static Slider m_cLoadingSlider = null;
     private NetworkController() {
     }
 
@@ -44,21 +42,19 @@ public class NetworkController {
             //System.out.println("showing loading");
             m_cLoadingDialog = (Dialog)mainMIDlet.getBuilder().createContainer(mainMIDlet.getResources(), "LoadingDialog");
         }
-        try
-        {
-            if(m_cLoadingDialog != null && !m_cLoadingDialog.isVisible()) {
-                int width = Display.getInstance().getDisplayWidth();
-                int height = Display.getInstance().getDisplayHeight();
+        if(m_cLoadingDialog != null && !m_cLoadingDialog.isVisible()) {
+            m_cLoadingSlider = (Slider)mainMIDlet.getBuilder().findByName("LoadingSlider", (Container)m_cLoadingDialog);
+            int width = Display.getInstance().getDisplayWidth();
+            int height = Display.getInstance().getDisplayHeight();
+            if(height < 130) {
                 // Devices with very small screens should use showmodeless instead
-                if(height < 130) {
-                    m_cLoadingDialog.showModeless();
-                } else {
-                    m_cLoadingDialog.show(height/3, height/3, width/4, width/4, false, false);
-                }
-                Thread.yield();
+                m_cLoadingDialog.showModeless();
+            } else {
+                m_cLoadingDialog.show(height/3, height/3, width/4, width/4, false, false);
             }
-        }catch(Exception e) {
-            e.printStackTrace();
+
+            Thread.yield();
+            
         }
         //System.out.println("finished showing loading");
     }//end showLoadingDialog()
@@ -68,6 +64,7 @@ public class NetworkController {
             //System.out.println("disposing loading");
             m_cLoadingDialog.dispose();
             m_cLoadingDialog = null;
+            m_cLoadingSlider = null;
             Thread.yield();
         }
         //System.out.println("finished disposing loading");
@@ -75,7 +72,7 @@ public class NetworkController {
 
     /****Search ************************************************/
       
-    public void performSearch(String _sSearchTerm, int _iOffset) {
+    public void performSearch(String _sLanguage, String _sSearchTerm, int _iOffset) {
         //http://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch=ted&srprop=hasrelated&srlimit=10
         
         StringBuffer url = new StringBuffer();
@@ -113,12 +110,11 @@ public class NetworkController {
         
         NetworkController.showLoadingDialog();
         //System.out.println("search Url: "+url.toString());
-        networkNexus(BASE_URL+url.toString(), "", HttpConnection.GET, PARSE_SEARCH);
+        networkNexus("http://"+_sLanguage+BASE_URL+url.toString(), "", HttpConnection.GET, PARSE_SEARCH);
         //return results;
     }//end performSearch(String url)
-    
-    
-    public void fetchArticle(String _sSearchTerm, String _sSection) {
+        
+    public void fetchArticle(String _sLanguage, String _sSearchTerm, String _sSection) {
         //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections
         /*if (_sSearchTerm != null && _sSearchTerm.length() == 0) {
             mainMIDlet.previousSearchQuery = _sSearchTerm;
@@ -161,11 +157,62 @@ public class NetworkController {
         
         url.append("&noheadings=");
         
+        if(_sLanguage == null || _sLanguage.length() <= 0) {
+            _sLanguage = "en";
+        }
         //performSearch(BASE_URL+url.toString());
         NetworkController.showLoadingDialog();
         //System.out.println("search Url: "+url.toString());
-        networkNexus(BASE_URL+url.toString(), "", HttpConnection.GET, FETCH_ARTICLE);
-    }//end performSearch
+        networkNexus("http://"+_sLanguage+BASE_URL+url.toString(), "", HttpConnection.GET, FETCH_ARTICLE);
+    }//end fetchArticle(String _sLanguage, String _sSearchTerm, String _sSection)
+        
+    public void searchArticleLanguages(String _sLanguage, String _sSearchTerm, String _sOffset) {
+        //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections
+        /*if (_sSearchTerm != null && _sSearchTerm.length() == 0) {
+            mainMIDlet.previousSearchQuery = _sSearchTerm;
+        }else {
+            mainMIDlet.previousSearchQuery = "";
+        }*/
+        StringBuffer url = new StringBuffer();
+        url.append(WEBAPI +"?");
+        
+        //adding common items: action, props, format
+        url.append("action=query");
+        url.append("&");
+        url.append("prop=langlinks");
+        url.append("&");
+        url.append("format=json");
+        url.append("&");
+        url.append("lllimit=");
+        url.append(SEARCH_LIMIT);
+
+        
+        if(_sOffset != null && _sOffset.length() > 0) {
+            
+            url.append("&");
+            url.append("llcontinue=");
+            url.append(_sOffset);
+        }        
+        
+        String sKeyword = _sSearchTerm.trim();
+        if (sKeyword != null && sKeyword.length() > 0) {
+            url.append("&");
+            sKeyword = sKeyword.replace(' ', '_');
+            url.append("titles=");           
+            // We append an underscore to the end of the keyword to ensure
+            // that we get back a normalized title.
+            url.append(HtmlEncode(sKeyword));
+            //url.append("");
+        }
+        
+        if(_sLanguage == null || _sLanguage.length() <= 0) {
+            _sLanguage = "en";
+        }
+        //performSearch(BASE_URL+url.toString());
+        NetworkController.showLoadingDialog();
+        //System.out.println("search Url: "+url.toString());
+        networkNexus("http://"+_sLanguage+BASE_URL+url.toString(), "", HttpConnection.GET, SEARCH_LANGUAGES);
+    }//end fetchArticle(String _sLanguage, String _sSearchTerm, String _sSection)
     
     /****Network Methods ******************************************************/
     

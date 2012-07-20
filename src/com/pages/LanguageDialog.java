@@ -25,7 +25,7 @@ import com.components.ListComponentItem;
  *
  * @author caxthelm
  */
-public class ListDialog extends BasePage
+public class LanguageDialog extends BasePage
 {
     //Common Command Ids ;
     private final int COMMAND_BACK = COMMAND_RIGHT;
@@ -35,14 +35,14 @@ public class ListDialog extends BasePage
     Container m_cListContainer = null;
     Hashtable m_hListObjects = new Hashtable();
     private int m_iCurrentOffset = 0;
+    private String m_sContinue = "";
     private int m_iMaxResults = 0;
     private String m_sSearchText = "";
     
     
-    public ListDialog(String _sTitle, Object _results, int _idx) {
-        super("ListDialog", DIALOG_SEARCHRESULT);
+    public LanguageDialog(String _sTitle, Object _results, int _idx) {
+        super("ListDialog", DIALOG_LANGUAGE);
         try {
-            //System.out.println("List Size: "+_mainItem.childCount());
             if(!m_bIsLoaded) {
                 //TODO: make error dialog.
                 System.err.println("We failed to load");
@@ -74,7 +74,7 @@ public class ListDialog extends BasePage
             
             
             if(_results != null) {
-                addData(_results, NetworkController.PARSE_SEARCH);
+                addData(_results, NetworkController.SEARCH_LANGUAGES);
             }
             new Thread(new Runnable()  {
                 public void run()  {
@@ -114,16 +114,14 @@ public class ListDialog extends BasePage
                 break;
                 
             case COMMAND_NEXT:
-                if(m_iCurrentOffset + NetworkController.SEARCH_LIMIT < m_iMaxResults) {
-                    m_iCurrentOffset += NetworkController.SEARCH_LIMIT;
-                    NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sSearchText, m_iCurrentOffset);
-                }
+                    m_iCurrentOffset += NetworkController.SEARCH_LIMIT;                    
+                    NetworkController.getInstance().searchArticleLanguages(mainMIDlet.getLanguage(), m_sSearchText, m_sContinue);
                 ae.consume();
                 break;
             case COMMAND_PREV:
                 if(m_iCurrentOffset >= NetworkController.SEARCH_LIMIT) {
                     m_iCurrentOffset -= NetworkController.SEARCH_LIMIT;
-                    NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sSearchText, m_iCurrentOffset);
+                    //NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sSearchText, m_iCurrentOffset);
                 }
                 ae.consume();
                 break;
@@ -136,11 +134,13 @@ public class ListDialog extends BasePage
                     if(comp == null)
                         break;
                     String text = comp.getTag();
+                    String lang = text.substring(0, text.indexOf(" ")).trim();
+                    text = text.substring(text.indexOf(" - ") + 3);
                     System.out.println("requesting article: "+text);
                     m_cDialog.dispose();
                     mainMIDlet.dialogBack();
                     Thread.yield();
-                    NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), text, "0");
+                    NetworkController.getInstance().fetchArticle(lang, text, "0");
                     //System.out.println("the selection: " + mainItem.getLocName()+", value: " + newInt.intValue());
                     //System.out.println("the new selection: " + mainItem.getSelected().getLocName()+", value: " + mainItem.getSelected().getID());
                         //mainMIDlet.insertCurrentCat(item, typeIdex);
@@ -152,15 +152,24 @@ public class ListDialog extends BasePage
     
     
     public void addData(Object _results, int _iResultType) {
-        System.out.println("results: "+_iResultType+", "+_results);
+        //System.out.println("results: "+_iResultType+", "+_results);
         if(!(_results instanceof JsonObject)) {
             return;//TODO: do something with the dialog.
         }
         
         if(m_cContentContainer != null) {
-            
             m_cContentContainer.removeAll();
             m_hListObjects.clear();
+            m_sContinue = null;
+            Object oQuery = ((JsonObject)_results).get("query-continue");
+            if(oQuery != null && oQuery instanceof JsonObject) {
+                Object oSearchInfo = ((JsonObject)oQuery).get("langlinks");
+                if(oSearchInfo != null && oSearchInfo instanceof JsonObject) {
+                    JsonObject searchObj = (JsonObject)oSearchInfo;
+                    m_sContinue = (String)searchObj.get("llcontinue");
+                }
+            }
+            //Previous Button
             if(m_iCurrentOffset > 0) {
                 Button prevButton = new Button();
                 prevButton.setUIID("Button");
@@ -169,30 +178,26 @@ public class ListDialog extends BasePage
                 prevButton.setCommand(nextPage);
                 m_cContentContainer.addComponent(prevButton);
             }
-            Object oQuery = ((JsonObject)_results).get("query");
-            if(oQuery != null && oQuery instanceof JsonObject) {
-                Object oSearchInfo = ((JsonObject)oQuery).get("searchinfo");
-                if(oSearchInfo != null && oSearchInfo instanceof JsonObject) {
-                    JsonObject searchObj = (JsonObject)oSearchInfo;
-                    m_iMaxResults = ((Integer)searchObj.get("totalhits")).intValue();
-                }
-            }
-            Vector vItems = Utilities.getQueryResultsFromJSON((JsonObject)_results);
+            
+            //List Items
+            Vector vItems = Utilities.getLanguagesFromJSON((JsonObject)_results);
             for(int i = 0; 
                     i < vItems.size() && i < NetworkController.SEARCH_LIMIT ; i++)
             {
                  JsonObject item = (JsonObject)vItems.elementAt(i);
                  ListComponentItem listItem = new ListComponentItem(40+i);
-                 Component comp = listItem.createComponent((String)item.get("title"));
+                 Component comp = listItem.createComponent((String)item.get("lang")+" - "+(String)item.get("*"));
                  if(comp != null) {
                      
                      m_cContentContainer.addComponent(comp);
                      m_hListObjects.put(new Integer(40+i), listItem);
                  }
-                     
             }
-            System.out.println("checking numbs: "+m_iMaxResults+", "+vItems.size()+", "+m_iCurrentOffset);
-            if(m_iCurrentOffset + vItems.size() < m_iMaxResults) {
+            
+            //Next Button
+            if(vItems.size() >= NetworkController.SEARCH_LIMIT 
+                    && (m_sContinue != null && m_sContinue.length() > 0))
+            {
                 Button nextButton = new Button();
                 nextButton.setUIID("Button");
                 String text = mainMIDlet.getString("NextPage");
