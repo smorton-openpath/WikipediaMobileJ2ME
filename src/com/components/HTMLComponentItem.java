@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package com.components;
+import com.Utilities;
 
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
@@ -78,7 +79,7 @@ public class HTMLComponentItem extends ComponentItem {
                 vOutput.addElement(cCurrentCont);
             }
             //TODO: check for email addresses
-            if(_sText.charAt(0) == '<') { //Deal with Tags               
+            if(_sText.charAt(0) == '<') { //Deal with Tags
                 //deal with HTML tag.
                 boolean isSingleTag = false;
                 String tag = "";                                    
