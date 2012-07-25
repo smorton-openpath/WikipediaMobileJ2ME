@@ -343,49 +343,57 @@ public class HTMLComponentItem extends ComponentItem {
     
     private Vector parseBold(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_BOLD;
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseBold(Vector tags, int _iStyleMask)
     
     private Vector parseBreak(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseBreak(Vector tags, int _iStyleMask)
     
     private Vector parseHeader(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseHeader(Vector tags, int _iStyleMask)
     
     private Vector parseItalic(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_ITALIC;
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseItalic(Vector tags, int _iStyleMask)
     
     private Vector parseList(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseList(Vector tags, int _iStyleMask)
     
     private Vector parseParagraph(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseParagraph(Vector tags, int _iStyleMask)
     
     private Vector parseTable(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableHeader(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableCell(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableRow(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseImage(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(tags, _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
     }//end parseImage(Vector tags, int _iStyleMask)
+
+    private Vector removeFirstVectorElement(Vector _vOldVector) {
+        Vector newVec = new Vector();
+        for(int i=1; i<_vOldVector.size(); i++) {
+            newVec.addElement(_vOldVector.elementAt(i));
+        }
+        return newVec;
+    }
 }
 
