@@ -261,12 +261,78 @@ public class HTMLComponentItem extends ComponentItem {
         return vOutput;
     }//end chopHTMLString(String _sText)
     
-    private Container parseHtmlString(String _sText) {
+    private Vector parseHtmlTagVector(Vector tags, int styleMask) {
+        
+        Vector components = new Vector();
+        
+        for(int i=0; i<tags.size(); i++) {
+            
+            String tag = (String) (tags.elementAt(i));
+            
+            if( ((String) (tags.elementAt(i))).substring(0,1).equals("<")) {
+
+                // It's a tag!  Parse it as one!
+                if(tag.indexOf("/") > 0 && tag.indexOf("/") < 4) {
+                    // It's a close tag
+                    
+                } else {
+                    // It's an open tag
+                    //link
+                    if( tag.substring(1,2).equals("a")) {
+                        parseLink(tag, styleMask);
+                    }
+                    //bold
+                    if( tag.substring(1,2).equals("b")) {
+                        parseBold(tag, styleMask);
+                    }
+                    //header
+                    if(tag.substring(1,2).equals("h")) {
+                        parseHeader(tag, styleMask);
+                    }
+                    //italic
+                    if(tag.substring(1,2).equals("i")) {
+                        parseItalic(tag, styleMask);
+                    }
+                    //list
+                    if(tag.substring(1,3).equals("ul")) {
+                        parseList(tag, styleMask);
+                    }
+                    //paragraph
+                    if(tag.substring(1,2).equals("p")) {
+                        parseParagraph(tag, styleMask);
+                    }
+                    //table
+                    if(tag.substring(1,6).equals("table")) {
+                        parseTable(tag, styleMask);
+                    }
+                    //table header
+                    if(tag.substring(1,3).equals("th")) {
+                        parseTableHeader(tag, styleMask);
+                    }
+                    //table cell
+                    if(tag.equals("td")) {
+                        parseTableCell(tag, styleMask);
+                    }
+                    //table row
+                    if(tag.equals("tr")) {
+                        parseTableRow(tag, styleMask);
+                    }
+                    //image
+                    if(tag.equals("img")) {
+                        parseImage(tag, styleMask);
+                    }
+                }
+            } else {
+                // It's not a tag.  Just text.
+                components.addElement(parseText((String)tags.elementAt(i), styleMask));
+            }
+        }
         int iCurrentIdx = 0;
         int iNextTagIdx = 0;
         int iNextTagLength = -1;        
         int iEndNextTagIdx = 0;
-        return null;
+        
+        return components;
         
     }//end  parseHtmlString(String _sText)
     private Component parseText(String _sText, int styleMask) {
@@ -306,5 +372,21 @@ public class HTMLComponentItem extends ComponentItem {
     private Component parseTable(String _sText, int _iStyleMask) {
         return null;
     }//end parseTable(String _sText)
+    
+    private Component parseTableHeader(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseTable(String _sText)
+    
+    private Component parseTableCell(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseTable(String _sText)
+    
+    private Component parseTableRow(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseTable(String _sText)
+    
+    private Component parseImage(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseImage(String _sText)
 }
 
