@@ -25,6 +25,7 @@ public class HTMLComponentItem extends ComponentItem {
     private final int STYLE_BOLD = 1;
     private final int STYLE_ITALIC = 2;
     private final int STYLE_HEADER = 4;
+    private final int STYLE_LINK = 8;
     
     public HTMLComponentItem() {
         super(COMP_HTMLTEXT);
@@ -262,76 +263,108 @@ public class HTMLComponentItem extends ComponentItem {
         return vOutput;
     }//end chopHTMLString(String _sText)
     
-    private Vector parseHtmlTagVector(Vector tags, int styleMask) {
+    private String getTagID(String _sText) {
+        //Get the tag identifier
+        String tag = "";
+        int tagIdx = _sText.indexOf(' ');
+        int endIdx = _sText.indexOf('>');
+        if(tagIdx != -1 && tagIdx < endIdx){
+            endIdx = tagIdx;
+        }
+        if(endIdx == -1) {//Something went massively wrong if we have no end >
+            return "";
+        }
+        if(_sText.charAt(1) == '/') {
+            tag = _sText.substring(2, endIdx);
+        }else {                    
+            tagIdx = _sText.indexOf('/');
+            if(tagIdx != -1 && tagIdx < endIdx){
+                endIdx = tagIdx;
+            }
+            tag = _sText.substring(1, endIdx);
+        }
+        return tag;
+    }
+    
+    private Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
         
         Vector components = new Vector();
         
-        for(int i=0; i<tags.size(); i++) {
-            String tag = (String) (tags.elementAt(i));
-            if( tag.substring(0,1).equals("<")) {
+        for(int i=0; i<_vTags.size(); i++) {
+            String tag = (String) (_vTags.elementAt(i));
+            String baseTag = getTagID(tag);
+            if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
                 
                 Vector tagsToPass = new Vector();
-                for(int j=i; j<tags.size(); j++) {
-                    tagsToPass.addElement(tags.elementAt(j));
+                for(int j=i; j<_vTags.size(); j++) {
+                    tagsToPass.addElement(_vTags.elementAt(j));
                 }
                 
-                if( tag.substring(1,2).equals("a")) {
-                    parseLink(tagsToPass, styleMask);
+                if( baseTag.equalsIgnoreCase("a")) {
+                    parseLink(tagsToPass, _iStyleMask);
                 }
                 //bold
-                if( tag.substring(1,2).equals("b")) {
-                    parseBold(tagsToPass, styleMask);
+                if( baseTag.equalsIgnoreCase("b")) {
+                    parseBold(tagsToPass, _iStyleMask);
                 }
                 //header
-                if(tag.substring(1,2).equals("h")) {
-                    parseHeader(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("h2")) {
+                    parseHeader(tagsToPass, _iStyleMask);
                 }
                 //italic
-                if(tag.substring(1,2).equals("i")) {
-                    parseItalic(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("i")) {
+                    parseItalic(tagsToPass, _iStyleMask);
                 }
                 //list
-                if(tag.substring(1,3).equals("ul")) {
-                    parseList(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("ul")) {
+                    parseList(tagsToPass, _iStyleMask);
                 }
                 //paragraph
-                if(tag.substring(1,2).equals("p")) {
-                    parseParagraph(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("p")) {
+                    parseParagraph(tagsToPass, _iStyleMask);
                 }
                 //table
-                if(tag.substring(1,6).equals("table")) {
-                    parseTable(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("table")) {
+                    parseTable(tagsToPass, _iStyleMask);
                 }
                 //table header
-                if(tag.substring(1,3).equals("th")) {
-                    parseTableHeader(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("th")) {
+                    parseTableHeader(tagsToPass, _iStyleMask);
                 }
                 //table cell
-                if(tag.substring(1,3).equals("td")) {
-                    parseTableCell(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("td")) {
+                    parseTableCell(tagsToPass, _iStyleMask);
                 }
                 //table row
-                if(tag.substring(1,3).equals("tr")) {
-                    parseTableRow(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("tr")) {
+                    parseTableRow(tagsToPass, _iStyleMask);
                 }
                 //image
-                if(tag.substring(1,4).equals("img")) {
-                    parseImage(tagsToPass, styleMask);
+                if(baseTag.equalsIgnoreCase("img")) {
+                    parseImage(tagsToPass, _iStyleMask);
                 }
             } else {
                 // It's not a tag.  Just text.
-                components.addElement(parseText(tag, styleMask));
+                components.addElement(parseText(tag, _iStyleMask));
             }
         }
         
         return components;
         
     }//end  parseHtmlString(String _sText)
-    private Component parseText(String _sText, int styleMask) {
-        Label newLabel = new Label(_sText);
-        newLabel.setUIID("No_Margins");
-        return (Component)newLabel;
+    private Component parseText(String _sText, int _iStyleMask) {
+        Component newComp = null;
+        if((_iStyleMask & STYLE_LINK) == 1) {
+            LinkButton newLink = new LinkButton(_sText);
+            newLink.setUIID("LabelButtonLink");
+            newComp = newLink;
+        }else {
+            Label newLabel = new Label(_sText);
+            newLabel.setUIID("No_Margins");
+            newComp = newLabel;
+        }
+        return newComp;
     }//end parseText(String _sText)
     
     private Component parseLink(Vector tags, int _iStyleMask) {

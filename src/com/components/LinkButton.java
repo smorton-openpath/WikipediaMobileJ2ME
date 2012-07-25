@@ -28,6 +28,11 @@ public class LinkButton extends Button {
         m_sLink = _sLink;
     }//end LinkButton(String _sText, String _sLink)
     
+    public LinkButton(String _sText) {
+        super(_sText);
+        setCommand(_sText);
+    }//end LinkButton(String _sText, String _sLink)
+    
     public void setCommand(String _sText) {
         Command test = new Command(_sText, com.pages.BasePage.COMMAND_LINK);
         this.setCommand(test);
@@ -42,6 +47,9 @@ public class LinkButton extends Button {
         return m_sOtherInfo;
     }//end getOtherInfo()
     
+    public void setLink(String _sLink) {
+        m_sLink = _sLink;
+    }//end setLink();
     public String getLink() {
         return m_sLink;
     }//end getLink() 
