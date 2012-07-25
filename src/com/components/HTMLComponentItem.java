@@ -295,64 +295,63 @@ public class HTMLComponentItem extends ComponentItem {
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
-                
-                Vector tagsToPass = new Vector();
-                for(int j=i; j<_vTags.size(); j++) {
-                    tagsToPass.addElement(_vTags.elementAt(j));
+               
+                if(tag.indexOf("/") == 2) {
+                    //It's a close tag
+                    return components;
                 }
                 
                 if( baseTag.equalsIgnoreCase("a")) {
-                    parseLink(tagsToPass, _iStyleMask);
+                    components.addElement(parseLink(_vTags, _iStyleMask);
                 }
                 //bold
                 if( baseTag.equalsIgnoreCase("b")) {
-                    parseBold(tagsToPass, _iStyleMask);
+                    components.addElement(parseBold(_vTags, _iStyleMask);
                 }
                 //header
                 if(baseTag.equalsIgnoreCase("h2")) {
-                    parseHeader(tagsToPass, _iStyleMask);
+                    components.addElement(parseHeader(_vTags, _iStyleMask);
                 }
                 //italic
                 if(baseTag.equalsIgnoreCase("i")) {
-                    parseItalic(tagsToPass, _iStyleMask);
+                    components.addElement(parseItalic(_vTags, _iStyleMask);
                 }
                 //list
                 if(baseTag.equalsIgnoreCase("ul")) {
-                    parseList(tagsToPass, _iStyleMask);
+                    components.addElement(parseList(_vTags, _iStyleMask);
                 }
                 //paragraph
                 if(baseTag.equalsIgnoreCase("p")) {
-                    parseParagraph(tagsToPass, _iStyleMask);
+                   components.addElement(parseParagraph(_vTags, _iStyleMask);
                 }
                 //table
                 if(baseTag.equalsIgnoreCase("table")) {
-                    parseTable(tagsToPass, _iStyleMask);
+                    components.addElement(parseTable(_vTags, _iStyleMask);
                 }
                 //table header
                 if(baseTag.equalsIgnoreCase("th")) {
-                    parseTableHeader(tagsToPass, _iStyleMask);
+                    components.addElement(parseTableHeader(_vTags, _iStyleMask);
                 }
                 //table cell
                 if(baseTag.equalsIgnoreCase("td")) {
-                    parseTableCell(tagsToPass, _iStyleMask);
+                    components.addElement(parseTableCell(_vTags, _iStyleMask);
                 }
                 //table row
                 if(baseTag.equalsIgnoreCase("tr")) {
-                    parseTableRow(tagsToPass, _iStyleMask);
+                    components.addElement(parseTableRow(_vTags, _iStyleMask);
                 }
                 //image
                 if(baseTag.equalsIgnoreCase("img")) {
-                    parseImage(tagsToPass, _iStyleMask);
+                    components.addElement(parseImage(_vTags, _iStyleMask);
                 }
             } else {
                 // It's not a tag.  Just text.
                 components.addElement(parseText(tag, _iStyleMask));
             }
         }
-        
         return components;
-        
     }//end  parseHtmlString(String _sText)
+
     private Component parseText(String _sText, int _iStyleMask) {
         Component newComp = null;
         if((_iStyleMask & STYLE_LINK) == 1) {
@@ -367,51 +366,55 @@ public class HTMLComponentItem extends ComponentItem {
         return newComp;
     }//end parseText(String _sText)
     
-    private Component parseLink(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseLink(String _sText)
+    private Vector parseLink(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    }//end parseLink(Vector tags, int _iStyleMask)
     
-    private Component parseBold(Vector tags, int _iStyleMask) {
+    private Vector parseBold(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_BOLD;
-        return null;
-    }//end parseBold(String _sText)
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseBold(Vector tags, int _iStyleMask)
     
-    private Component parseHeader(Vector tags, int _iStyleMask) {
+    private Vector parseBreak(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseBreak(Vector tags, int _iStyleMask)
+    
+    private Vector parseHeader(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        return null;
-    }//end parseHeader(String _sText)
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseHeader(Vector tags, int _iStyleMask)
     
-    private Component parseItalic(Vector tags, int _iStyleMask) {
+    private Vector parseItalic(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_ITALIC;
-        return null;
-    }//end parseItalic(String _sText)
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseItalic(Vector tags, int _iStyleMask)
     
-    private Component parseList(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseList(String _sText)
+    private Vector parseList(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseList(Vector tags, int _iStyleMask)
     
-    private Component parseParagraph(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseParagraph(String _sText)
+    private Vector parseParagraph(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseParagraph(Vector tags, int _iStyleMask)
     
-    private Component parseTable(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseTable(String _sText)
+    private Vector parseTable(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Component parseTableHeader(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseTable(String _sText)
+    private Vector parseTableHeader(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Component parseTableCell(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseTable(String _sText)
+    private Vector parseTableCell(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Component parseTableRow(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseTable(String _sText)
+    private Vector parseTableRow(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Component parseImage(Vector tags, int _iStyleMask) {
-        return null;
-    }//end parseImage(String _sText)
+    private Vector parseImage(Vector tags, int _iStyleMask) {
+        return parseHtmlTagVector(tags, _iStyleMask);
+    }//end parseImage(Vector tags, int _iStyleMask)
 }
 
