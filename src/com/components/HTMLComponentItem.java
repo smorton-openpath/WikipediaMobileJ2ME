@@ -338,54 +338,54 @@ public class HTMLComponentItem extends ComponentItem {
     }//end parseText(String _sText)
     
     private Vector parseLink(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseLink(Vector tags, int _iStyleMask)
     
     private Vector parseBold(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_BOLD;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseBold(Vector tags, int _iStyleMask)
     
     private Vector parseBreak(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseBreak(Vector tags, int _iStyleMask)
     
     private Vector parseHeader(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseHeader(Vector tags, int _iStyleMask)
     
     private Vector parseItalic(Vector tags, int _iStyleMask) {
         _iStyleMask += STYLE_ITALIC;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseItalic(Vector tags, int _iStyleMask)
     
     private Vector parseList(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseList(Vector tags, int _iStyleMask)
     
     private Vector parseParagraph(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseParagraph(Vector tags, int _iStyleMask)
     
     private Vector parseTable(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableHeader(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableCell(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableRow(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseImage(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask));
     }//end parseImage(Vector tags, int _iStyleMask)
 
     private Vector removeFirstVectorElement(Vector _vOldVector) {
@@ -394,6 +394,23 @@ public class HTMLComponentItem extends ComponentItem {
             newVec.addElement(_vOldVector.elementAt(i));
         }
         return newVec;
+    }
+    
+    private Vector flattenVectors(Vector _vToFlatten) {
+        Vector flattened = new Vector();
+        
+        for(int i=0; i<_vToFlatten.size(); i++) {
+            if(typeOf(_vToFlatten.elementAt(i)) == Vector) {
+                Vector innerVec = (Vector) _vToFlatten.elementAt(i);
+                for(int j=0; j<innerVec; j++) {
+                    flattened.addElement(innerVec.elementAt(j));
+                }
+            } else {
+                flattened.addElement(_vToFlatten.elementAt(i));
+            }
+        }
+        
+        return flattened;
     }
 }
 
