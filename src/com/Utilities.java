@@ -120,6 +120,56 @@ public class Utilities {
         return retString.toString();
     }//end stripHTML(String _sHaystack)
     
+    public static Vector tokenizeString(String _sText) {
+        Vector vOutput = new Vector();
+        char[] breakItems = {' ', '\n', '\t', '<'};
+        boolean done = false;
+        int iCurrentIdx = 0;
+        int iFullLength = _sText.length();
+        while (!done && iCurrentIdx < iFullLength) {
+            int nextIdx = 0;
+            String text = "";
+            if(_sText.charAt(iCurrentIdx) == '<') {//parse tags
+                int tagIdx = _sText.indexOf(' ', iCurrentIdx);
+                nextIdx = _sText.indexOf('>', iCurrentIdx) + 1;
+                if(nextIdx == -1) {//Something went massively wrong if we have no end >
+                    return vOutput;
+                }
+                text += _sText.substring(iCurrentIdx, nextIdx);
+            }else {//parse text
+                int breakItem = 0;
+                for(int i = 0; i < breakItems.length; i++) {
+                    int idx = _sText.indexOf(breakItems[i], iCurrentIdx);
+
+                    if(nextIdx <= 0 || (idx > 0 && idx < nextIdx)) {
+                        nextIdx = idx;
+                        breakItem = i;
+                    }
+                }
+                //if we broke on a space, keep that space.
+                if(breakItems[breakItem] != '<') {
+                    nextIdx++;
+                }
+                if(nextIdx > 0) {
+                    text += _sText.substring(iCurrentIdx, nextIdx);
+                }else {
+                    text += _sText;
+                    nextIdx = _sText.length() - 1;
+                }
+            }
+            if(nextIdx <= iCurrentIdx) {
+                System.out.println("failed at: "+iCurrentIdx+", "+nextIdx);
+                done = true;
+            }
+            if(text.length() > 0) {
+                System.out.println("adding: "+text);
+                vOutput.addElement(text);
+            }
+            iCurrentIdx = nextIdx;
+        }
+        return vOutput;
+    }
+    
     public static Vector getSectionsFromJSON(JsonObject _oJson) {
         Vector vReturnVec = null;
         if(_oJson == null)
