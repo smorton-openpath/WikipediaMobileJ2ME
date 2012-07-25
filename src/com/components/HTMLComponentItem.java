@@ -266,18 +266,9 @@ public class HTMLComponentItem extends ComponentItem {
         Vector components = new Vector();
         
         for(int i=0; i<tags.size(); i++) {
-            
-            String tag = (String) (tags.elementAt(i));
-            
             if( ((String) (tags.elementAt(i))).substring(0,1).equals("<")) {
-
                 // It's a tag!  Parse it as one!
-                if(tag.indexOf("/") > 0 && tag.indexOf("/") < 4) {
-                    // It's a close tag
-                    
-                } else {
-                    // It's an open tag
-                    //link
+                String tag = (String) (tags.elementAt(i));
                     if( tag.substring(1,2).equals("a")) {
                         parseLink(tag, styleMask);
                     }
@@ -310,27 +301,22 @@ public class HTMLComponentItem extends ComponentItem {
                         parseTableHeader(tag, styleMask);
                     }
                     //table cell
-                    if(tag.equals("td")) {
+                    if(tag.substring(1,3).equals("td")) {
                         parseTableCell(tag, styleMask);
                     }
                     //table row
-                    if(tag.equals("tr")) {
+                    if(tag.substring(1,3).equals("tr")) {
                         parseTableRow(tag, styleMask);
                     }
                     //image
-                    if(tag.equals("img")) {
-                        parseImage(tag, styleMask);
+                    if(tag.substring(1,4).equals("img")) {
+                        parseImage((String)tags.elementAt(i), styleMask);
                     }
-                }
             } else {
                 // It's not a tag.  Just text.
                 components.addElement(parseText((String)tags.elementAt(i), styleMask));
             }
         }
-        int iCurrentIdx = 0;
-        int iNextTagIdx = 0;
-        int iNextTagLength = -1;        
-        int iEndNextTagIdx = 0;
         
         return components;
         
