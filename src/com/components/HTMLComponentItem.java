@@ -367,34 +367,59 @@ public class HTMLComponentItem extends ComponentItem {
     }//end parseText(String _sText)
     
     private Vector parseLink(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        String tag = (String) (_vTags.firstElement());
+        _vTags.removeElementAt(0);
+        _iStyleMask += STYLE_LINK;
+        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
+        
+        int startImgIdx = tag.indexOf("title=\"")+7;
+        int endImgIdx = tag.indexOf("\"", startImgIdx);
+        String titleText = tag.substring(startImgIdx, endImgIdx);
+
+        startImgIdx = tag.indexOf("href=\"")+6;
+        endImgIdx = tag.indexOf("\"", startImgIdx);
+        String linkText = tag.substring(startImgIdx, endImgIdx);
+
+        for(int i = 0; i < compVec.size(); i++) {
+            Component oComp = (Component)compVec.elementAt(i);
+            if(oComp instanceof LinkButton) {
+                ((LinkButton)oComp).setLink(linkText);
+            }
+        }
+        return compVec;
     }//end parseLink(Vector tags, int _iStyleMask)
     
     private Vector parseBold(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_BOLD;
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseBold(Vector tags, int _iStyleMask)
     
     private Vector parseBreak(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));    
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));   
     }//end parseBreak(Vector tags, int _iStyleMask)
     
     private Vector parseHeader(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseHeader(Vector tags, int _iStyleMask)
     
     private Vector parseItalic(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_ITALIC;
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseItalic(Vector tags, int _iStyleMask)
     
     private Vector parseList(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseList(Vector tags, int _iStyleMask)
     
     private Vector parseParagraph(Vector _vTags, int _iStyleMask) {
-        Vector compVec = parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
+        _vTags.removeElementAt(0);
+        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
         Vector returnVec = new Vector();
         Container newContainer = new Container();
         for(int i = 0; i < compVec.size(); i++) {
@@ -404,25 +429,29 @@ public class HTMLComponentItem extends ComponentItem {
     }//end parseParagraph(Vector tags, int _iStyleMask)
     
     private Vector parseTable(Vector _vTags, int _iStyleMask) {
-        parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask); 
+        _vTags.removeElementAt(0);
+        parseHtmlTagVector(_vTags, _iStyleMask); 
         return null;
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableHeader(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableCell(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseTableRow(Vector _vTags, int _iStyleMask) {
-        return flattenVectors(parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask));
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
     }//end parseTable(Vector tags, int _iStyleMask)
     
     private Vector parseImage(Vector _vTags, int _iStyleMask) {
         String tag = (String) (_vTags.firstElement());
-                
+        _vTags.removeElementAt(0);
         //pull out src parameter
         int startImgIdx = tag.indexOf("src=\"")+5;
         int endImgIdx = tag.indexOf("\"", startImgIdx);
