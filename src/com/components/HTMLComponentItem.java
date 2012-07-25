@@ -34,7 +34,11 @@ public class HTMLComponentItem extends ComponentItem {
         Container cTextComp = new Container();//new HTMLRequestHandler());
         //cTextComp.setWidth(500);
         cTextComp.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        Vector vComponents = chopHTMLString(_sText);
+//        Vector vComponents = chopHTMLString(_sText);
+        Vector tags = Utilities.tokenizeString(_sText);
+        _sText = null;
+        System.gc();
+        Vector vComponents = parseHtmlTagVector(tags, 0);
         for(int i = 0; i < vComponents.size(); i++)
         {
             Object oComp = vComponents.elementAt(i);
@@ -286,8 +290,11 @@ public class HTMLComponentItem extends ComponentItem {
         return tag;
     }
     
+    static int nestedDepth = 0;
     private Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
-        
+        nestedDepth++;
+        System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
+        System.out.println("   ...depth: "+nestedDepth);
         Vector components = new Vector();
         
         for(int i=0; i<_vTags.size(); i++) {
@@ -296,52 +303,37 @@ public class HTMLComponentItem extends ComponentItem {
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
                
-                if(tag.indexOf("/") == 2) {
+                if(tag.indexOf("/") == 1) {
                     //It's a close tag
+                    nestedDepth--;
+                    System.out.println("   ...depth2: "+nestedDepth);
+                    System.out.println("      ...closing tag was: " + tag);
+                    System.out.println("      ...components length was " + components.size());
+                    removeFirstVectorElement(_vTags);
                     return components;
                 }
                 
                 if( baseTag.equalsIgnoreCase("a")) {
                     components.addElement(parseLink(_vTags, _iStyleMask));
-                }
-                //bold
-                if( baseTag.equalsIgnoreCase("b")) {
+                } else if( baseTag.equalsIgnoreCase("b")) {
                     components.addElement(parseBold(_vTags, _iStyleMask));
-                }
-                //header
-                if(baseTag.equalsIgnoreCase("h2")) {
+                } else if(baseTag.equalsIgnoreCase("h2")) {
                     components.addElement(parseHeader(_vTags, _iStyleMask));
-                }
-                //italic
-                if(baseTag.equalsIgnoreCase("i")) {
+                } else if(baseTag.equalsIgnoreCase("i")) {
                     components.addElement(parseItalic(_vTags, _iStyleMask));
-                }
-                //list
-                if(baseTag.equalsIgnoreCase("ul")) {
+                } else if(baseTag.equalsIgnoreCase("ul")) {
                     components.addElement(parseList(_vTags, _iStyleMask));
-                }
-                //paragraph
-                if(baseTag.equalsIgnoreCase("p")) {
+                } else if(baseTag.equalsIgnoreCase("p")) {
                    components.addElement(parseParagraph(_vTags, _iStyleMask));
-                }
-                //table
-                if(baseTag.equalsIgnoreCase("table")) {
+                } else if(baseTag.equalsIgnoreCase("table")) {
                     components.addElement(parseTable(_vTags, _iStyleMask));
-                }
-                //table header
-                if(baseTag.equalsIgnoreCase("th")) {
+                } else if(baseTag.equalsIgnoreCase("th")) {
                     components.addElement(parseTableHeader(_vTags, _iStyleMask));
-                }
-                //table cell
-                if(baseTag.equalsIgnoreCase("td")) {
+                } else if(baseTag.equalsIgnoreCase("td")) {
                     components.addElement(parseTableCell(_vTags, _iStyleMask));
-                }
-                //table row
-                if(baseTag.equalsIgnoreCase("tr")) {
+                } else if(baseTag.equalsIgnoreCase("tr")) {
                     components.addElement(parseTableRow(_vTags, _iStyleMask));
-                }
-                //image
-                if(baseTag.equalsIgnoreCase("img")) {
+                } else if(baseTag.equalsIgnoreCase("img")) {
                     components.addElement(parseImage(_vTags, _iStyleMask));
                 }
             } else {
@@ -349,6 +341,8 @@ public class HTMLComponentItem extends ComponentItem {
                 components.addElement(parseText(tag, _iStyleMask));
             }
         }
+        nestedDepth--;
+        System.out.println("   ...depth3: "+nestedDepth);
         return components;
     }//end  parseHtmlString(String _sText)
 
@@ -501,20 +495,17 @@ public class HTMLComponentItem extends ComponentItem {
     }//end parseImage(Vector tags, int _iStyleMask)
 
     private Vector removeFirstVectorElement(Vector _vOldVector) {
-        Vector newVec = new Vector();
-        for(int i=1; i<_vOldVector.size(); i++) {
-            newVec.addElement(_vOldVector.elementAt(i));
-        }
-        return newVec;
+        _vOldVector.removeElementAt(0);
+        return _vOldVector;
     }
     
     private Vector flattenVectors(Vector _vToFlatten) {
-        Vector flattened = new Vector();
+  /*      Vector flattened = new Vector();
         
         for(int i=0; i<_vToFlatten.size(); i++) {
-            if((_vToFlatten.elementAt(i)) instanceof Vector) {
+            if(_vToFlatten.elementAt(i) instanceof Vector) {
                 Vector innerVec = (Vector) _vToFlatten.elementAt(i);
-                for(int j = 0; j < innerVec.size(); j++) {
+                for(int j=0; j<innerVec.size(); j++) {
                     flattened.addElement(innerVec.elementAt(j));
                 }
             } else {
@@ -523,6 +514,10 @@ public class HTMLComponentItem extends ComponentItem {
         }
         
         return flattened;
+    * 
+    */
+        return _vToFlatten;
     }
+    
 }
 
