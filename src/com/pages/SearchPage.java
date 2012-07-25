@@ -105,10 +105,10 @@ public class SearchPage extends BasePage {
         int i = 0;
         m_cForm.removeAllCommands();
         String  str = "";
-        str = mainMIDlet.getString("BackSK");
-        m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         str = mainMIDlet.getString("HomeSK");
         m_cForm.addCommand(new Command(str, COMMAND_HOME), i++);
+        str = mainMIDlet.getString("BackSK");
+        m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         
     }//end updateSoftkeys()
     

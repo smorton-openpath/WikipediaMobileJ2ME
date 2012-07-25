@@ -97,13 +97,13 @@ public class MainPage extends BasePage {
             str = mainMIDlet.getString("OkSK");
             m_cForm.addCommand(new Command(str, Command_OK), i++);
         }else {*/
-            str = mainMIDlet.getString("ExitSK");
-            m_cForm.addCommand(new Command(str, COMMAND_EXIT), i++);
-            str = mainMIDlet.getString("StoredPagesSK");
-            m_cForm.addCommand(new Command(str, COMMAND_STOREDPAGES), i++);
         //}
+        str = mainMIDlet.getString("StoredPagesSK");
+        m_cForm.addCommand(new Command(str, COMMAND_STOREDPAGES), i++);
         str = mainMIDlet.getString("SettingsSK");
         m_cForm.addCommand(new Command(str, COMMAND_SETTINGS), i++);
+        str = mainMIDlet.getString("ExitSK");
+        m_cForm.addCommand(new Command(str, COMMAND_EXIT), i++);
         
         /*if(!mainMIDlet.isTouchEnabled()) {            
             str = mainMIDlet.getString("ExitSK");
@@ -215,8 +215,7 @@ public class MainPage extends BasePage {
             if(oTextItem instanceof JsonObject) {
                 String sText = (String)((JsonObject)oTextItem).get("text");
                 sText = Utilities.stripSlash(sText);
-                HTMLComponentItem oHTMLItem = new HTMLComponentItem();
-                
+                HTMLComponentItem oHTMLItem = new HTMLComponentItem();                
                 Component cTextComp = oHTMLItem.createComponent(sText);
                 if(cTextComp != null) {
                     articleCont.addComponent(cTextComp);

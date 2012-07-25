@@ -11,6 +11,7 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.html.*;
 
 import java.util.Vector;
+
 /**
  *
  * @author caxthelm

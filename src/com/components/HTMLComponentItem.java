@@ -7,6 +7,9 @@ package com.components;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.io.NetworkManager;
+import com.sun.lwuit.io.services.ImageDownloadService;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 
 import java.util.Vector;
@@ -18,6 +21,9 @@ import java.util.Stack;
  */
 
 public class HTMLComponentItem extends ComponentItem {
+    private final int STYLE_BOLD = 1;
+    private final int STYLE_ITALIC = 2;
+    private final int STYLE_HEADER = 4;
     
     public HTMLComponentItem() {
         super(COMP_HTMLTEXT);
@@ -30,7 +36,15 @@ public class HTMLComponentItem extends ComponentItem {
         for(int i = 0; i < vComponents.size(); i++)
         {
             Object oComp = vComponents.elementAt(i);
-            cTextComp.addComponent((Component)oComp);
+            boolean addComp = true;
+            
+            //We may get empty containers, if that happens we strip them out to save space.
+            if(oComp instanceof Container && ((Container)oComp).getComponentCount() <= 0) {
+                addComp = false;
+            }
+            if(addComp) {
+                cTextComp.addComponent((Component)oComp);
+            }
         }
         
         cTextComp.getUnselectedStyle().setMargin(0, 0, 0, 0);
@@ -48,16 +62,21 @@ public class HTMLComponentItem extends ComponentItem {
         boolean isBold = false;
         boolean isItalic = false;
         boolean isHeader = false;
+        int tableIdx = 0;  
         boolean hasLeadingSpace = false;
         
         Container cCurrentCont = new Container();
-        vOutput.addElement(cCurrentCont);//Prep the text with a starting container.
-        Container cCurrentTable = null;       
+        vOutput.addElement(cCurrentCont);//Prep the text with a starting container.     
         String sCurrentLink = null;
         while( _sText.length() > 0) {
             String word = "";
             int nextIdx = 0;
-                
+            
+            //We must always have an active container.
+            if(cCurrentCont == null ) {                        
+                cCurrentCont = new Container();
+                vOutput.addElement(cCurrentCont);
+            }
             //TODO: check for email addresses
             if(_sText.charAt(0) == '<') { //Deal with Tags               
                 //deal with HTML tag.
@@ -119,55 +138,58 @@ public class HTMLComponentItem extends ComponentItem {
                     endImgIdx = _sText.indexOf("\"", startImgIdx);
                     String srcText = _sText.substring(startImgIdx, endImgIdx);
                     
+                    int width = -1;
+                    int height = -1;
+                    startImgIdx = _sText.indexOf("width=\"")+7;
+                    if(startImgIdx > -1) {
+                        endImgIdx = _sText.indexOf("\"", startImgIdx);
+                        width = Integer.parseInt(_sText.substring(startImgIdx, endImgIdx));
+                    }
+                    
+                    startImgIdx = _sText.indexOf("height=\"")+8;
+                    if(startImgIdx > -1) {
+                        endImgIdx = _sText.indexOf("\"", startImgIdx);
+                        height = Integer.parseInt(_sText.substring(startImgIdx, endImgIdx));
+                    }
+                    
                     if(altText.length() <= 0) {
                         altText = srcText.substring(srcText.lastIndexOf('/') + 1);
                         altText = altText.replace('_', ' ');
                     }
-                    
-                    ImageButton newLink = new ImageButton(altText, srcText);
-                    //newLink.setUIID("LabelButtonLink");
-                    if(cCurrentCont != null) {
-                        cCurrentCont.addComponent(newLink);
-                    }else {
+                    //If the image is less than 51 pixels it is likely an icon; so just go ahead and show it.
+                    if(width > 0 && width <= 50 && height > 0 && height <= 50 && tableIdx <= 0) {
+                        Label newLabel = new Label();
+                        newLabel.setUIID("no_MarginsTransparent");
+                        ImageDownloadService img = new ImageDownloadService("http:"+srcText, newLabel);
+                        NetworkManager.getInstance().addToQueue(img);
+                        cCurrentCont.addComponent( newLabel);
+                    }else if(tableIdx <= 0) {
+                        //System.out.println("adding image: "+altText+", "+srcText);
+                        ImageButton newLink = new ImageButton(altText, srcText);
+                        //Add button to the list, reset the container
+                        cCurrentCont = null;
                         vOutput.addElement(newLink);
                     }
-                }else if(tag.equalsIgnoreCase("p")) {//Paragraphs are new containers
+                    //newLink.setUIID("LabelButtonLink");
+                    
+                }else if(tag.equalsIgnoreCase("p")) {//Paragraphs are new containers                    
+                    cCurrentCont = null;
+                }else if(tag.equalsIgnoreCase("h2")) {//headers are new containers
+                    cCurrentCont = null;
                     if(isEndTag) {
-                        cCurrentCont = null;
-                    }else {
-                        cCurrentCont = new Container();
-                        vOutput.addElement(cCurrentCont);
-                    }
-                }else if(tag.equalsIgnoreCase("h2")) {//Paragraphs are new containers
-                    if(isEndTag) {
-                        cCurrentCont = null;
                         isHeader = false;
                     }else {
-                        cCurrentCont = new Container();
-                        vOutput.addElement(cCurrentCont);
                         isHeader = true;
                         //TODO: check the previous tag and see if it is ul or ol
                     }
-                }else if(tag.equalsIgnoreCase("li")) {//Paragraphs are new containers
-                    if(isEndTag) {
-                        cCurrentCont = null;
-                    }else {
-                        cCurrentCont = new Container();
-                        vOutput.addElement(cCurrentCont);
-                        //TODO: check the previous tag and see if it is ul or ol
-                    }
+                }else if(tag.equalsIgnoreCase("li")) {//points are new containers
+                    cCurrentCont = null;
                 }else if(tag.equalsIgnoreCase("table")) {
+                    cCurrentCont = null;
                     if(isEndTag) {
-                        //once done with the table put a new container back.
-                        cCurrentTable = null;
-                        cCurrentCont = new Container();
-                        vOutput.addElement(cCurrentCont);
+                        tableIdx--;
                     }else {
-                        //Take away the old container and add in a new table.
-                        cCurrentCont = null;
-                        cCurrentTable = new Container();
-                        //vOutput.addElement(cCurrentTable);
-                        //TODO: check the previous tag and see if it is ul or ol
+                        tableIdx++;
                     }
                 }else if(tag.equalsIgnoreCase("ul")) {//Paragraphs are new containers
                 }
@@ -221,20 +243,68 @@ public class HTMLComponentItem extends ComponentItem {
                 if(isBold) {
                 }
                 if(cCurrentCont != null) {
-                    cCurrentCont.addComponent(newComp);
-                }else if(cCurrentTable != null) {
-                    cCurrentTable.addComponent(newComp);
-                }else {
+                    if(tableIdx <= 0) {//Axthelm - turning tables off for now.
+                        //System.out.println("adding: "+text);
+                        cCurrentCont.addComponent(newComp);
+                    }
+                }else {                      
+                    System.out.println("adding to main");
                     vOutput.addElement(newComp);
                 }
             }
             if(nextIdx == -1) {
                 break;
             }
-            _sText = _sText.substring(nextIdx);
+            _sText = _sText.substring(nextIdx);            
             //_sText = _sText.trim();
         }//end while( _sText.length() > 0)
         return vOutput;
     }//end chopHTMLString(String _sText)
+    
+    private Container parseHtmlString(String _sText) {
+        int iCurrentIdx = 0;
+        int iNextTagIdx = 0;
+        int iNextTagLength = -1;        
+        int iEndNextTagIdx = 0;
+        return null;
+        
+    }//end  parseHtmlString(String _sText)
+    private Component parseText(String _sText, int styleMask) {
+        
+        Label newLabel = new Label(_sText);
+        newLabel.setUIID("No_Margins");
+        return (Component)newLabel;
+    }//end parseText(String _sText)
+    
+    private Component parseLink(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseLink(String _sText)
+    
+    private Component parseBold(String _sText, int _iStyleMask) {
+        _iStyleMask += STYLE_BOLD;
+        return null;
+    }//end parseBold(String _sText)
+    
+    private Component parseHeader(String _sText, int _iStyleMask) {
+        _iStyleMask += STYLE_HEADER;
+        return null;
+    }//end parseHeader(String _sText)
+    
+    private Component parseItalic(String _sText, int _iStyleMask) {
+        _iStyleMask += STYLE_ITALIC;
+        return null;
+    }//end parseItalic(String _sText)
+    
+    private Component parseList(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseList(String _sText)
+    
+    private Component parseParagraph(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseParagraph(String _sText)
+    
+    private Component parseTable(String _sText, int _iStyleMask) {
+        return null;
+    }//end parseTable(String _sText)
 }
 
