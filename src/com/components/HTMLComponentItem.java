@@ -302,47 +302,47 @@ public class HTMLComponentItem extends ComponentItem {
                 }
                 
                 if( baseTag.equalsIgnoreCase("a")) {
-                    components.addElement(parseLink(_vTags, _iStyleMask);
+                    components.addElement(parseLink(_vTags, _iStyleMask));
                 }
                 //bold
                 if( baseTag.equalsIgnoreCase("b")) {
-                    components.addElement(parseBold(_vTags, _iStyleMask);
+                    components.addElement(parseBold(_vTags, _iStyleMask));
                 }
                 //header
                 if(baseTag.equalsIgnoreCase("h2")) {
-                    components.addElement(parseHeader(_vTags, _iStyleMask);
+                    components.addElement(parseHeader(_vTags, _iStyleMask));
                 }
                 //italic
                 if(baseTag.equalsIgnoreCase("i")) {
-                    components.addElement(parseItalic(_vTags, _iStyleMask);
+                    components.addElement(parseItalic(_vTags, _iStyleMask));
                 }
                 //list
                 if(baseTag.equalsIgnoreCase("ul")) {
-                    components.addElement(parseList(_vTags, _iStyleMask);
+                    components.addElement(parseList(_vTags, _iStyleMask));
                 }
                 //paragraph
                 if(baseTag.equalsIgnoreCase("p")) {
-                   components.addElement(parseParagraph(_vTags, _iStyleMask);
+                   components.addElement(parseParagraph(_vTags, _iStyleMask));
                 }
                 //table
                 if(baseTag.equalsIgnoreCase("table")) {
-                    components.addElement(parseTable(_vTags, _iStyleMask);
+                    components.addElement(parseTable(_vTags, _iStyleMask));
                 }
                 //table header
                 if(baseTag.equalsIgnoreCase("th")) {
-                    components.addElement(parseTableHeader(_vTags, _iStyleMask);
+                    components.addElement(parseTableHeader(_vTags, _iStyleMask));
                 }
                 //table cell
                 if(baseTag.equalsIgnoreCase("td")) {
-                    components.addElement(parseTableCell(_vTags, _iStyleMask);
+                    components.addElement(parseTableCell(_vTags, _iStyleMask));
                 }
                 //table row
                 if(baseTag.equalsIgnoreCase("tr")) {
-                    components.addElement(parseTableRow(_vTags, _iStyleMask);
+                    components.addElement(parseTableRow(_vTags, _iStyleMask));
                 }
                 //image
                 if(baseTag.equalsIgnoreCase("img")) {
-                    components.addElement(parseImage(_vTags, _iStyleMask);
+                    components.addElement(parseImage(_vTags, _iStyleMask));
                 }
             } else {
                 // It's not a tag.  Just text.
@@ -354,7 +354,7 @@ public class HTMLComponentItem extends ComponentItem {
 
     private Component parseText(String _sText, int _iStyleMask) {
         Component newComp = null;
-        if((_iStyleMask & STYLE_LINK) == 1) {
+        if((_iStyleMask & STYLE_LINK) != 0) {
             LinkButton newLink = new LinkButton(_sText);
             newLink.setUIID("LabelButtonLink");
             newComp = newLink;
@@ -366,55 +366,109 @@ public class HTMLComponentItem extends ComponentItem {
         return newComp;
     }//end parseText(String _sText)
     
-    private Vector parseLink(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseLink(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseLink(Vector tags, int _iStyleMask)
     
-    private Vector parseBold(Vector tags, int _iStyleMask) {
+    private Vector parseBold(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_BOLD;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseBold(Vector tags, int _iStyleMask)
     
-    private Vector parseBreak(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseBreak(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseBreak(Vector tags, int _iStyleMask)
     
-    private Vector parseHeader(Vector tags, int _iStyleMask) {
+    private Vector parseHeader(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseHeader(Vector tags, int _iStyleMask)
     
-    private Vector parseItalic(Vector tags, int _iStyleMask) {
+    private Vector parseItalic(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_ITALIC;
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseItalic(Vector tags, int _iStyleMask)
     
-    private Vector parseList(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseList(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseList(Vector tags, int _iStyleMask)
     
-    private Vector parseParagraph(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseParagraph(Vector _vTags, int _iStyleMask) {
+        Vector compVec = parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
+        Vector returnVec = new Vector();
+        Container newContainer = new Container();
+        for(int i = 0; i < compVec.size(); i++) {
+            newContainer.addComponent((Component)compVec.elementAt(i));
+        }
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseParagraph(Vector tags, int _iStyleMask)
     
-    private Vector parseTable(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseTable(Vector _vTags, int _iStyleMask) {
+        parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask); 
+        return null;
     }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Vector parseTableHeader(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseTableHeader(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Vector parseTableCell(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseTableCell(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Vector parseTableRow(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseTableRow(Vector _vTags, int _iStyleMask) {
+        return parseHtmlTagVector(removeFirstVectorElement(_vTags), _iStyleMask);
     }//end parseTable(Vector tags, int _iStyleMask)
     
-    private Vector parseImage(Vector tags, int _iStyleMask) {
-        return parseHtmlTagVector(removeFirstVectorElement(tags), _iStyleMask);
+    private Vector parseImage(Vector _vTags, int _iStyleMask) {
+        String tag = (String) (_vTags.firstElement());
+                
+        //pull out src parameter
+        int startImgIdx = tag.indexOf("src=\"")+5;
+        int endImgIdx = tag.indexOf("\"", startImgIdx);
+        String srcText = tag.substring(startImgIdx, endImgIdx);
+        
+        //Pull out alt parameter
+        startImgIdx = tag.indexOf("alt=\"")+5;
+        endImgIdx = tag.indexOf("\"", startImgIdx);
+        String altText = tag.substring(startImgIdx, endImgIdx);
+        
+        //double check alt text
+        if(altText.length() <= 0) {
+            altText = srcText.substring(srcText.lastIndexOf('/') + 1);
+            altText = altText.replace('_', ' ');
+        }
+
+        //pull out height and width
+        int width = -1;
+        int height = -1;
+        startImgIdx = tag.indexOf("width=\"")+7;
+        if(startImgIdx > -1) {
+            endImgIdx = tag.indexOf("\"", startImgIdx);
+            width = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
+        }
+
+        startImgIdx = tag.indexOf("height=\"")+8;
+        if(startImgIdx > -1) {
+            endImgIdx = tag.indexOf("\"", startImgIdx);
+            height = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
+        }
+        Vector returnVec = new Vector();
+        
+        //If the image is less than 51 pixels it is likely an icon; so just go ahead and show it.        
+        if(width > 0 && width <= 50 && height > 0 && height <= 50) {
+            Label newLabel = new Label();
+            newLabel.setUIID("no_MarginsTransparent");
+            ImageDownloadService img = new ImageDownloadService("http:"+srcText, newLabel);
+            NetworkManager.getInstance().addToQueue(img);
+            returnVec.addElement( newLabel);
+        }else {
+            //System.out.println("adding image: "+altText+", "+srcText);
+            ImageButton newLink = new ImageButton(altText, srcText);
+            //Add button to the list, reset the container
+            returnVec.addElement(newLink);
+        }
+        return returnVec;
     }//end parseImage(Vector tags, int _iStyleMask)
 
     private Vector removeFirstVectorElement(Vector _vOldVector) {
