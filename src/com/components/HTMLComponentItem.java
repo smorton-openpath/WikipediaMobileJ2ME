@@ -45,7 +45,7 @@ public class HTMLComponentItem extends ComponentItem {
             boolean addComp = true;
             
             //We may get empty containers, if that happens we strip them out to save space.
-            if(oComp instanceof Container && ((Container)oComp).getComponentCount() <= 0) {
+            if(oComp == null || oComp instanceof Container && ((Container)oComp).getComponentCount() <= 0) {
                 addComp = false;
             }
             if(addComp) {
@@ -254,7 +254,7 @@ public class HTMLComponentItem extends ComponentItem {
                         cCurrentCont.addComponent(newComp);
                     }
                 }else {                      
-                    System.out.println("adding to main");
+                    //System.out.println("adding to main");
                     vOutput.addElement(newComp);
                 }
             }
@@ -293,12 +293,12 @@ public class HTMLComponentItem extends ComponentItem {
     static int nestedDepth = 0;
     private Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
         nestedDepth++;
-        System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
-        System.out.println("   ...depth: "+nestedDepth);
+        //System.out.println("   ...depth: "+nestedDepth);
         Vector components = new Vector();
         
-        for(int i=0; i<_vTags.size(); i++) {
-            String tag = (String) (_vTags.elementAt(i));
+        while(_vTags.size() > 0) {
+            String tag = (String) (_vTags.elementAt(0));
+        //System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
@@ -306,11 +306,11 @@ public class HTMLComponentItem extends ComponentItem {
                 if(tag.indexOf("/") == 1) {
                     //It's a close tag
                     nestedDepth--;
-                    System.out.println("   ...depth2: "+nestedDepth);
-                    System.out.println("      ...closing tag was: " + tag);
-                    System.out.println("      ...components length was " + components.size());
-                    removeFirstVectorElement(_vTags);
-                    return components;
+                    //System.out.println("   ...depth2: "+nestedDepth);
+                    //System.out.println("      ...closing tag was: " + tag);
+                    //System.out.println("      ...components length was " + components.size());
+                    _vTags.removeElementAt(0);
+                    return flattenVectors(components);
                 }
                 
                 if( baseTag.equalsIgnoreCase("a")) {
@@ -335,15 +335,19 @@ public class HTMLComponentItem extends ComponentItem {
                     components.addElement(parseTableRow(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("img")) {
                     components.addElement(parseImage(_vTags, _iStyleMask));
+                }else {
+                    components.addElement(parseDefault(_vTags, _iStyleMask));
                 }
             } else {
                 // It's not a tag.  Just text.
                 components.addElement(parseText(tag, _iStyleMask));
+                _vTags.removeElementAt(0);
             }
-        }
+            //String tag2 = (String) (_vTags.elementAt(0));
+        }//end while
         nestedDepth--;
-        System.out.println("   ...depth3: "+nestedDepth);
-        return components;
+        //System.out.println("   ...depth3: "+nestedDepth);
+        return flattenVectors(components);
     }//end  parseHtmlString(String _sText)
 
     private Component parseText(String _sText, int _iStyleMask) {
@@ -364,7 +368,7 @@ public class HTMLComponentItem extends ComponentItem {
         String tag = (String) (_vTags.firstElement());
         _vTags.removeElementAt(0);
         _iStyleMask += STYLE_LINK;
-        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
+        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         
         int startImgIdx = tag.indexOf("title=\"")+7;
         int endImgIdx = tag.indexOf("\"", startImgIdx);
@@ -375,7 +379,7 @@ public class HTMLComponentItem extends ComponentItem {
         String linkText = tag.substring(startImgIdx, endImgIdx);
 
         for(int i = 0; i < compVec.size(); i++) {
-            Component oComp = (Component)compVec.elementAt(i);
+            Object oComp = (Object)compVec.elementAt(i);
             if(oComp instanceof LinkButton) {
                 ((LinkButton)oComp).setLink(linkText);
             }
@@ -390,6 +394,11 @@ public class HTMLComponentItem extends ComponentItem {
     }//end parseBold(Vector tags, int _iStyleMask)
     
     private Vector parseBreak(Vector _vTags, int _iStyleMask) {
+        _vTags.removeElementAt(0);
+        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));   
+    }//end parseBreak(Vector tags, int _iStyleMask)
+    
+    private Vector parseDefault(Vector _vTags, int _iStyleMask) {
         _vTags.removeElementAt(0);
         return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));   
     }//end parseBreak(Vector tags, int _iStyleMask)
@@ -413,12 +422,14 @@ public class HTMLComponentItem extends ComponentItem {
     
     private Vector parseParagraph(Vector _vTags, int _iStyleMask) {
         _vTags.removeElementAt(0);
-        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
+        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
         for(int i = 0; i < compVec.size(); i++) {
+            //System.out.println("para: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
         }
+        returnVec.addElement(newContainer);
         return returnVec;
     }//end parseParagraph(Vector tags, int _iStyleMask)
     
@@ -500,7 +511,7 @@ public class HTMLComponentItem extends ComponentItem {
     }
     
     private Vector flattenVectors(Vector _vToFlatten) {
-  /*      Vector flattened = new Vector();
+       Vector flattened = new Vector();
         
         for(int i=0; i<_vToFlatten.size(); i++) {
             if(_vToFlatten.elementAt(i) instanceof Vector) {
@@ -514,9 +525,6 @@ public class HTMLComponentItem extends ComponentItem {
         }
         
         return flattened;
-    * 
-    */
-        return _vToFlatten;
     }
     
 }

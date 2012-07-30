@@ -58,7 +58,6 @@ public class SplashPage extends BasePage
                     }
                 });
             }
-            m_cForm.show();
             
             if(m_bHasNetwork) {
                 m_tiSplashTimer = new Timer();
