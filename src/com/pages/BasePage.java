@@ -24,6 +24,8 @@ public class BasePage implements ActionListener {
     public static final int PAGE_SEARCH = 3;
     public static final int PAGE_SETTINGS = 4;
     public static final int PAGE_ARTICLE = 5;
+    public static final int PAGE_TABLE = 6;
+    
     
     public static final int DIALOG_IMAGE = -1;
     public static final int DIALOG_SEARCHRESULT = -2;
@@ -37,6 +39,7 @@ public class BasePage implements ActionListener {
     public static final int COMMAND_OK = -1;
     public static final int COMMAND_LINK = -2;
     public static final int COMMAND_IMAGE = -3;
+    public static final int COMMAND_TABLE = -4;
     //commands 10 through 29 are reserved for common IDs
     public static final int COMMAND_LANGUAGE = 10;
     public static final int COMMAND_SEARCHBUTTON = 20;

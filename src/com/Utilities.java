@@ -162,7 +162,7 @@ public class Utilities {
                 done = true;
             }
             if(text.length() > 0) {
-                System.out.println("adding: "+text);
+                //System.out.println("adding: "+text);
                 vOutput.addElement(text);
             }
             iCurrentIdx = nextIdx;

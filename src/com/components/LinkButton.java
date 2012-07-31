@@ -6,6 +6,7 @@ package com.components;
 
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 
 /**
  *

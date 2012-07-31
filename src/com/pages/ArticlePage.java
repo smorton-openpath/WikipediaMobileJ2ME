@@ -7,6 +7,7 @@ package com.pages;
 import com.*;
 import com.components.LinkButton;
 import com.components.ImageButton;
+import com.components.TableButton;
 import com.components.HTMLComponentItem;
 import com.components.SectionComponentItem;
 
@@ -188,11 +189,21 @@ public class ArticlePage extends BasePage {
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
-                            System.out.println("linkTitle: "+title);
+                            //System.out.println("linkTitle: "+title);
                             NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), title,  "0");
                         }
                     }
                 }
+                break;
+            case COMMAND_TABLE:
+                {
+                    Component oComp = ae.getComponent();
+                    if(oComp instanceof LinkButton) {
+                        //System.out.println("tableButton: "+((LinkButton)oComp).getLink());
+                        mainMIDlet.setCurrentPage(new TablePage(((LinkButton)oComp).getText(), ((LinkButton)oComp).getLink()));
+                    }
+                }
+                break;
             default://dealing with the dynamic events
                 {
                     if(commandId > 40) {
