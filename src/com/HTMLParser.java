@@ -14,8 +14,9 @@ import com.sun.lwuit.Container;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.io.NetworkManager;
 import com.sun.lwuit.io.services.ImageDownloadService;
-import com.sun.lwuit.layouts.BorderLayout;
-import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.layouts.*;
+import com.sun.lwuit.table.*;
+import com.sun.lwuit.Font;
 
 import java.util.Vector;
 import java.util.Stack;
@@ -34,12 +35,20 @@ public class HTMLParser {
     
     private static Vector tableVector = null;
     
+    private static Font m_oFontBold = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD , Font.SIZE_MEDIUM);
+    private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
+    private static Font m_oFontBoldItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD | Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
+    
     public HTMLParser() {
     }
     
     public static Component parseHtml(String _sText, boolean _bShowTables) {
         Container cTextComp = new Container();//new HTMLRequestHandler());
         //cTextComp.setWidth(500);
+        if(_sText == null) {            
+            return cTextComp;
+        }
+        _sText = Utilities.replace("&#160;", " ", _sText);
         cTextComp.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 //        Vector vComponents = chopHTMLString(_sText);
         int initialParams = 0;
@@ -186,6 +195,19 @@ public class HTMLParser {
             newLabel.setUIID("No_Margins");
             newComp = newLabel;
         }
+        if((_iStyleMask & STYLE_BOLD) != 0 && (_iStyleMask & STYLE_ITALIC) != 0) {
+            newComp.getStyle().setFont(m_oFontBoldItalic);
+            newComp.getSelectedStyle().setFont(m_oFontBoldItalic);
+            newComp.getPressedStyle().setFont(m_oFontBoldItalic);
+        }else if((_iStyleMask & STYLE_BOLD) != 0 || (_iStyleMask & STYLE_HEADER) != 0) {
+            newComp.getStyle().setFont(m_oFontBold);
+            newComp.getSelectedStyle().setFont(m_oFontBold);
+            newComp.getPressedStyle().setFont(m_oFontBold);
+        }else if((_iStyleMask & STYLE_ITALIC) != 0) {
+            newComp.getStyle().setFont(m_oFontItalic);
+            newComp.getSelectedStyle().setFont(m_oFontItalic);
+            newComp.getPressedStyle().setFont(m_oFontItalic);
+        }
         return newComp;
     }//end parseText(String _sText)
     
@@ -235,8 +257,7 @@ public class HTMLParser {
     //<h2>
     private static Vector parseHeader(Vector _vTags, int _iStyleMask) {
         _iStyleMask += STYLE_HEADER;
-        _vTags.removeElementAt(0);
-        return flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
+        return parseParagraph(_vTags, _iStyleMask);
     }//end parseHeader(Vector tags, int _iStyleMask)
     
     //<i>
@@ -329,9 +350,10 @@ public class HTMLParser {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             newContainer.setUIID("Table");
-            //newContainer.setSnapToGrid(true);
+            newContainer.setSnapToGrid(true);
             
             newContainer.setScrollableY(true);
+            //newContainer.setScrollableX(true);
             int j = 0;
             for(int i = 0; i < compVec.size(); i++) {
                 newContainer.addComponent((Component)compVec.elementAt(i));
@@ -365,13 +387,23 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-        newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));        
-        newContainer.setUIID("Table");
-        int j = 0;
-        for(int i = 0; i < compVec.size(); i++) {
-            //System.out.println("  Row Comp: "+compVec.elementAt(i));
-            newContainer.addComponent((Component)compVec.elementAt(i));
+        //newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
+            newContainer.setUIID("TableRow");
+        if(compVec.size() == 1) {
+            BorderLayout border = new BorderLayout();
+            border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
+            newContainer.setLayout(border);
+            //newContainer.setUIID("No_Margins");
+            ((Component)compVec.elementAt(0)).setUIID("TableCellSpecial");
+            newContainer.addComponent(BorderLayout.CENTER, (Component)compVec.elementAt(0));
+        }else {
+            newContainer.setLayout(new GridLayout(1, compVec.size()));
+            for(int i = 0; i < compVec.size(); i++) {
+                //System.out.println("  Row Comp: "+compVec.elementAt(i));
+                newContainer.addComponent((Component)compVec.elementAt(i));
+            }
         }
+        newContainer.invalidate();
         returnVec.addElement(newContainer);
         //System.out.println(" ~table Row real: "+j+" of "+compVec.size());
         return returnVec;
@@ -379,14 +411,14 @@ public class HTMLParser {
     
     //<th>
     private static Vector parseTableHeader(Vector _vTags, int _iStyleMask) {
-        //Just do what paragraph does, but BOLD!
-        _iStyleMask += STYLE_BOLD;
-        //System.out.println("    *adding header");
-        _vTags.removeElementAt(0);
-        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
+        _vTags.removeElementAt(0);
+        _iStyleMask += STYLE_BOLD;
+        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
+        compVec = stripVector(compVec);
         newContainer.setUIID("TableCell");
+        newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
@@ -397,16 +429,22 @@ public class HTMLParser {
     
     //<td>
     private static Vector parseTableCell(Vector _vTags, int _iStyleMask) {
-        //Just do what paragraph does.
-        _vTags.removeElementAt(0);
-        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
+        _vTags.removeElementAt(0);
+        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
+        compVec = stripVector(compVec);
+        
+        //Just do what paragraph does.
         newContainer.setUIID("TableCell");
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("cell: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
         }
+        Label spacer = new Label(" ");
+        spacer.setUIID("No_Margins");
+        newContainer.addComponent(spacer);
+        newContainer.invalidate();
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableCell(Vector tags, int _iStyleMask)

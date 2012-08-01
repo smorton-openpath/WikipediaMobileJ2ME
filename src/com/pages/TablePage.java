@@ -141,6 +141,9 @@ public class TablePage extends BasePage {
         {              
             Component cTextComp = HTMLParser.parseHtml((String)_results, true);      
             cTextComp.setUIID("Table");
+            if(cTextComp instanceof Container) {
+                ((Container)cTextComp).invalidate();
+            }
             m_cContentContainer.addComponent(cTextComp);
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.repaint();
