@@ -101,8 +101,8 @@ public class ArticlePage extends BasePage {
         m_cForm.addCommand(new Command(str, COMMAND_HOME), i++);
         str = mainMIDlet.getString("SearchSK");
         m_cForm.addCommand(new Command(str, COMMAND_SEARCH), i++);
-        str = mainMIDlet.getString("SavepageSK");
-        m_cForm.addCommand(new Command(str, COMMAND_SAVEPAGE), i++);
+        //str = mainMIDlet.getString("SavepageSK");
+        //m_cForm.addCommand(new Command(str, COMMAND_SAVEPAGE), i++);
         if(mainMIDlet.getBookmarks().recordExists(m_sTitle)){
             str = mainMIDlet.getString("DeleteBookmarkSK");
             m_cForm.addCommand(new Command(str, COMMAND_DELETEBOOKMARK), i++);

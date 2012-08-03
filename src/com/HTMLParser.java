@@ -304,12 +304,13 @@ public class HTMLParser {
         Vector returnVec = new Vector();
         
         //If the image is less than 51 pixels it is likely an icon; so just go ahead and show it.        
-        if(width > 0 && width <= 50 && height > 0 && height <= 50) {
+        if(width > 0 && width <= 60 ){//&& height > 0 && height <= 50) {
             Label newLabel = new Label();
             newLabel.setUIID("no_MarginsTransparent");
             ImageDownloadService img = new ImageDownloadService("http:"+srcText, newLabel);
             NetworkManager.getInstance().addToQueue(img);
             returnVec.addElement( newLabel);
+            //System.out.println("made image: "+srcText);
         }else {
             //System.out.println("adding image: "+altText+", "+srcText);
             ImageButton newLink = new ImageButton(altText, srcText);
@@ -417,12 +418,17 @@ public class HTMLParser {
         _iStyleMask += STYLE_BOLD;
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         compVec = stripVector(compVec);
+        
         newContainer.setUIID("TableCell");
         newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
         }
+        /*Label spacer = new Label(" ");
+        spacer.setUIID("No_Margins");
+        newContainer.addComponent(spacer);
+        newContainer.invalidate();*/
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableHeader(Vector tags, int _iStyleMask)
@@ -435,7 +441,6 @@ public class HTMLParser {
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         compVec = stripVector(compVec);
         
-        //Just do what paragraph does.
         newContainer.setUIID("TableCell");
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("cell: "+compVec.elementAt(i));
@@ -497,8 +502,9 @@ public class HTMLParser {
             if(element instanceof Label) {
                 Label labelElement = (Label)element;
                 String text = labelElement.getText();
-                if(text != null && text.length() > 0 && !text.equalsIgnoreCase("\n")) {
+                if(text != null && text.length() > 0 && (!text.equalsIgnoreCase("\n") || labelElement.getIcon() != null)) {
                     returnVec.addElement(element);
+                    //System.out.println("adding element: "+element);
                 }
             }else {
                 returnVec.addElement(element);

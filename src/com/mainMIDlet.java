@@ -201,15 +201,16 @@ public class mainMIDlet extends MIDlet
             System.out.println("nothing to go back to");
             return;
         }
-        BasePage newLast = (BasePage)m_vScreenStack.elementAt(m_vScreenStack.size() - 2);
         //System.out.println("wanting to show: " +newLast.getType());
-        newLast.refreshPage();
-        newLast.updateSoftkeys();
-        newLast.showForm();
+        //newLast.showForm();
         BasePage last = (BasePage)m_vScreenStack.lastElement();
+        m_vScreenStack.removeElementAt(m_vScreenStack.size() - 1);
         last.dispose();
         getBuilder().back();
-        m_vScreenStack.removeElementAt(m_vScreenStack.size() - 1);
+        BasePage newLast = (BasePage)m_vScreenStack.lastElement();
+        //newLast.refreshPage();
+        //newLast.updateSoftkeys();
+        newLast.showForm();
         Thread.yield();
         //System.out.println("checkSize: "+screenStack.size());
     }//end pageBack()
@@ -218,12 +219,12 @@ public class mainMIDlet extends MIDlet
         if(m_vScreenStack.size() < 2) {//Don't go back if we have nothing to go back to.
             return;
         }
-        BasePage newLast = (BasePage)m_vScreenStack.elementAt(m_vScreenStack.size() - 2);
-        newLast.refreshPage();
         //System.out.println("wanting to show: " +newLast.getType());
         BasePage last = (BasePage)m_vScreenStack.lastElement();
         last.dispose();
         m_vScreenStack.removeElementAt(m_vScreenStack.size() - 1);
+        BasePage newLast = (BasePage)m_vScreenStack.lastElement();
+        newLast.showForm();
         Thread.yield();
         //System.out.println("checkSize: "+screenStack.size());
     }//end dialogBack()
