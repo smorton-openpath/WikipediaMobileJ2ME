@@ -80,6 +80,8 @@ public class MainPage extends BasePage {
                 }
             });
             updateSoftkeys();
+            m_cForm.setCyclicFocus(false);
+            m_cForm.setFocusScrolling(false);
             m_cForm.addCommandListener(this);
             mainMIDlet.getBuilder().setHomeForm("MainPageForm");
             //mForm.repaint();
@@ -95,9 +97,9 @@ public class MainPage extends BasePage {
             str = mainMIDlet.getString("SearchSK");
             m_cForm.addCommand(new Command(str, Command_Search), i++);
             str = mainMIDlet.getString("OkSK");
-            m_cForm.addCommand(new Command(str, Command_OK), i++);
-        }else {*/
-        //}
+            m_cForm.addCommand(new Command(str, COMMAND_OK), i++);
+        }else {
+        }*/
         str = mainMIDlet.getString("StoredPagesSK");
         m_cForm.addCommand(new Command(str, COMMAND_STOREDPAGES), i++);
         str = mainMIDlet.getString("SettingsSK");

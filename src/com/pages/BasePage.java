@@ -45,6 +45,7 @@ public class BasePage implements ActionListener {
     public static final int COMMAND_SEARCHBUTTON = 20;
     public static final int COMMAND_NEXT = 21;
     public static final int COMMAND_PREV = 22;
+    public static final int COMMAND_CONTRIBUTORS = 29;
     //Commands 30+ are dynamic commands.
     
     int m_iPageType = PAGE_SPLASH;

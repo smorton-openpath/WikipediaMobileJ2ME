@@ -23,6 +23,7 @@ public class NetworkController {
     public static final int PARSE_SEARCH = 0;
     public static final int FETCH_ARTICLE = 1;
     public static final int SEARCH_LANGUAGES = 2;
+    public static final int FETCH_TERMS = 3;
     
     private static Slider m_cLoadingSlider = null;
     private NetworkController() {
@@ -142,8 +143,7 @@ public class NetworkController {
             url.append("sections=");
             url.append(_sSection);
         }
-        
-        
+                
         String sKeyword = _sSearchTerm.trim();
         if (sKeyword != null && sKeyword.length() > 0) {
             url.append("&");
@@ -165,6 +165,56 @@ public class NetworkController {
         //System.out.println("search Url: "+url.toString());
         networkNexus("http://"+_sLanguage+BASE_URL+url.toString(), "", HttpConnection.GET, FETCH_ARTICLE);
     }//end fetchArticle(String _sLanguage, String _sSearchTerm, String _sSection)
+    
+    public void fetchTermsOfUse(String _sLanguage, String _sSearchTerm, String _sSection){
+        //http://wikimediafoundation.org/w/api.php?action=mobileview&format=json&page=Terms_of_use
+        
+        //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections
+        /*if (_sSearchTerm != null && _sSearchTerm.length() == 0) {
+            mainMIDlet.previousSearchQuery = _sSearchTerm;
+        }else {
+            mainMIDlet.previousSearchQuery = "";
+        }*/
+        StringBuffer url = new StringBuffer();
+        url.append(WEBAPI +"?");
+        
+        //adding common items: action, props, format
+        url.append("action=mobileview");
+        url.append("&");
+        url.append("format=json");
+        /*url.append("&");
+        url.append("prop=text%7Csections%7Cnormalizedtitle");
+        url.append("&");
+        url.append("sectionprop=toclevel%7Cline%7Cnumber");*/
+
+        
+        if(_sSection == null || _sSection.length() == 0) {
+            _sSection = "0";
+        }
+        
+        if(!_sSection.equalsIgnoreCase("-1")) {
+            url.append("&");
+            url.append("sections=");
+            url.append(_sSection);
+        }
+        
+        String sKeyword = _sSearchTerm.trim();
+        if (sKeyword != null && sKeyword.length() > 0) {
+            url.append("&");
+            sKeyword = sKeyword.replace(' ', '_');
+            url.append("page=");           
+            // We append an underscore to the end of the keyword to ensure
+            // that we get back a normalized title.
+            url.append(HtmlEncode(sKeyword) + "_");
+            //url.append("");
+        }
+        
+        //url.append("&noheadings=");
+        //performSearch(BASE_URL+url.toString());
+        NetworkController.showLoadingDialog();
+        //System.out.println("search Url: "+url.toString());
+        networkNexus("http://wikimediafoundation.org"+url.toString(), "", HttpConnection.GET, FETCH_TERMS);
+    }
         
     public void searchArticleLanguages(String _sLanguage, String _sSearchTerm, String _sOffset) {
         //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections

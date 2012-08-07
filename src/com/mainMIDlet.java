@@ -44,6 +44,8 @@ public class mainMIDlet extends MIDlet
     
     public static int m_iPhoneType = TYPE_S40;
     
+    public static boolean m_bUseMainSection = true;
+    
     public static mainMIDlet getMIDlet() {
         return m_oInstance;
     }//end getMIDlet()
@@ -53,7 +55,7 @@ public class mainMIDlet extends MIDlet
         Display.init(this);
         m_vScreenStack = new Vector();
         m_bHasTouch = Display.getInstance().isTouchScreenDevice();
-          
+        
         Display.getInstance().setDefaultVirtualKeyboard(null);
         boolean bHaveNetwork = true;
         try {

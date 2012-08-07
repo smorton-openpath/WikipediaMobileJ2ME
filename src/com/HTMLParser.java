@@ -173,7 +173,10 @@ public class HTMLParser {
                 }
             } else {
                 // It's not a tag.  Just text.
-                components.addElement(parseText(tag, _iStyleMask));
+                Component text = parseText(tag, _iStyleMask);
+                if(text != null) {
+                    components.addElement(text);
+                }
                 _vTags.removeElementAt(0);
             }
             //String tag2 = (String) (_vTags.elementAt(0));
@@ -185,6 +188,9 @@ public class HTMLParser {
 
     private static Component parseText(String _sText, int _iStyleMask) {
         //System.out.println("setting Text: "+_sText);
+        if(_sText.indexOf("\n") >= 0) {
+            _sText = _sText.replace('\n', '\r');//return null;//
+        }
         Component newComp = null;
         if((_iStyleMask & STYLE_LINK) != 0) {
             LinkButton newLink = new LinkButton(_sText);
@@ -347,7 +353,7 @@ public class HTMLParser {
         _vTags.removeElementAt(0);
         Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
         compVec = stripVector(compVec);
-        if((_iStyleMask & STYLE_SHOWTABLES) != 0 || compVec.size() < 2) {
+        if((_iStyleMask & STYLE_SHOWTABLES) != 0 || (compVec.size() < 2 && false)) {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             newContainer.setUIID("Table");
@@ -389,7 +395,8 @@ public class HTMLParser {
         Vector returnVec = new Vector();
         Container newContainer = new Container();
         //newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
-            newContainer.setUIID("TableRow");
+        newContainer.setUIID("TableRow");
+        //System.out.println("  Row Comp: "+compVec.size());
         if(compVec.size() == 1) {
             BorderLayout border = new BorderLayout();
             border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
@@ -502,7 +509,10 @@ public class HTMLParser {
             if(element instanceof Label) {
                 Label labelElement = (Label)element;
                 String text = labelElement.getText();
-                if(text != null && text.length() > 0 && (!text.equalsIgnoreCase("\n") || labelElement.getIcon() != null)) {
+                String textTrim = text.trim();
+                if(labelElement.getIcon() != null || (text != null && text.length() > 0 
+                        && textTrim.length() > 0)) 
+                {
                     returnVec.addElement(element);
                     //System.out.println("adding element: "+element);
                 }

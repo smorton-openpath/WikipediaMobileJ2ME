@@ -37,6 +37,7 @@ public class ArticlePage extends BasePage {
     private Vector m_vArticleStack;
     
     private Label m_cTitleLabel;
+    private boolean m_bIsFoundationPage;
     
     //Lwuit Commands:
     boolean m_bStartWithSearch = false;
@@ -51,11 +52,17 @@ public class ArticlePage extends BasePage {
     public int[] getRequestInts() {
         return m_iToRequest;
     }
-    
     public ArticlePage(String _sTitle, boolean _bPerformSearch) {
-        super("ArticlePageForm", PAGE_MAIN);
+        super("ArticlePageForm", PAGE_ARTICLE);
+        initPage(_sTitle, _bPerformSearch, false);        
+    }//end ArticlePage(String _sTitle, boolean _bPerformSearch)
+    
+    public ArticlePage(String _sTitle, boolean _bPerformSearch, boolean _bIsFoundationPage) {
+        super("ArticlePageForm", PAGE_ARTICLE);
+        initPage(_sTitle, _bPerformSearch, _bIsFoundationPage);
+    }
         
-        
+    public void initPage(String _sTitle, boolean _bPerformSearch, boolean _bIsFoundationPage) {
         m_vArticleStack = new Vector();
         
         if(!m_bIsLoaded) {
@@ -63,6 +70,7 @@ public class ArticlePage extends BasePage {
             System.err.println("We failed to load");
             return;
         }
+        m_bIsFoundationPage = _bIsFoundationPage;
         m_bStartWithSearch = _bPerformSearch;
         m_sTitle = _sTitle;
         m_cTitleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
@@ -77,21 +85,27 @@ public class ArticlePage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
-                    if(m_bStartWithSearch) {                        
-                        //addData(m_oData, NetworkController.PARSE_SEARCH);
-                        NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
+                    if(m_bIsFoundationPage) {
+                        NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, "0");
                     }else {
-                        NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, "0");
+                        if(m_bStartWithSearch) {                        
+                            //addData(m_oData, NetworkController.PARSE_SEARCH);
+                            NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
+                        }else {
+                            NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, "0");
+                        }
                     }
                 }
             });
             updateSoftkeys();
+            m_cForm.setCyclicFocus(false);
+            m_cForm.setFocusScrolling(false);
             m_cForm.addCommandListener(this);
             //mForm.repaint();
         }catch(Exception e) {
             e.printStackTrace();
         }
-    }//end SearchPage()
+    }//end initPage(String _sTitle, boolean _bPerformSearch, boolean _bIsFoundationPage)
     
     public void updateSoftkeys() {
         int i = 0;
@@ -141,8 +155,13 @@ public class ArticlePage extends BasePage {
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1); 
                         String[] titleAndSections = (String[])m_vArticleStack.lastElement();
                         System.out.println("popping: "+titleAndSections[0]);
-                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);                    
-                        NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), titleAndSections[0], titleAndSections[1]);
+                        m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
+                        
+                        if(m_bIsFoundationPage) {
+                            NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), titleAndSections[0], titleAndSections[1]);
+                        }else {
+                            NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), titleAndSections[0], titleAndSections[1]);
+                        }
                         
                     } else {
                         mainMIDlet.pageBack();
@@ -170,6 +189,8 @@ public class ArticlePage extends BasePage {
             case COMMAND_HOME:
                     mainMIDlet.setCurrentPage(new MainPage(), true);
                 break;
+            case COMMAND_CONTRIBUTORS:
+                break;
             case COMMAND_IMAGE:
                 {
                     Component oComp = ae.getComponent();
@@ -190,7 +211,12 @@ public class ArticlePage extends BasePage {
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
                             //System.out.println("linkTitle: "+title);
-                            NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), title,  "0");
+                            //Axthelm - On wiki foundation pages links to non-foundation pages start with <en>.wikipedia.org
+                            if(m_bIsFoundationPage && url.indexOf("wikipedia.org") < 0) {
+                                NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), title, "0");
+                            }else {
+                                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), title,  "0");
+                            }
                         }
                     }
                 }
@@ -217,17 +243,29 @@ public class ArticlePage extends BasePage {
                             }else {
                                 int arrayLevel = Integer.parseInt(sectionItem.getTag()) - 1;
                                 m_iToRequest[arrayLevel] = Integer.parseInt(sID);
-                                m_sCurrentSections = "0";
+                                m_sCurrentSections = "0|";
+                                
+                                if(mainMIDlet.m_bUseMainSection) {
+                                    m_sCurrentSections = "";
+                                }
                                 
                                 for(int i = 0; i < arrayLevel + 1; i++) {
-                                    m_sCurrentSections += "|" + m_iToRequest[i];
+                                    if(i > 0) {
+                                       m_sCurrentSections += "|";
+                                    }
+                                    m_sCurrentSections += m_iToRequest[i];
                                 }
                                 
                                 String[] toAdd = new String[2];
                                 toAdd[0] = m_sTitle;
                                 toAdd[1] = m_sCurrentSections;
                                 m_vArticleStack.addElement(toAdd);
-                                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
+                                
+                                if(m_bIsFoundationPage) {
+                                    NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
+                                }else {
+                                    NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
+                                }
                             }
                         }//end if(section instanceof SectionComponentItem)
                     }//end if(commandId > 40)
@@ -262,12 +300,15 @@ public class ArticlePage extends BasePage {
                 NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
             }else if(_iResultType == NetworkController.FETCH_ARTICLE) {                
                 NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
+            }else if(_iResultType == NetworkController.FETCH_TERMS) {
+                NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
             }
         }else {
             switch(_iResultType) { 
                 case NetworkController.PARSE_SEARCH:
                     parseSearch(_results);
                     break;
+                case NetworkController.FETCH_TERMS:
                 case NetworkController.FETCH_ARTICLE:
                     String[] titleAndSections = null;
                     parseArticle(_results);
@@ -320,27 +361,35 @@ public class ArticlePage extends BasePage {
                 e.printStackTrace();
             }
             //Deal with the main article text first.
-           
-            Object oTextItem = sections.firstElement();
-            if(oTextItem instanceof JsonObject) {
-                String sText = (String)((JsonObject)oTextItem).get("text");
-                sText = Utilities.stripSlash(sText); 
-                HTMLComponentItem oHTMLItem = new HTMLComponentItem();
-                Component cTextComp = oHTMLItem.createComponent(sText);
-                if(cTextComp != null) {                   
-                    m_cContentContainer.addComponent(cTextComp);
-                }
-            }//end if(oTextItem instanceof JsonObject)
+            if(!mainMIDlet.m_bUseMainSection) {
+                Object oTextItem = sections.firstElement();
+                if(oTextItem instanceof JsonObject) {
+                    String sText = (String)((JsonObject)oTextItem).get("text");
+                    sText = Utilities.stripSlash(sText); 
+                    HTMLComponentItem oHTMLItem = new HTMLComponentItem();
+                    Component cTextComp = oHTMLItem.createComponent(sText);
+                    if(cTextComp != null) {                   
+                        m_cContentContainer.addComponent(cTextComp);
+                    }
+                }//end if(oTextItem instanceof JsonObject)
+            }
             
             
             //Add in the other sections
             //Since we can cascade through sub-sections, we are using an Array to denote which level should get the child.
             //TODO: There must be a better way to do this.
             SectionComponentItem[] aSections = new SectionComponentItem[6];
-            for(int i = 1; i < sections.size(); i++) {
+            for(int i = 0; i < sections.size(); i++) {
+                if(!mainMIDlet.m_bUseMainSection && i == 0) {
+                    //if we are not using a main section we will show all the text above.
+                    continue;
+                }
                 //System.out.println(sections.elementAt(i));
                 JsonObject oSection = (JsonObject)sections.elementAt(i);
                 String sTitle = (String)oSection.get("line");
+                if(i == 0 && (sTitle == null || sTitle.length() <= 0)) {
+                    sTitle = mainMIDlet.getString("Main");
+                }
                 String sText = (String)oSection.get("text");
                 boolean bActive = false;
                 
@@ -349,6 +398,10 @@ public class ArticlePage extends BasePage {
                 }
                 
                 String sTocLevel = oSection.getString("toclevel");
+                
+                if(sTocLevel == null || sTocLevel.length() <= 0) {
+                    sTocLevel = "1";
+                }
                 String sNumber = oSection.getString("number");
                 //String sLevel = oSection.getString("level");
                 String sID = oSection.getString("id");
@@ -389,14 +442,24 @@ public class ArticlePage extends BasePage {
                     }//end if(cSectionComp != null)
                 }
             }//end for(int i = 1; i > sections.size(); i++)
-            if(m_sCurrentSections.equalsIgnoreCase("0")) {            
+                        
+            if(m_bIsFoundationPage) {
+            }else {
+                /*Button contributors = new Button();
+                String contribStr = mainMIDlet.getString("Contributors");
+                Command comm = new Command(contribStr, COMMAND_CONTRIBUTORS);
+                contributors.setCommand(comm);
+                m_cContentContainer.addComponent(contributors);*/
+                //TODO: Add contributor section.
+            }
+            //if(m_sCurrentSections.equalsIgnoreCase("0")){            
                 Component first = m_cContentContainer.findFirstFocusable();
                 if(first != null)
                 {
                     first.setFocus(true);
                     first.requestFocus();
                 }
-            }
+            //}
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.repaint();
     }//end parseArticle(Object _results)
