@@ -232,7 +232,7 @@ public class ArticlePage extends BasePage {
                 break;
             default://dealing with the dynamic events
                 {
-                    if(commandId > 40) {
+                    if(commandId >= 40) {
                         String sID = String.valueOf(commandId - 40);
                         Object section = m_oComponentList.get(new Integer(commandId));
                         if(section instanceof SectionComponentItem) {
@@ -240,6 +240,7 @@ public class ArticlePage extends BasePage {
                             if(sectionItem.isActive())
                             {
                                 sectionItem.setActive(false);
+                                m_cForm.repaint();
                             }else {
                                 int arrayLevel = Integer.parseInt(sectionItem.getTag()) - 1;
                                 m_iToRequest[arrayLevel] = Integer.parseInt(sID);
@@ -390,6 +391,7 @@ public class ArticlePage extends BasePage {
                 if(i == 0 && (sTitle == null || sTitle.length() <= 0)) {
                     sTitle = mainMIDlet.getString("Main");
                 }
+                sTitle = Utilities.stripSlash(sTitle);
                 String sText = (String)oSection.get("text");
                 boolean bActive = false;
                 

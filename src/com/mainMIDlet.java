@@ -142,17 +142,8 @@ public class mainMIDlet extends MIDlet
             if(defaultLocale.length() > 2) {
                 defaultLocale = defaultLocale.substring(0,2);
             }
-            try {
-            //throws an exception if all of the strings aren't present
-                if(defaultLocale.equalsIgnoreCase("en")) {
-                    m_hMainLocale = getResources().getL10N("WikiLoc","en");
-                }else {
-                    m_hMainLocale = getResources().getL10N("WikiLoc", "it");
-                }
-                m_sLanguage = defaultLocale;
-            }catch(Exception e) {
-                m_hMainLocale = getResources().getL10N("WikiLoc","en");
-            }
+            setLanguage(defaultLocale);
+            pullL10N(defaultLocale);
             if(m_hMainLocale == null) {
                 return "";
             }
@@ -166,9 +157,25 @@ public class mainMIDlet extends MIDlet
         return text;
     }//end getString(String _sKey)
     
+    private static void pullL10N(String _sLangCode) {
+        
+        try {
+        //throws an exception if all of the strings aren't present
+            if(_sLangCode.equalsIgnoreCase("en")) {
+                m_hMainLocale = getResources().getL10N("WikiLoc","en");
+            }
+        }catch(Exception e) {
+            m_hMainLocale = getResources().getL10N("WikiLoc","en");
+        }
+    }//end pullL10N(String _sLangCode)
+    
     public static String getLanguage() {
         return m_sLanguage;
-    }
+    }//end getLanguage()
+    
+    public static void setLanguage(String _sLanguage) {
+        m_sLanguage = _sLanguage;
+    }//end setLanguage(String _sLanguage)
     
     public static void setCurrentPage(BasePage _oPage, boolean _bResetStack) {
         //System.out.println("pageLoaded: "+page.isLoaded);

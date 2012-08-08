@@ -45,12 +45,12 @@ public class Utilities {
             index = _sHaystack.indexOf(_sNeedle);
         }
         return _sHaystack;
-    }//end replace(String needle, String replacement, String haystack)
+    }//end deletePart(String _sNeedle, String _sHaystack)
     
     public static String stripSlash(String _sHaystack) {
         String result = "";
         int index = _sHaystack.indexOf('\\');
-        while(index > 0 && index + 1 < _sHaystack.length()) {
+        while((index > -1) && index + 1 < _sHaystack.length()) {
             String temp = _sHaystack.substring(0, index);
             boolean foundU = false;
             switch((char)_sHaystack.charAt(index+1)) {
@@ -79,7 +79,7 @@ public class Utilities {
                     foundU = true;
                     break;
             }
-            if(index > 0) {
+            if(index > -1) {
                 if(foundU) {
                     temp += com.sun.lwuit.html.HTMLUtils.convertHTMLCharEntity("#x" + _sHaystack.substring(index + 2, index + 6));
                     temp += _sHaystack.substring(index + 6);
@@ -91,7 +91,7 @@ public class Utilities {
             }
         }
         return _sHaystack;
-    }//end replace(String needle, String replacement, String haystack)
+    }//end stripSlash(String _sHaystack)
     
     //Used to strip out html from small sections of text.
     public static String stripHTML(String _sHaystack) {
@@ -219,6 +219,31 @@ public class Utilities {
                         continue;
                     }
                     vReturnVec = (Vector)page.get("langlinks");
+                }
+            }
+        }
+        return vReturnVec;
+    }//end getSectionsFromJSON(JsonObject _oJson)
+    
+    public static Vector getMainLanguagesFromJSON(JsonObject _oJson) {
+        /*This structure is a little weird. it has base object -> query->pages
+         * 
+         */
+        Vector vReturnVec = null;
+        if(_oJson == null)
+            return null;
+        
+        Object oQuery = _oJson.get("sitematrix");
+        if(oQuery != null && oQuery instanceof JsonObject) {
+            Object oPages = ((JsonObject)oQuery).get("pages");
+            if(oPages != null && oPages instanceof JsonObject) {
+                Enumeration pages = ((JsonObject)oPages).elements();
+                while (pages.hasMoreElements()) {
+                    JsonObject page = (JsonObject) pages.nextElement();
+                    if(page.isEmpty()) {
+                        continue;
+                    }
+                    vReturnVec = (Vector)page.get("sitematrix");
                 }
             }
         }

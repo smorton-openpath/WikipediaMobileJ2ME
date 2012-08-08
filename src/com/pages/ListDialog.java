@@ -152,7 +152,7 @@ public class ListDialog extends BasePage
     
     
     public void addData(Object _results, int _iResultType) {
-        System.out.println("results: "+_iResultType+", "+_results);
+        //System.out.println("results: "+_iResultType+", "+_results);
         if(!(_results instanceof JsonObject)) {
             return;//TODO: do something with the dialog.
         }
@@ -183,7 +183,11 @@ public class ListDialog extends BasePage
             {
                  JsonObject item = (JsonObject)vItems.elementAt(i);
                  ListComponentItem listItem = new ListComponentItem(40+i);
-                 Component comp = listItem.createComponent((String)item.get("title"));
+                 
+                 String text = Utilities.stripSlash((String)item.get("title"));
+                 System.out.println("test: "+(String)item.get("title")+", "+text);
+                 
+                 Component comp = listItem.createComponent(text);
                  if(comp != null) {
                      
                      m_cContentContainer.addComponent(comp);

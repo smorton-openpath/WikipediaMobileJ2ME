@@ -371,10 +371,31 @@ public class HTMLParser {
                 tableVector.removeElementAt(0);
             }
         }else {
-            String title = mainMIDlet.getString("Table");
+            String title = null;//
             //System.out.println("title: "+title +", "+ compVec.firstElement());
-            if(compVec != null && compVec.size() > 0 && compVec.firstElement() instanceof Label) {
-                title = ((Label)compVec.firstElement()).getText();
+            
+            //Axthelm - This is ugly code, but I couldn't think of a better way to pull out the first item.
+            //Axthelm - we expect the title to be the first item of the first row.
+            if(compVec != null && compVec.size() > 0){
+                if(compVec.firstElement() instanceof Label) {//if first item is a label, use that.
+                    title = ((Label)compVec.firstElement()).getText();
+                }else if(compVec.firstElement() instanceof Container) {//else use the first row.
+                    Container trCont = (Container)compVec.firstElement();
+                    if(trCont.getComponentAt(0) instanceof Label) {//if the row contains just a label (odd), use that.
+                        title = ((Label)trCont.getComponentAt(0)).getText();
+                    }else if(trCont.getComponentAt(0) instanceof Container) {//more likely it has a group of labels
+                        Container tdCont = (Container)trCont.getComponentAt(0);
+                        title = "";
+                        // put them together and use it.
+                        for(int i = 0; i < tdCont.getComponentCount(); i++) {
+                            title += ((Label)tdCont.getComponentAt(i)).getText();
+                        }//end for(int i = 0; i < tdCont.getComponentCount(); i++)
+                    }//end if(trCont.getComponentAt(0) instanceof Label) - else
+                }//end if(compVec.firstElement() instanceof Label) - else
+            }//end if(compVec != null && compVec.size() > 0)
+            
+            if(title == null || title.length() <= 0) {
+                title = mainMIDlet.getString("Table");
             }
             if(tableVector != null && tableVector.size() > 0) {
                 TableButton newTable = new TableButton(title, (String)tableVector.elementAt(0));

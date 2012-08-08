@@ -55,11 +55,11 @@ public class NetworkThread implements Runnable {
         m_sMethod = _sMethod;
         m_iParseStyle = _iParseStyle;
         
-        try {
+        /*try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             m_oSaxParser = factory.newSAXParser();
         } catch(Exception e) {
-        }
+        }*/
     }//end NetworkThread(String _sURI, String _sPostData, String _sMethod, int _iParseStyle)
     
     public void run() {

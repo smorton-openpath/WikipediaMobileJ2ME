@@ -165,9 +165,9 @@ public class BasePage implements ActionListener {
                 int height = Display.getInstance().getDisplayHeight();
                 // Devices with very small screens should use showmodeless instead
                 if(height < 130) {
-                        m_cFailDialog.showModeless();
+                    m_cFailDialog.showModeless();
                 } else {
-                        m_cFailDialog.show(height/5, height/5, width/16, width/16, false, false);
+                    m_cFailDialog.show(height/5, height/5, width/16, width/16, false, false);
                 }
                 
                     

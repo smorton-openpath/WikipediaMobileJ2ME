@@ -20,6 +20,13 @@ public class JsonObject extends Hashtable {
         super();
     }
     
+    public Object get(Object _key) {
+        if(this.containsKey(_key)) {
+            return super.get(_key);
+        }
+        return null;                
+    }
+    
     public void cleanChildren() {
         Enumeration keys = keys();
         while(keys.hasMoreElements()) {

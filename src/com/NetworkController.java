@@ -262,7 +262,42 @@ public class NetworkController {
         NetworkController.showLoadingDialog();
         //System.out.println("search Url: "+url.toString());
         networkNexus("http://"+_sLanguage+BASE_URL+url.toString(), "", HttpConnection.GET, SEARCH_LANGUAGES);
-    }//end fetchArticle(String _sLanguage, String _sSearchTerm, String _sSection)
+    }//end searchArticleLanguages(String _sLanguage, String _sSearchTerm, String _sOffset)
+        
+    public void searchLanguages(String _sLanguage, String _sOffset) {
+        //?action=mobileview&format=json&page=purple&sections=0&prop=text%7Csections
+        /*if (_sSearchTerm != null && _sSearchTerm.length() == 0) {
+            mainMIDlet.previousSearchQuery = _sSearchTerm;
+        }else {
+            mainMIDlet.previousSearchQuery = "";
+        }*/
+        StringBuffer url = new StringBuffer();
+        url.append(WEBAPI +"?");
+        
+        //adding common items: action, props, format
+        url.append("action=sitematrix");
+        url.append("&");
+        url.append("format=json");
+        url.append("&");
+        url.append("smlimit=");
+        url.append(SEARCH_LIMIT);
+
+        
+        if(_sOffset != null && _sOffset.length() > 0) {
+            
+            url.append("&");
+            url.append("smcontinue=");
+            url.append(_sOffset);
+        }        
+                
+        if(_sLanguage == null || _sLanguage.length() <= 0) {
+            _sLanguage = "en";
+        }
+        //performSearch(BASE_URL+url.toString());
+        NetworkController.showLoadingDialog();
+        //System.out.println("search Url: "+url.toString());
+        networkNexus("http://www."+"mediawiki.org"+url.toString(), "", HttpConnection.GET, SEARCH_LANGUAGES);
+    }//end searchLanguages(String _sLanguage, String _sOffset)
     
     /****Network Methods ******************************************************/
     
