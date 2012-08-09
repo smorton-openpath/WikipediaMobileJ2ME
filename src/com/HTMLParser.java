@@ -388,7 +388,11 @@ public class HTMLParser {
                         title = "";
                         // put them together and use it.
                         for(int i = 0; i < tdCont.getComponentCount(); i++) {
-                            title += ((Label)tdCont.getComponentAt(i)).getText();
+                            try{
+                                title += ((Label)tdCont.getComponentAt(i)).getText();
+                            } catch(ClassCastException cce) {
+                                // If we don't have a network connection, we throw an exception here.
+                            }
                         }//end for(int i = 0; i < tdCont.getComponentCount(); i++)
                     }//end if(trCont.getComponentAt(0) instanceof Label) - else
                 }//end if(compVec.firstElement() instanceof Label) - else
