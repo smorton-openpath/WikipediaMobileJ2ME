@@ -7,6 +7,7 @@ package com;
 import com.components.LinkButton;
 import com.components.ImageButton;
 import com.components.TableButton;
+import com.pages.BasePage;
 
 
 import com.sun.lwuit.Component;
@@ -119,7 +120,9 @@ public class HTMLParser {
     }//end getTagID(String _sText)
     
     static int nestedDepth = 0;
+    static int thisWordCount = 0;
     private static Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
+        
         nestedDepth++;
         //System.out.println("   ...depth: "+nestedDepth);
         Vector components = new Vector();
@@ -150,6 +153,7 @@ public class HTMLParser {
                     components.addElement(parseText(" \n", _iStyleMask));
                     _vTags.removeElementAt(0);
                 } else if(baseTag.equalsIgnoreCase("h2")) {
+                    thisWordCount = 0;
                     components.addElement(parseHeader(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("i")) {
                     components.addElement(parseItalic(_vTags, _iStyleMask));
@@ -180,7 +184,16 @@ public class HTMLParser {
                 // It's not a tag.  Just text.
                 Component text = parseText(tag, _iStyleMask);
                 if(text != null) {
-                    components.addElement(text);
+                    thisWordCount++;
+                    if(mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
+                        if(thisWordCount < 60) {
+                            components.addElement(text);
+                        } else if(thisWordCount == 60) {
+                            components.addElement(new Label("..."));
+                        }
+                    } else {
+                        components.addElement(text);
+                    }
                 }
                 _vTags.removeElementAt(0);
             }
@@ -203,7 +216,6 @@ public class HTMLParser {
             newComp = newLink;
         }else {
             Label newLabel = new Label(_sText);
-            System.out.println("font " + newLabel.getStyle().getFont().getHeight());
             newLabel.setUIID("No_Margins");
             newComp = newLabel;
         }
@@ -344,10 +356,39 @@ public class HTMLParser {
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
+        
+        int totalWidth = 0;
+        int tallestPrefH = 0;
+        int totalHeight = 21;
+        
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
+            
+            if(((Component)compVec.elementAt(i)).getPreferredH() > tallestPrefH) {
+                tallestPrefH = ((Component)compVec.elementAt(i)).getPreferredH();
+            }
+            try {
+                totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
+                if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
+                    totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+                    totalWidth = 0;
+                }
+            } catch (Exception e) {
+                totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+            }
+            
         }
+        
+        int numOfLines = (totalWidth*40 + compVec.size() * 10) / com.sun.lwuit.Display.getInstance().getDisplayWidth();
+        
+        //newContainer.setPreferredH((totalHeight / 2) + 10);
+        newContainer.setPreferredH((int) ((totalHeight / 1.8) + 10));
+        newContainer.layoutContainer();
+        newContainer.invalidate();
+        newContainer.layoutContainer();
+        newContainer.revalidate();
+        
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseParagraph(Vector tags, int _iStyleMask)
@@ -379,7 +420,6 @@ public class HTMLParser {
                 tableVector.removeElementAt(0);
             }
             
-            System.out.println("newContainer.getHeight() = " + newContainer.getHeight());
         }else {
             String title = null;//
             //System.out.println("title: "+title +", "+ compVec.firstElement());
@@ -422,14 +462,11 @@ public class HTMLParser {
         
         Vector flatForLogging = flattenVectors(returnVec);
         for(int i=0; i<flatForLogging.size(); i++) {
-            //System.out.println("+i+i+i+i");
             try {
                 Container container = (Container) flatForLogging.elementAt(i);
                 for(int j=0; j<container.getComponentCount(); j++) {
-                    //System.out.println("+++" + container.getComponentAt(j));
                     try {
                         GridLayout gl = ((GridLayout)((Container)container.getComponentAt(j)).getLayout());
-                        //System.out.println("+++___it was a gridlayout, rows=" + gl.getRows() + ", columns=" + gl.getColumns());
                     } catch(Exception ex) {
                         
                     }
@@ -451,7 +488,6 @@ public class HTMLParser {
         Container newContainer = new Container();
         newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         newContainer.setUIID("TableRow");
-        //System.out.println("  Row Comp: "+compVec.size());
         if(compVec.size() == 1) {
             //BorderLayout border = new BorderLayout();
             //border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
@@ -466,7 +502,6 @@ public class HTMLParser {
             //newContainer.setLayout(new GridLayout(compVec.size(), 1));
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             for(int i = 0; i < compVec.size(); i++) {
-                //System.out.println("  Row Comp: "+compVec.elementAt(i));
                 newContainer.addComponent((Component)compVec.elementAt(i));
 //                returnVec.addElement(compVec.elementAt(i));
                 
@@ -479,7 +514,6 @@ public class HTMLParser {
         newContainer.revalidate();
         newContainer.layoutContainer();
         returnVec.addElement(newContainer);
-        //System.out.println(" ~table Row real: "+j+" of "+compVec.size());
         return returnVec;
     }//end parseTableRow(Vector tags, int _iStyleMask)
     
@@ -495,7 +529,6 @@ public class HTMLParser {
         newContainer.setUIID("TableCell");
         newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
         for(int i = 0; i < compVec.size(); i++) {
-            //System.out.println("para: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
         }
         /*Label spacer = new Label(" ");
@@ -529,7 +562,6 @@ public class HTMLParser {
             if(((Component)compVec.elementAt(i)).getPreferredH() > tallestPrefH) {
                 tallestPrefH = ((Component)compVec.elementAt(i)).getPreferredH();
             }
-            System.out.println("  ++  ++  " + ((Component)compVec.elementAt(i)).getPreferredH());
             try {
                 totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
                 if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {

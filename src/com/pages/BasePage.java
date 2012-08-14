@@ -121,6 +121,16 @@ public class BasePage implements ActionListener {
     
     public void refreshPage() {
         if(m_cForm != null) {
+            
+            /*TODO: We need to re-calculate height for paragraphs here.
+            for(int i=0; i<m_cContentContainer.getComponentCount(); i++) {
+                try {
+                    ((Container)m_cContentContainer.getComponentAt(i)).invalidate();
+                    ((Container)m_cContentContainer.getComponentAt(i)).revalidate();
+                } catch(Exception e) {
+                }
+            }*/
+            
             m_cForm.refreshTheme();
             m_cForm.invalidate();
             m_cForm.repaint();//must be repaint for loading screens to show.

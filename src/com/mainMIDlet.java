@@ -205,6 +205,10 @@ public class mainMIDlet extends MIDlet
         return item;
     }//end getCurrentPage()
     
+    protected void SizeChanged() {
+        getCurrentPage().refreshPage();
+    }
+    
     public static void pageBack() {
         if(m_vScreenStack.size() < 2) {//Don't go back if we have nothing to go back to.
             System.out.println("nothing to go back to");
