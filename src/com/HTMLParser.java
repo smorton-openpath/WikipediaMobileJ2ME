@@ -20,6 +20,7 @@ import com.sun.lwuit.Font;
 
 import java.util.Vector;
 import java.util.Stack;
+import javax.microedition.lcdui.Display;
 
 /**
  *
@@ -36,7 +37,7 @@ public class HTMLParser {
     private static Vector tableVector = null;
     
     private static Font m_oFontBold = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD , Font.SIZE_MEDIUM);
-    private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
+    private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_SMALL);
     private static Font m_oFontBoldItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD | Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
     
     public HTMLParser() {
@@ -159,12 +160,16 @@ public class HTMLParser {
                 } else if(baseTag.equalsIgnoreCase("p")) {
                    components.addElement(parseParagraph(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("table")) {
+                    //System.out.println("   ---   in parseHtmlTagVector, found a table");
                     components.addElement(parseTable(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("tr")) {
+                    //System.out.println("   ---   in parseHtmlTagVector, found a tr");
                     components.addElement(parseTableRow(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("th")) {
+                    //System.out.println("   ---   in parseHtmlTagVector, found a th");
                     components.addElement(parseTableHeader(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("td")) {
+                    //System.out.println("   ---   in parseHtmlTagVector, found a td");
                     components.addElement(parseTableCell(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("ul")) {
                     components.addElement(parseList(_vTags, _iStyleMask));
@@ -182,7 +187,7 @@ public class HTMLParser {
             //String tag2 = (String) (_vTags.elementAt(0));
         }//end while
         nestedDepth--;
-        //System.out.println("   ...depth3: "+nestedDepth);
+        //System.out.println("depth at end of parsehtmltagvectors: "+nestedDepth);
         return flattenVectors(components);
     }//end  parseHtmlString(String _sText)
 
@@ -198,6 +203,7 @@ public class HTMLParser {
             newComp = newLink;
         }else {
             Label newLabel = new Label(_sText);
+            System.out.println("font " + newLabel.getStyle().getFont().getHeight());
             newLabel.setUIID("No_Margins");
             newComp = newLabel;
         }
@@ -356,10 +362,12 @@ public class HTMLParser {
         if((_iStyleMask & STYLE_SHOWTABLES) != 0 || (compVec.size() < 2 && false)) {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+            //newContainer.setLayout(new FlowLayout());
+            //newContainer.setHeight(com.sun.lwuit.Display.getInstance().getDisplayHeight());
             newContainer.setUIID("Table");
             newContainer.setSnapToGrid(true);
             
-            newContainer.setScrollableY(true);
+            //newContainer.setScrollableY(true);
             //newContainer.setScrollableX(true);
             int j = 0;
             for(int i = 0; i < compVec.size(); i++) {
@@ -370,6 +378,8 @@ public class HTMLParser {
             if((_iStyleMask & STYLE_SHOWTABLES) == 0) {
                 tableVector.removeElementAt(0);
             }
+            
+            System.out.println("newContainer.getHeight() = " + newContainer.getHeight());
         }else {
             String title = null;//
             //System.out.println("title: "+title +", "+ compVec.firstElement());
@@ -409,6 +419,26 @@ public class HTMLParser {
             compVec.removeAllElements();
             System.gc();
         }
+        
+        Vector flatForLogging = flattenVectors(returnVec);
+        for(int i=0; i<flatForLogging.size(); i++) {
+            //System.out.println("+i+i+i+i");
+            try {
+                Container container = (Container) flatForLogging.elementAt(i);
+                for(int j=0; j<container.getComponentCount(); j++) {
+                    //System.out.println("+++" + container.getComponentAt(j));
+                    try {
+                        GridLayout gl = ((GridLayout)((Container)container.getComponentAt(j)).getLayout());
+                        //System.out.println("+++___it was a gridlayout, rows=" + gl.getRows() + ", columns=" + gl.getColumns());
+                    } catch(Exception ex) {
+                        
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
         return returnVec;
     }//end parseTable(Vector tags, int _iStyleMask)
     
@@ -419,24 +449,35 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-        //newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
+        newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         newContainer.setUIID("TableRow");
         //System.out.println("  Row Comp: "+compVec.size());
         if(compVec.size() == 1) {
-            BorderLayout border = new BorderLayout();
-            border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
-            newContainer.setLayout(border);
-            //newContainer.setUIID("No_Margins");
+            //BorderLayout border = new BorderLayout();
+            //border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
+            //newContainer.setLayout(border);
+            newContainer.setUIID("No_Margins");
             ((Component)compVec.elementAt(0)).setUIID("TableCellSpecial");
-            newContainer.addComponent(BorderLayout.CENTER, (Component)compVec.elementAt(0));
+            newContainer.addComponent(/*BorderLayout.CENTER, */(Component)compVec.elementAt(0));
+            //newContainer.setPreferredW(com.sun.lwuit.Display.getInstance().getDisplayWidth());
+          //  returnVec.addElement(compVec.elementAt(0));
         }else {
-            newContainer.setLayout(new GridLayout(1, compVec.size()));
+            //newContainer.setLayout(new GridLayout(1, compVec.size()));
+            //newContainer.setLayout(new GridLayout(compVec.size(), 1));
+            newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             for(int i = 0; i < compVec.size(); i++) {
                 //System.out.println("  Row Comp: "+compVec.elementAt(i));
                 newContainer.addComponent((Component)compVec.elementAt(i));
+//                returnVec.addElement(compVec.elementAt(i));
+                
             }
+            //newContainer.setScrollableY(true);
+            newContainer.setPreferredW(com.sun.lwuit.Display.getInstance().getDisplayWidth());
         }
+        newContainer.layoutContainer();
         newContainer.invalidate();
+        newContainer.revalidate();
+        newContainer.layoutContainer();
         returnVec.addElement(newContainer);
         //System.out.println(" ~table Row real: "+j+" of "+compVec.size());
         return returnVec;
@@ -474,15 +515,47 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         
         newContainer.setUIID("TableCell");
+        FlowLayout fl = new FlowLayout(Component.LEFT);
+        fl.setFillRows(true);
+        newContainer.setLayout(fl);
+        fl.layoutContainer(newContainer);
+        //newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        int totalWidth = 0;
+        int tallestPrefH = 0;
+        int totalHeight = 21;
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("cell: "+compVec.elementAt(i));
             newContainer.addComponent((Component)compVec.elementAt(i));
+            if(((Component)compVec.elementAt(i)).getPreferredH() > tallestPrefH) {
+                tallestPrefH = ((Component)compVec.elementAt(i)).getPreferredH();
+            }
+            System.out.println("  ++  ++  " + ((Component)compVec.elementAt(i)).getPreferredH());
+            try {
+                totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
+                if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
+                    totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+                    totalWidth = 0;
+                }
+            } catch (Exception e) {
+                totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+            }
         }
-        Label spacer = new Label(" ");
-        spacer.setUIID("No_Margins");
-        newContainer.addComponent(spacer);
+        
+        int numOfLines = (totalWidth*40 + compVec.size() * 30) / com.sun.lwuit.Display.getInstance().getDisplayWidth();
+        
+        //Label spacer = new Label(" ");
+        //spacer.setUIID("No_Margins");
+        //newContainer.addComponent(spacer);
+        newContainer.setPreferredH((totalHeight / 2) + 10);
+        newContainer.layoutContainer();
         newContainer.invalidate();
+        newContainer.layoutContainer();
+        newContainer.revalidate();
         returnVec.addElement(newContainer);
+        
+        Vector flatForLogging = flattenVectors(returnVec);
+        
+        
         return returnVec;
     }//end parseTableCell(Vector tags, int _iStyleMask)
 

@@ -143,9 +143,14 @@ public class TablePage extends BasePage {
             cTextComp.setUIID("Table");
             if(cTextComp instanceof Container) {
                 ((Container)cTextComp).invalidate();
+                //((Container)cTextComp).revalidate();
             }
             m_cContentContainer.addComponent(cTextComp);
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
+//        m_cForm.invalidate();
+//        m_cForm.revalidate();
+//        m_cContentContainer.invalidate();
+//        m_cForm.revalidate();
         m_cForm.repaint();
     }//end addData(Object _results)
     
