@@ -9,6 +9,7 @@ package com.components;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.layouts.*;
 /**
  *
  * @author caxthelm
@@ -64,6 +65,7 @@ public class ImageButton extends Container {
             }else {
                 text += _sText;
             }
+            //this.setLayout(new FlowLayout());
             if(isFirst) {
                 isFirst = false;
                 LinkButton mainButton = new LinkButton("", m_sLink);

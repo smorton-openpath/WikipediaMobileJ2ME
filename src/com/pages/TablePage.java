@@ -24,7 +24,7 @@ public class TablePage extends BasePage {
     private final int COMMAND_ABOUT = 25;
     
     //Lwuit Commands:   
-    
+    Component m_cTable = null;
     String m_sTableText = "";
     public TablePage(String _sTitle, String _sTableText) {
         super("TablePageForm", PAGE_TABLE);
@@ -79,7 +79,9 @@ public class TablePage extends BasePage {
                 }
             }
         }
-        switch(commandId) {                
+        
+        //HTMLParser.resetAll(m_cTable);
+        switch(commandId) {
             //Softkeys
             case COMMAND_BACK:
                 mainMIDlet.pageBack();
@@ -139,18 +141,17 @@ public class TablePage extends BasePage {
         }
         if(m_cContentContainer != null )
         {              
-            Component cTextComp = HTMLParser.parseHtml((String)_results, true);      
-            cTextComp.setUIID("Table");
-            if(cTextComp instanceof Container) {
-                ((Container)cTextComp).invalidate();
+            m_cTable = HTMLParser.parseHtml((String)_results, true);      
+            m_cTable.setUIID("Table");
+            if(m_cTable instanceof Container) {
+                ((Container)m_cTable).invalidate();
                 //((Container)cTextComp).revalidate();
             }
-            m_cContentContainer.addComponent(cTextComp);
+            m_cContentContainer.addComponent(m_cTable);
+            HTMLParser.resetAll(m_cTable);
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
-//        m_cForm.invalidate();
-//        m_cForm.revalidate();
-//        m_cContentContainer.invalidate();
-//        m_cForm.revalidate();
+        m_cForm.invalidate();
+        m_cContentContainer.invalidate();
         m_cForm.repaint();
     }//end addData(Object _results)
     

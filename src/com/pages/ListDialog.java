@@ -185,7 +185,7 @@ public class ListDialog extends BasePage
                  ListComponentItem listItem = new ListComponentItem(40+i);
                  
                  String text = Utilities.stripSlash((String)item.get("title"));
-                 System.out.println("test: "+(String)item.get("title")+", "+text);
+                 //System.out.println("test: "+(String)item.get("title")+", "+text);
                  
                  Component comp = listItem.createComponent(text);
                  if(comp != null) {

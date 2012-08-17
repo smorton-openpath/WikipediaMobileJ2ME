@@ -20,6 +20,7 @@ import com.sun.lwuit.table.*;
 import com.sun.lwuit.Font;
 
 import java.util.Vector;
+import java.util.Hashtable;
 import java.util.Stack;
 import javax.microedition.lcdui.Display;
 
@@ -34,6 +35,10 @@ public class HTMLParser {
     private static final int STYLE_HEADER = 4;
     private static final int STYLE_LINK = 8;
     private static final int STYLE_SHOWTABLES = 16;
+    private static final int STYLE_INTABLE = 32;
+    
+    
+    private static final int TABLE_COLUMN_WIDTH = 150;
     
     private static Vector tableVector = null;
     
@@ -148,7 +153,7 @@ public class HTMLParser {
                     components.addElement(parseLink(_vTags, _iStyleMask));
                 } else if( baseTag.equalsIgnoreCase("b")) {
                     components.addElement(parseBold(_vTags, _iStyleMask));
-                } else if( baseTag.equalsIgnoreCase("br")) {
+                } else if( baseTag.equalsIgnoreCase("br") || baseTag.equalsIgnoreCase("hr")) {
                     
                     components.addElement(parseText(" \n", _iStyleMask));
                     _vTags.removeElementAt(0);
@@ -179,6 +184,7 @@ public class HTMLParser {
                     components.addElement(parseList(_vTags, _iStyleMask));
                 }else {
                     components.addElement(parseDefault(_vTags, _iStyleMask));
+                    
                 }
             } else {
                 // It's not a tag.  Just text.
@@ -328,7 +334,7 @@ public class HTMLParser {
         Vector returnVec = new Vector();
         
         //If the image is less than 51 pixels it is likely an icon; so just go ahead and show it.        
-        if(width > 0 && width <= 60 ){//&& height > 0 && height <= 50) {
+        if(width > 0 && width <= 60){//&& height > 0 && height <= 50) {
             Label newLabel = new Label();
             newLabel.setUIID("no_MarginsTransparent");
             ImageDownloadService img = new ImageDownloadService("http:"+srcText, newLabel);
@@ -338,6 +344,13 @@ public class HTMLParser {
         }else {
             //System.out.println("adding image: "+altText+", "+srcText);
             ImageButton newLink = new ImageButton(altText, srcText);
+            if((_iStyleMask & STYLE_SHOWTABLES) != 0){
+                //newLink.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+                setLayout(newLink, TABLE_COLUMN_WIDTH);
+                //newLink.setPreferredH(100);
+                //System.out.println("image height: "+newLink.getPreferredH()+", "+newLink.getHeight()+", "+newLink.getLayoutHeight());
+            }
+        
             //Add button to the list, reset the container
             returnVec.addElement(newLink);
         }
@@ -363,19 +376,20 @@ public class HTMLParser {
         
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
-            newContainer.addComponent((Component)compVec.elementAt(i));
+            Component pulledComp = (Component)compVec.elementAt(i);
+            newContainer.addComponent(pulledComp);
             
-            if(((Component)compVec.elementAt(i)).getPreferredH() > tallestPrefH) {
-                tallestPrefH = ((Component)compVec.elementAt(i)).getPreferredH();
+            if(pulledComp.getPreferredH() > tallestPrefH) {
+                tallestPrefH = pulledComp.getPreferredH();
             }
             try {
                 totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
                 if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
-                    totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+                    totalHeight += pulledComp.getPreferredH();
                     totalWidth = 0;
                 }
             } catch (Exception e) {
-                totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+                totalHeight += pulledComp.getPreferredH();
             }
             
         }
@@ -384,10 +398,12 @@ public class HTMLParser {
         
         //newContainer.setPreferredH((totalHeight / 2) + 10);
         newContainer.setPreferredH((int) ((totalHeight / 1.8) + 10));
+        if((_iStyleMask & STYLE_SHOWTABLES) != 0){
+            setLayout(newContainer, TABLE_COLUMN_WIDTH);
+        }
         newContainer.layoutContainer();
         newContainer.invalidate();
         newContainer.layoutContainer();
-        newContainer.revalidate();
         
         returnVec.addElement(newContainer);
         return returnVec;
@@ -396,21 +412,19 @@ public class HTMLParser {
     //<table>
     private static Vector parseTable(Vector _vTags, int _iStyleMask) {
         Vector returnVec = new Vector();
-        
         _vTags.removeElementAt(0);
-        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
+        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask + STYLE_INTABLE);
         compVec = stripVector(compVec);
         if((_iStyleMask & STYLE_SHOWTABLES) != 0 || (compVec.size() < 2 && false)) {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            //newContainer.setLayout(new FlowLayout());
-            //newContainer.setHeight(com.sun.lwuit.Display.getInstance().getDisplayHeight());
-            newContainer.setUIID("Table");
-            newContainer.setSnapToGrid(true);
-            
+            //newContainer.setUIID("Table");
+            //newContainer.setSnapToGrid(true);
+            if((_iStyleMask & STYLE_INTABLE) == 0) {
+                setLayout(newContainer, TABLE_COLUMN_WIDTH * 2);
+            }
             //newContainer.setScrollableY(true);
             //newContainer.setScrollableX(true);
-            int j = 0;
             for(int i = 0; i < compVec.size(); i++) {
                 newContainer.addComponent((Component)compVec.elementAt(i));
             }
@@ -418,9 +432,8 @@ public class HTMLParser {
             returnVec.addElement(newContainer);
             if((_iStyleMask & STYLE_SHOWTABLES) == 0) {
                 tableVector.removeElementAt(0);
-            }
-            
-        }else {
+            }            
+        }else if((_iStyleMask & STYLE_INTABLE) == 0){
             String title = null;//
             //System.out.println("title: "+title +", "+ compVec.firstElement());
             
@@ -452,30 +465,13 @@ public class HTMLParser {
                 title = mainMIDlet.getString("Table");
             }
             if(tableVector != null && tableVector.size() > 0) {
-                TableButton newTable = new TableButton(title, (String)tableVector.elementAt(0));
+                TableButton newTable = new TableButton(title, (String)tableVector.firstElement());
                 returnVec.addElement(newTable);
-                tableVector.removeElementAt(0);
+                tableVector.removeElement(tableVector.firstElement());
             }
             compVec.removeAllElements();
             System.gc();
         }
-        
-        Vector flatForLogging = flattenVectors(returnVec);
-        for(int i=0; i<flatForLogging.size(); i++) {
-            try {
-                Container container = (Container) flatForLogging.elementAt(i);
-                for(int j=0; j<container.getComponentCount(); j++) {
-                    try {
-                        GridLayout gl = ((GridLayout)((Container)container.getComponentAt(j)).getLayout());
-                    } catch(Exception ex) {
-                        
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
         return returnVec;
     }//end parseTable(Vector tags, int _iStyleMask)
     
@@ -486,33 +482,27 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-        newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        //newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
+        if(compVec.size() > 0) {
+            newContainer.setLayout(new GridLayout(1, compVec.size()));
+        }
         newContainer.setUIID("TableRow");
         if(compVec.size() == 1) {
-            //BorderLayout border = new BorderLayout();
-            //border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_CENTER_ABSOLUTE);
-            //newContainer.setLayout(border);
+            Component pulledComp = (Component)compVec.elementAt(0);
             newContainer.setUIID("No_Margins");
-            ((Component)compVec.elementAt(0)).setUIID("TableCellSpecial");
-            newContainer.addComponent(/*BorderLayout.CENTER, */(Component)compVec.elementAt(0));
-            //newContainer.setPreferredW(com.sun.lwuit.Display.getInstance().getDisplayWidth());
-          //  returnVec.addElement(compVec.elementAt(0));
+            pulledComp.setUIID("TableCellSpecial");
+            newContainer.addComponent(pulledComp);
+            setLayout(pulledComp, TABLE_COLUMN_WIDTH);
         }else {
-            //newContainer.setLayout(new GridLayout(1, compVec.size()));
-            //newContainer.setLayout(new GridLayout(compVec.size(), 1));
-            newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             for(int i = 0; i < compVec.size(); i++) {
-                newContainer.addComponent((Component)compVec.elementAt(i));
-//                returnVec.addElement(compVec.elementAt(i));
-                
+                Component pulledComp = (Component)compVec.elementAt(i);                
+                newContainer.addComponent(pulledComp);  
+                setLayout(pulledComp, TABLE_COLUMN_WIDTH);              
             }
-            //newContainer.setScrollableY(true);
-            newContainer.setPreferredW(com.sun.lwuit.Display.getInstance().getDisplayWidth());
         }
-        newContainer.layoutContainer();
-        newContainer.invalidate();
-        newContainer.revalidate();
-        newContainer.layoutContainer();
+        setLayout(newContainer, -1);
+        
+        //System.out.println("row width, height: "+newContainer.getPreferredW()+", "+newContainer.getPreferredH()+" = "+newContainer.getHeight());
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableRow(Vector tags, int _iStyleMask)
@@ -527,14 +517,10 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         
         newContainer.setUIID("TableCell");
-        newContainer.setLayout(new BoxLayout(BoxLayout.X_AXIS));
         for(int i = 0; i < compVec.size(); i++) {
             newContainer.addComponent((Component)compVec.elementAt(i));
         }
-        /*Label spacer = new Label(" ");
-        spacer.setUIID("No_Margins");
-        newContainer.addComponent(spacer);
-        newContainer.invalidate();*/
+        setLayout(newContainer, -1);
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableHeader(Vector tags, int _iStyleMask)
@@ -547,46 +533,24 @@ public class HTMLParser {
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         compVec = stripVector(compVec);
         
-        newContainer.setUIID("TableCell");
-        FlowLayout fl = new FlowLayout(Component.LEFT);
-        fl.setFillRows(true);
-        newContainer.setLayout(fl);
-        fl.layoutContainer(newContainer);
+        //newContainer.setLayout(new FlowLayout(Component.LEFT));
         //newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        int totalWidth = 0;
-        int tallestPrefH = 0;
-        int totalHeight = 21;
-        for(int i = 0; i < compVec.size(); i++) {
-            //System.out.println("cell: "+compVec.elementAt(i));
-            newContainer.addComponent((Component)compVec.elementAt(i));
-            if(((Component)compVec.elementAt(i)).getPreferredH() > tallestPrefH) {
-                tallestPrefH = ((Component)compVec.elementAt(i)).getPreferredH();
-            }
-            try {
-                totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
-                if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
-                    totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
-                    totalWidth = 0;
-                }
-            } catch (Exception e) {
-                totalHeight += ((Component)compVec.elementAt(i)).getPreferredH();
+        newContainer.setUIID("TableCell");
+        if(compVec.size() == 1) {
+            BorderLayout border = new BorderLayout();
+            border.setCenterBehavior(BorderLayout.CENTER_BEHAVIOR_SCALE);
+            newContainer.setLayout(border);
+            newContainer.addComponent(BorderLayout.CENTER, (Component)compVec.elementAt(0));
+            //newContainer.addComponent((Component)compVec.elementAt(0));
+        }else {
+            for(int i = 0; i < compVec.size(); i++) {
+                //System.out.println("cell: "+compVec.elementAt(i));
+                Component pulledComp = (Component)compVec.elementAt(i);
+                newContainer.addComponent(pulledComp);
             }
         }
-        
-        int numOfLines = (totalWidth*40 + compVec.size() * 30) / com.sun.lwuit.Display.getInstance().getDisplayWidth();
-        
-        //Label spacer = new Label(" ");
-        //spacer.setUIID("No_Margins");
-        //newContainer.addComponent(spacer);
-        newContainer.setPreferredH((totalHeight / 2) + 10);
-        newContainer.layoutContainer();
-        newContainer.invalidate();
-        newContainer.layoutContainer();
-        newContainer.revalidate();
+        setLayout(newContainer, -1);
         returnVec.addElement(newContainer);
-        
-        Vector flatForLogging = flattenVectors(returnVec);
-        
         
         return returnVec;
     }//end parseTableCell(Vector tags, int _iStyleMask)
@@ -666,7 +630,7 @@ public class HTMLParser {
             int nextTable = 0;
             int numTable = 0;
             //look for the next isntance of <table
-            tableIdx = _sText.indexOf("<table", tableIdx);
+            tableIdx = _sText.indexOf("<table", endTableIdx);
             endTableIdx = _sText.indexOf("</table>", tableIdx);//Check the next end tag
             nextTable = tableIdx;
             if(tableIdx == -1 || endTableIdx == -1) {
@@ -686,7 +650,7 @@ public class HTMLParser {
                 }
             }
             //After finding all nested loop through that many end tags.
-            for(; numTable > 0 && endTableIdx != -1; numTable--) {
+            for(; numTable >= 0 && endTableIdx != -1; numTable--) {
                 //System.out.println("got next end: " +numTable);
                 endTableIdx = _sText.indexOf("</table>", endTableIdx + 1);
             }
@@ -696,10 +660,44 @@ public class HTMLParser {
                 String test = _sText.substring(tableIdx, endTableIdx+8);
                 //System.out.println("table: "+test);
                 returnVec.addElement(test);
+            }else {
+                break;
             }
             tableIdx++;//look for the next consecutive table.
         }
         return returnVec;
     }//end takeOutTables(String _sText)
+    
+    private static void setLayout(Component _cContainer, int _iForcedWidth) {
+        
+        if(_iForcedWidth > 0 && _cContainer.getPreferredW() > _iForcedWidth) {
+            _cContainer.setPreferredW(_iForcedWidth);
+        }
+        if(_cContainer instanceof Container) {
+            ((Container)_cContainer).layoutContainer();
+            ((Container)_cContainer).invalidate();
+            ((Container)_cContainer).layoutContainer();
+        }
+        //if(_iForcedWidth > 0) {
+            _cContainer.setHeight(_cContainer.getPreferredH());
+        //}
+    }
+    
+    public static void resetAll(Component _cComp) {
+        if(_cComp == null) {
+            return;
+        }
+        if(_cComp instanceof Container)
+        {
+            int childSize = ((Container)_cComp).getComponentCount();
+            for(int i = 0; i < childSize; i++) {
+                Component pulledComp = ((Container)_cComp).getComponentAt(i);
+                resetAll(pulledComp);
+            }//end for(int i = 0; i < childSize; i++)            
+        }
+        setLayout(_cComp, -1);
+        
+        //System.out.println("container: "+_cComp.getPreferredH()+", "+_cComp.getHeight()+", "+_cComp);
+    }
 }
 
