@@ -255,7 +255,8 @@ public class NetworkController {
             url.append("titles=");           
             // We append an underscore to the end of the keyword to ensure
             // that we get back a normalized title.
-            url.append(HtmlEncode(sKeyword));
+            //url.append(HtmlEncode(sKeyword));
+            url.append(replaceUnicodeEscapes(sKeyword));
             //url.append("");
         }
         
