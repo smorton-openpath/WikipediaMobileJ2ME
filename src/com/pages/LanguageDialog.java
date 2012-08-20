@@ -181,6 +181,10 @@ public class LanguageDialog extends BasePage
             
             //List Items
             Vector vItems = Utilities.getLanguagesFromJSON((JsonObject)_results);
+            if(vItems == null) {
+                System.out.println("no resutls: "+_results);
+                return;
+            }
             for(int i = 0; 
                     i < vItems.size() && i < NetworkController.SEARCH_LIMIT ; i++)
             {

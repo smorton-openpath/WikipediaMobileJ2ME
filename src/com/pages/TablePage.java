@@ -14,6 +14,8 @@ import java.util.Vector;
 
 import com.components.HTMLComponentItem;
 import com.components.LinkButton;
+import java.util.Timer;
+import java.util.TimerTask;
 /**
  *
  * @author caxthelm
@@ -26,6 +28,21 @@ public class TablePage extends BasePage {
     //Lwuit Commands:   
     Component m_cTable = null;
     String m_sTableText = "";
+    Timer m_tiReloadTimer = null;
+    
+    
+    private class SetPageTimerTask extends TimerTask {
+        public SetPageTimerTask() {
+        }//send SetPageTimerTask()
+        public void run() {
+            if(m_cTable != null) {
+                HTMLParser.resetAllTable(m_cTable);
+                m_cForm.repaint();
+                Thread.yield();
+            }
+        }//end run()
+    }
+    
     public TablePage(String _sTitle, String _sTableText) {
         super("TablePageForm", PAGE_TABLE);
         
@@ -80,7 +97,6 @@ public class TablePage extends BasePage {
             }
         }
         
-        //HTMLParser.resetAll(m_cTable);
         switch(commandId) {
             //Softkeys
             case COMMAND_BACK:
@@ -148,11 +164,14 @@ public class TablePage extends BasePage {
                 //((Container)cTextComp).revalidate();
             }
             m_cContentContainer.addComponent(m_cTable);
-            HTMLParser.resetAll(m_cTable);
+            //HTMLParser.resetAll(m_cTable);
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.invalidate();
         m_cContentContainer.invalidate();
         m_cForm.repaint();
+        Thread.yield();
+        m_tiReloadTimer = new Timer();
+        m_tiReloadTimer.schedule(new TablePage.SetPageTimerTask(), 1000);
     }//end addData(Object _results)
     
     

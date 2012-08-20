@@ -18,11 +18,11 @@ import com.sun.lwuit.io.services.ImageDownloadService;
 import com.sun.lwuit.layouts.*;
 import com.sun.lwuit.table.*;
 import com.sun.lwuit.Font;
+import com.sun.lwuit.Display;
 
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Stack;
-import javax.microedition.lcdui.Display;
 
 /**
  *
@@ -38,7 +38,8 @@ public class HTMLParser {
     private static final int STYLE_INTABLE = 32;
     
     
-    private static final int TABLE_COLUMN_WIDTH = 150;
+    private static int TABLE_WIDTH = 240;
+    private static final int TABLE_WIDTH_MODIFIER = 2;
     
     private static Vector tableVector = null;
     
@@ -221,6 +222,9 @@ public class HTMLParser {
             newLink.setUIID("LabelButtonLink");
             newComp = newLink;
         }else {
+            if(_sText.indexOf(" ") == -1) {
+                _sText = " "+_sText;
+            }
             Label newLabel = new Label(_sText);
             newLabel.setUIID("No_Margins");
             newComp = newLabel;
@@ -345,10 +349,7 @@ public class HTMLParser {
             //System.out.println("adding image: "+altText+", "+srcText);
             ImageButton newLink = new ImageButton(altText, srcText);
             if((_iStyleMask & STYLE_SHOWTABLES) != 0){
-                //newLink.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-                setLayout(newLink, TABLE_COLUMN_WIDTH);
-                //newLink.setPreferredH(100);
-                //System.out.println("image height: "+newLink.getPreferredH()+", "+newLink.getHeight()+", "+newLink.getLayoutHeight());
+                //setLayout(newLink, TABLE_WIDTH / TABLE_WIDTH_MODIFIER);
             }
         
             //Add button to the list, reset the container
@@ -369,37 +370,15 @@ public class HTMLParser {
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-        
-        int totalWidth = 0;
-        int tallestPrefH = 0;
-        int totalHeight = 21;
-        
+                
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);
             newContainer.addComponent(pulledComp);
             
-            if(pulledComp.getPreferredH() > tallestPrefH) {
-                tallestPrefH = pulledComp.getPreferredH();
-            }
-            try {
-                totalWidth += ((Label)compVec.elementAt(i)).getText().length() * 40;
-                if(totalWidth > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
-                    totalHeight += pulledComp.getPreferredH();
-                    totalWidth = 0;
-                }
-            } catch (Exception e) {
-                totalHeight += pulledComp.getPreferredH();
-            }
-            
         }
-        
-        int numOfLines = (totalWidth*40 + compVec.size() * 10) / com.sun.lwuit.Display.getInstance().getDisplayWidth();
-        
-        //newContainer.setPreferredH((totalHeight / 2) + 10);
-        newContainer.setPreferredH((int) ((totalHeight / 1.8) + 10));
         if((_iStyleMask & STYLE_SHOWTABLES) != 0){
-            setLayout(newContainer, TABLE_COLUMN_WIDTH);
+            //setLayout(newContainer, TABLE_COLUMN_WIDTH);
         }
         newContainer.layoutContainer();
         newContainer.invalidate();
@@ -411,6 +390,8 @@ public class HTMLParser {
     
     //<table>
     private static Vector parseTable(Vector _vTags, int _iStyleMask) {
+        
+        TABLE_WIDTH = Display.getInstance().getDisplayWidth() * TABLE_WIDTH_MODIFIER;
         Vector returnVec = new Vector();
         _vTags.removeElementAt(0);
         Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask + STYLE_INTABLE);
@@ -420,9 +401,9 @@ public class HTMLParser {
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             //newContainer.setUIID("Table");
             //newContainer.setSnapToGrid(true);
-            if((_iStyleMask & STYLE_INTABLE) == 0) {
-                setLayout(newContainer, TABLE_COLUMN_WIDTH * 2);
-            }
+            /*if((_iStyleMask & STYLE_INTABLE) == 0) {
+                setLayout(newContainer, TABLE_WIDTH);
+            }*/
             //newContainer.setScrollableY(true);
             //newContainer.setScrollableX(true);
             for(int i = 0; i < compVec.size(); i++) {
@@ -492,12 +473,12 @@ public class HTMLParser {
             newContainer.setUIID("No_Margins");
             pulledComp.setUIID("TableCellSpecial");
             newContainer.addComponent(pulledComp);
-            setLayout(pulledComp, TABLE_COLUMN_WIDTH);
+            setLayout(pulledComp, TABLE_WIDTH);
         }else {
             for(int i = 0; i < compVec.size(); i++) {
                 Component pulledComp = (Component)compVec.elementAt(i);                
-                newContainer.addComponent(pulledComp);  
-                setLayout(pulledComp, TABLE_COLUMN_WIDTH);              
+                newContainer.addComponent( pulledComp);                
+                setLayout(pulledComp, TABLE_WIDTH / compVec.size());              
             }
         }
         setLayout(newContainer, -1);
@@ -548,6 +529,9 @@ public class HTMLParser {
                 Component pulledComp = (Component)compVec.elementAt(i);
                 newContainer.addComponent(pulledComp);
             }
+            Label spacer = new Label(" ");
+            spacer.setUIID("No_Margins");
+            newContainer.addComponent(spacer);
         }
         setLayout(newContainer, -1);
         returnVec.addElement(newContainer);
@@ -628,7 +612,7 @@ public class HTMLParser {
         int endTableIdx = 0;
         while (tableIdx != -1 && tableIdx < _sText.length()) {//Table start loop
             int nextTable = 0;
-            int numTable = 0;
+            int numTable = 1;
             //look for the next isntance of <table
             tableIdx = _sText.indexOf("<table", endTableIdx);
             endTableIdx = _sText.indexOf("</table>", tableIdx);//Check the next end tag
@@ -652,7 +636,11 @@ public class HTMLParser {
             //After finding all nested loop through that many end tags.
             for(; numTable >= 0 && endTableIdx != -1; numTable--) {
                 //System.out.println("got next end: " +numTable);
-                endTableIdx = _sText.indexOf("</table>", endTableIdx + 1);
+                int endIdx = _sText.indexOf("</table>", endTableIdx + 1);
+                if(endIdx == -1) {
+                    break;
+                }
+                endTableIdx = endIdx;
             }
             //System.out.println("final Table: "+tableIdx+", "+endTableIdx);
             //That last end tag is our endpoint.  Put that string in our collection vector.
@@ -679,25 +667,55 @@ public class HTMLParser {
             ((Container)_cContainer).layoutContainer();
         }
         //if(_iForcedWidth > 0) {
-            _cContainer.setHeight(_cContainer.getPreferredH());
+            //_cContainer.setHeight(_cContainer.getPreferredH());
         //}
     }
     
-    public static void resetAll(Component _cComp) {
+    public static void resetAllTable(Component _cComp) {
         if(_cComp == null) {
             return;
         }
         if(_cComp instanceof Container)
         {
-            int childSize = ((Container)_cComp).getComponentCount();
+            int totalWidth = 0;
+            int tallestPrefH = 0;
+            int totalHeight = 0;
+            
+            Container newContainer = ((Container)_cComp);
+            int childSize = newContainer.getComponentCount();
+            int lines = 1;
             for(int i = 0; i < childSize; i++) {
-                Component pulledComp = ((Container)_cComp).getComponentAt(i);
-                resetAll(pulledComp);
-            }//end for(int i = 0; i < childSize; i++)            
+                Component pulledComp = newContainer.getComponentAt(i);
+                resetAllTable(pulledComp);
+                
+                if(newContainer.getLayout() instanceof FlowLayout) {
+                    //recalculate height for flow layouts.
+                    if(i == 0) {
+                        totalHeight = pulledComp.getHeight();
+                        //System.out.println("new line: "+tallestPrefH+", "+totalHeight);
+                    }
+                    if(pulledComp.getHeight() > tallestPrefH) {
+                        tallestPrefH = pulledComp.getHeight();
+                    }
+                    totalWidth += pulledComp.getPreferredW();
+                    //System.out.println("cell width: "+newContainer.getPreferredW()+", "+totalWidth);
+                    if(totalWidth >= newContainer.getPreferredW() - 10) {
+                        lines++;
+                        totalHeight += tallestPrefH;
+                        //System.out.println("new line: "+tallestPrefH+", "+totalHeight);
+                        tallestPrefH = 0;
+                        totalWidth = pulledComp.getPreferredW();
+                    }
+                }//end if(newContainer.getLayout() instanceof FlowLayout)
+            }//end for(int i = 0; i < childSize; i++)
+            //System.out.println("total cell height: "+totalHeight+", "+lines+", "+childSize);
+            if(newContainer.getLayout() instanceof FlowLayout) {
+                newContainer.setPreferredH(totalHeight 
+                        + newContainer.getStyle().getPadding(Component.BOTTOM) 
+                        + newContainer.getStyle().getPadding(Component.TOP));
+            }
         }
         setLayout(_cComp, -1);
-        
-        //System.out.println("container: "+_cComp.getPreferredH()+", "+_cComp.getHeight()+", "+_cComp);
     }
 }
 

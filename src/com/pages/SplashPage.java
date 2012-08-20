@@ -18,7 +18,7 @@ import java.util.TimerTask;
 public class SplashPage extends BasePage
 {
     boolean m_bHasNetwork = true;
-    Timer m_tiSplashTimer;
+    Timer m_tiSplashTimer = null;
     private class SetPageTimerTask extends TimerTask {
         public SetPageTimerTask() {
         }//send SetPageTimerTask()

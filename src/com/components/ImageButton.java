@@ -75,6 +75,9 @@ public class ImageButton extends Container {
                 addComponent(mainButton);
                 this.setLeadComponent(mainButton);
             }else {
+                if(_sText.indexOf(" ") == -1) {
+                    _sText = " "+_sText;
+                }
                 Label newLabel = new Label(text);
                 newLabel.setUIID("No_MarginsTransparent");
                 addComponent(newLabel);

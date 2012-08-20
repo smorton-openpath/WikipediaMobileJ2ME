@@ -125,7 +125,7 @@ public class mainMIDlet extends MIDlet
         if(m_rMainBuilder == null) {
             
             m_rMainBuilder = new UIBuilder();
-            m_rMainBuilder.setHomeForm("MainPageForm");
+            m_rMainBuilder.setHomeForm("SearchPageForm");
             m_rMainBuilder.setKeepResourcesInRam(false);
             m_rMainBuilder.registerCustomComponent("WebBrowser", com.sun.lwuit.io.ui.WebBrowser.class);
         }
