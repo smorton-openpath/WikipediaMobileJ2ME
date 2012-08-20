@@ -151,7 +151,11 @@ public class NetworkController {
             url.append("page=");           
             // We append an underscore to the end of the keyword to ensure
             // that we get back a normalized title.
-            url.append(HtmlEncode(sKeyword) + "_");
+            sKeyword = replaceUnicodeEscapes(sKeyword);
+            
+            //url.append(HtmlEncode(sKeyword) + "_");
+            url.append(sKeyword + "_");
+            
             //url.append("");
         }
         
@@ -330,4 +334,18 @@ public class NetworkController {
         }
         return _sHaystack;
     }//end htmlReplace(String needle, String haystack)
+
+    private String replaceUnicodeEscapes(String sKeyword) {
+        int indOfEscapedChar = sKeyword.indexOf("\\u");
+        if (indOfEscapedChar > -1) {
+            String toParse = "#x" + sKeyword.substring(indOfEscapedChar + 2, indOfEscapedChar + 6);
+            String toReplaceWith = com.sun.lwuit.html.HTMLUtils.convertHTMLCharEntity(toParse);
+            sKeyword = sKeyword.substring(0, indOfEscapedChar) + toReplaceWith + sKeyword.substring(indOfEscapedChar + 6, sKeyword.length());
+        }
+        
+        if (indOfEscapedChar > -1) {
+            sKeyword = replaceUnicodeEscapes(sKeyword);
+        }
+        return sKeyword;
+    }
 }
