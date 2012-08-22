@@ -184,7 +184,7 @@ public class ListDialog extends BasePage
                  JsonObject item = (JsonObject)vItems.elementAt(i);
                  ListComponentItem listItem = new ListComponentItem(40+i);
                  
-                 String text = Utilities.stripSlash((String)item.get("title"));
+                 String text = Utilities.decodeEverything((String)item.get("title"));
                  //System.out.println("test: "+(String)item.get("title")+", "+text);
                  
                  Component comp = listItem.createComponent(text);

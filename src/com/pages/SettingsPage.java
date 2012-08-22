@@ -251,7 +251,7 @@ public class SettingsPage extends BasePage {
                 }
                 JsonObject item = (JsonObject)vItems.get(""+i);
                 ListComponentItem listItem = new ListComponentItem(40+i);
-                Component comp = listItem.createComponent(Utilities.stripSlash((String)item.get("code")+" - "+(String)item.get("name")));
+                Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));
                 if(comp != null) {
                     m_cLanguageContainer.addComponent(comp);
                     m_hListObjects.put(new Integer(40+i), listItem);

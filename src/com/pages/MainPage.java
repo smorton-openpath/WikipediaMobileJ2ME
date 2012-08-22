@@ -216,7 +216,7 @@ public class MainPage extends BasePage {
             Object oTextItem = sections.firstElement();
             if(oTextItem instanceof JsonObject) {
                 String sText = (String)((JsonObject)oTextItem).get("text");
-                sText = Utilities.stripSlash(sText);
+                sText = Utilities.decodeEverything(sText);
                 HTMLComponentItem oHTMLItem = new HTMLComponentItem();                
                 Component cTextComp = oHTMLItem.createComponent(sText);
                 if(cTextComp != null) {

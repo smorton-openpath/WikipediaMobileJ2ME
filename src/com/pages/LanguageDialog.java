@@ -190,7 +190,7 @@ public class LanguageDialog extends BasePage
             {
                  JsonObject item = (JsonObject)vItems.elementAt(i);
                  ListComponentItem listItem = new ListComponentItem(40+i);
-                 Component comp = listItem.createComponent(Utilities.stripSlash((String)item.get("lang")+" - "+(String)item.get("*")));
+                 Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("lang")+" - "+(String)item.get("*")));
                  if(comp != null) {
                      
                      m_cContentContainer.addComponent(comp);

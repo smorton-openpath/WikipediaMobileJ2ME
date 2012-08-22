@@ -98,6 +98,9 @@ public class HTMLParser {
         
         cTextComp.getUnselectedStyle().setMargin(0, 0, 0, 0);
         cTextComp.getSelectedStyle().setMargin(0, 0, 0, 0);
+        /*cTextComp.layoutContainer();
+        cTextComp.invalidate();
+        cTextComp.layoutContainer();*/
         tableVector = null;
         return cTextComp;
     }
@@ -149,7 +152,6 @@ public class HTMLParser {
                     _vTags.removeElementAt(0);
                     return flattenVectors(components);
                 }
-                
                 if( baseTag.equalsIgnoreCase("a")) {
                     components.addElement(parseLink(_vTags, _iStyleMask));
                 } else if( baseTag.equalsIgnoreCase("b")) {
@@ -215,6 +217,7 @@ public class HTMLParser {
         //System.out.println("setting Text: "+_sText);
         if(_sText.indexOf("\n") >= 0) {
             _sText = _sText.replace('\n', '\r');//return null;//
+            
         }
         Component newComp = null;
         if((_iStyleMask & STYLE_LINK) != 0) {
@@ -242,6 +245,9 @@ public class HTMLParser {
             newComp.getSelectedStyle().setFont(m_oFontItalic);
             newComp.getPressedStyle().setFont(m_oFontItalic);
         }
+        newComp.getStyle().setMargin(0, 0, 1, 1);
+        newComp.getSelectedStyle().setMargin(0, 0, 1, 1);
+        newComp.getPressedStyle().setMargin(0, 0, 1, 1);
         return newComp;
     }//end parseText(String _sText)
     
@@ -370,16 +376,13 @@ public class HTMLParser {
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-                
+        newContainer.getStyle().setMargin(0, 0, 1, 1);
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);
-            newContainer.addComponent(pulledComp);
+            newContainer.addComponent(pulledComp);           
             
-        }
-        if((_iStyleMask & STYLE_SHOWTABLES) != 0){
-            //setLayout(newContainer, TABLE_COLUMN_WIDTH);
-        }
+        }//end for(int i = 0; i < compVec.size(); i++)
         newContainer.layoutContainer();
         newContainer.invalidate();
         newContainer.layoutContainer();

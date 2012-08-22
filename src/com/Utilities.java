@@ -47,13 +47,25 @@ public class Utilities {
         return _sHaystack;
     }//end deletePart(String _sNeedle, String _sHaystack)
     
+    public static String decodeEverything(String _sHaystack) {
+        String result = null;
+        result = decodeHTML(_sHaystack);
+        result = stripSlash(result);
+        result = decodePercent(result);
+        _sHaystack = "";
+        System.gc();
+        Thread.yield();
+        
+        return result;
+    }
+    
     public static String stripSlash(String _sHaystack) {
         String result = "";
         int index = _sHaystack.indexOf('\\');
         while((index > -1) && index + 1 < _sHaystack.length()) {
             String temp = _sHaystack.substring(0, index);
             boolean foundU = false;
-            switch((char)_sHaystack.charAt(index+1)) {
+            switch(_sHaystack.charAt(index+1)) {
                 case '\"':
                     temp += '\"';
                     break;
@@ -92,6 +104,105 @@ public class Utilities {
         }
         return _sHaystack;
     }//end stripSlash(String _sHaystack)
+    
+    public static String decodeHTML(String _sHaystack) {
+        StringBuffer result = new StringBuffer();
+        int index = _sHaystack.indexOf('&');
+        while((index > -1) && index + 1 < _sHaystack.length()) {
+            result.append(_sHaystack.substring(0, index));
+            _sHaystack = _sHaystack.substring(index);
+            int endIndex = _sHaystack.indexOf(';');
+            if(endIndex == -1 || endIndex > 6)
+            {
+                index = 1;//If there are too many characters between & and ; then the & is not an encoded character.
+                index = _sHaystack.indexOf('&', index);
+                continue;
+            }
+            String chunk = "";
+            boolean haveGood = true;
+            for(int i = 1; i < endIndex; i++)//0 is &
+            {
+                if((_sHaystack.charAt(i) >= 'A' && _sHaystack.charAt(i) <= 'Z')
+                        || (_sHaystack.charAt(i) >= 'a' && _sHaystack.charAt(i) <= 'z')
+                        || (_sHaystack.charAt(i) >= '0' && _sHaystack.charAt(i) <= '9')
+                        || (_sHaystack.charAt(i) == '#')) {
+                    chunk += _sHaystack.charAt(i);
+                }else {
+                    haveGood = false;
+                    break;
+                }
+            }
+            if(!haveGood) {
+                index = 1;//if there is a non-letter between the & and ; the & is not an encoded character
+                index = _sHaystack.indexOf('&', index);
+                continue;
+            }
+            chunk = chunk.toLowerCase();
+            if(chunk.equalsIgnoreCase("amp")) {
+                result.append("&");
+            }else if(chunk.equalsIgnoreCase("gt")) {
+                result.append(">");
+            }else if(chunk.equalsIgnoreCase("lt")) {
+                result.append("<");
+            }else if(chunk.equalsIgnoreCase("quot") || chunk.equalsIgnoreCase("ldquo") || chunk.equalsIgnoreCase("rdquo")) {
+                result.append("\"");
+            }else if(chunk.equalsIgnoreCase("lsquo") || chunk.equalsIgnoreCase("rsquo")) {
+                result.append("\'");
+            }else if(chunk.equalsIgnoreCase("#8211") || chunk.equalsIgnoreCase("#8212") 
+                    || chunk.equalsIgnoreCase("ndash") || chunk.equalsIgnoreCase("mdash")) {
+                result.append("-");
+            }
+            _sHaystack = _sHaystack.substring(endIndex + 1);
+            index = _sHaystack.indexOf('&');
+        }
+        result.append(_sHaystack);
+        return result.toString();
+    }//end decodeHTML(String _sHaystack)
+    
+    public static String decodePercent(String _sHaystack) {
+        StringBuffer result = new StringBuffer();
+        int index = _sHaystack.indexOf('%');
+        while((index > -1) && index + 1 < _sHaystack.length()) {
+            result.append(_sHaystack.substring(0, index));
+            _sHaystack = _sHaystack.substring(index);
+            String chunk = "";
+            boolean haveGood = true;
+            for(int i = 1; i < 3; i++)//0 is %
+            {
+                if(((char)_sHaystack.charAt(i) >= 'A' && _sHaystack.charAt(i) <= 'F')
+                        || (_sHaystack.charAt(i) >= 'a' && _sHaystack.charAt(i) <= 'f')
+                        || (_sHaystack.charAt(i) >= '0' && _sHaystack.charAt(i) <= '9')) {
+                    chunk += _sHaystack.charAt(i);
+                }else {
+                    haveGood = false;
+                    break;
+                }
+            }
+            if(!haveGood) {
+                index = 1;//if there is a non-letter between the & and ; the & is not an encoded character
+                index = _sHaystack.indexOf('%', index);
+                continue;
+            }
+            chunk = chunk.toLowerCase();
+            int iChar = 0;
+            for(int i = 0; i < 2; i++) {
+                if((chunk.charAt(i) >= 'a' && chunk.charAt(i) <= 'f')) {
+                    iChar += 10 + (int)chunk.charAt(i) - (int)'a';
+                }else {
+                    iChar += (int)chunk.charAt(i) - (int)'0';
+                }
+                if(i == 0) {
+                    iChar *= 16;
+                }
+            }
+            //System.out.println("char: "+iChar);
+            result.append((char)iChar);
+            _sHaystack = _sHaystack.substring(3);
+            index = _sHaystack.indexOf('%');
+        }
+        result.append(_sHaystack);
+        return result.toString();
+    }//end decodePercent(String _sHaystack)
     
     //Used to strip out html from small sections of text.
     public static String stripHTML(String _sHaystack) {

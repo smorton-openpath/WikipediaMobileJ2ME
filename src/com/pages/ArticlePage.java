@@ -366,7 +366,7 @@ public class ArticlePage extends BasePage {
                 Object oTextItem = sections.firstElement();
                 if(oTextItem instanceof JsonObject) {
                     String sText = (String)((JsonObject)oTextItem).get("text");
-                    sText = Utilities.stripSlash(sText); 
+                    sText = Utilities.decodeEverything(sText);
                     HTMLComponentItem oHTMLItem = new HTMLComponentItem();
                     Component cTextComp = oHTMLItem.createComponent(sText);
                     if(cTextComp != null) {                   
@@ -391,7 +391,7 @@ public class ArticlePage extends BasePage {
                 if(i == 0 && (sTitle == null || sTitle.length() <= 0)) {
                     sTitle = mainMIDlet.getString("Main");
                 }
-                sTitle = Utilities.stripSlash(sTitle);
+                sTitle = Utilities.decodeEverything(sTitle);
                 String sText = (String)oSection.get("text");
                 boolean bActive = false;
                 
@@ -432,7 +432,7 @@ public class ArticlePage extends BasePage {
                         
                         if(sText != null && !(sText.length() < 1)) {
                             //TODO: Need to strip out the <h2> tag at the beginning
-                            sText = Utilities.stripSlash(sText);
+                            sText = Utilities.decodeEverything(sText);
                             sectionItem.addText(sText);
                         }
                         

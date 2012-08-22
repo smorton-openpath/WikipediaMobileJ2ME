@@ -55,7 +55,6 @@ public class mainMIDlet extends MIDlet
         Display.init(this);
         m_vScreenStack = new Vector();
         m_bHasTouch = Display.getInstance().isTouchScreenDevice();
-        
         Display.getInstance().setDefaultVirtualKeyboard(null);
         boolean bHaveNetwork = true;
         try {
