@@ -447,19 +447,15 @@ public class HTMLParser {
         _vTags.removeElementAt(0);
         Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask + STYLE_INTABLE);
         compVec = stripVector(compVec);
-        if((_iStyleMask & STYLE_SHOWTABLES) != 0 || (compVec.size() < 2 && false)) {
+        if((_iStyleMask & STYLE_SHOWTABLES) != 0) {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-            //newContainer.setUIID("Table");
+            newContainer.setUIID("Table");
             newContainer.setSnapToGrid(true);
-            /*if((_iStyleMask & STYLE_INTABLE) == 0) {
-                setLayout(newContainer, TABLE_WIDTH);
-            }*/
-            //newContainer.setScrollableY(true);
-            //newContainer.setScrollableX(true);
             for(int i = 0; i < compVec.size(); i++) {
                 newContainer.addComponent((Component)compVec.elementAt(i));
             }
+            newContainer.setWidth(TABLE_WIDTH);
             
             returnVec.addElement(newContainer);
             if((_iStyleMask & STYLE_SHOWTABLES) == 0) {
@@ -523,7 +519,7 @@ public class HTMLParser {
         }
         setLayout(newContainer, -1);
         
-        //System.out.println("row width, height: "+newContainer.getPreferredW()+", "+newContainer.getPreferredH()+" = "+newContainer.getHeight());
+        System.out.println("row width, height: "+newContainer.getPreferredW()+", "+newContainer.getPreferredH()+" = "+newContainer.getHeight());
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableRow(Vector tags, int _iStyleMask)
@@ -652,7 +648,7 @@ public class HTMLParser {
         int endTableIdx = 0;
         while (tableIdx != -1 && tableIdx < _sText.length()) {//Table start loop
             int nextTable = 0;
-            int numTable = 1;
+            int numTable = 0;
             //look for the next isntance of <table
             tableIdx = _sText.indexOf("<table", endTableIdx);
             endTableIdx = _sText.indexOf("</table>", tableIdx);//Check the next end tag
@@ -674,7 +670,7 @@ public class HTMLParser {
                 }
             }
             //After finding all nested loop through that many end tags.
-            for(; numTable >= 0 && endTableIdx != -1; numTable--) {
+            for(; numTable > 0 && endTableIdx != -1; numTable--) {
                 //System.out.println("got next end: " +numTable);
                 int endIdx = _sText.indexOf("</table>", endTableIdx + 1);
                 if(endIdx == -1) {
@@ -696,8 +692,7 @@ public class HTMLParser {
         return returnVec;
     }//end takeOutTables(String _sText)
     
-    public static String takeOutTableString(String _sText, Vector _vTableVectors) 
-    {
+    public static String takeOutTableString(String _sText, Vector _vTableVectors) {
         if(_vTableVectors == null || _vTableVectors.size() == 0) {
             return _sText;
         }
@@ -724,7 +719,7 @@ public class HTMLParser {
             _sText = temp;
         }
         return _sText;
-    }
+    }//end takeOutTableString(String _sText, Vector _vTableVectors)
     
     private static void setLayout(Component _cContainer, int _iForcedWidth) {
         
@@ -736,17 +731,13 @@ public class HTMLParser {
             ((Container)_cContainer).invalidate();
             ((Container)_cContainer).layoutContainer();
         }
-        //if(_iForcedWidth > 0) {
-            //_cContainer.setHeight(_cContainer.getPreferredH());
-        //}
-    }
+    }//end setLayout(Component _cContainer, int _iForcedWidth)
     
     public static void resetAllTable(Component _cComp) {
         if(_cComp == null) {
             return;
         }
-        if(_cComp instanceof Container)
-        {
+        if(_cComp instanceof Container) {
             int totalWidth = 0;
             int tallestPrefH = 0;
             int totalHeight = 0;
@@ -786,6 +777,6 @@ public class HTMLParser {
             }
         }
         setLayout(_cComp, -1);
-    }
+    }//end resetAllTable(Component _cComp)
 }
 

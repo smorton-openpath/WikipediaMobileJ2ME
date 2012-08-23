@@ -169,11 +169,6 @@ public class BasePage implements ActionListener {
                 text.setUIID("Label");
                 text.setEditable(false);
                 m_cFailDialog.addComponent(text);
-                
-                /*if(mainMIDlet.phoneType == mainMIDlet.TYPE_S60) {
-                    m_cFailDialog.show(195, 196, 55, 56, false, true);
-                }else*/
-              //      m_cFailDialog.show(10, 10, 10, 10, false);
                     
                 int width = Display.getInstance().getDisplayWidth();
                 int height = Display.getInstance().getDisplayHeight();
@@ -183,9 +178,6 @@ public class BasePage implements ActionListener {
                 } else {
                     m_cFailDialog.show(height/5, height/5, width/16, width/16, false, false);
                 }
-                
-                    
-                
             }
             //throw new RuntimeException("base failed");
         } catch (Exception e ) {

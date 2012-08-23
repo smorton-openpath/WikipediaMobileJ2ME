@@ -211,6 +211,7 @@ public class ArticlePage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = ((LinkButton)oComp).getLink();
+                        System.out.println("link: "+url);
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
@@ -234,7 +235,38 @@ public class ArticlePage extends BasePage {
                             }else {
                                 NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
                             }
+                            break;                            
                         }
+                        try {
+                            m_cFailDialog = new Dialog();
+                            if(m_cFailDialog != null) {
+                                String OkSk = mainMIDlet.getString("ok");
+                                Command commands = new Command(OkSk);
+                                m_cFailDialog.addCommand(new Command(OkSk){
+                                    public void actionPerformed(ActionEvent ev) {
+                                            m_cFailDialog.dispose();
+                                            m_cForm.show();
+                                        }
+                                    });
+                                TextArea text = new TextArea(url);
+                                text.setUIID("Label");
+                                text.setEditable(false);
+                                m_cFailDialog.addComponent(text);
+
+                                int width = Display.getInstance().getDisplayWidth();
+                                int height = Display.getInstance().getDisplayHeight();
+                                // Devices with very small screens should use showmodeless instead
+                                if(height < 130) {
+                                    m_cFailDialog.showModeless();
+                                } else {
+                                    m_cFailDialog.show(height/5, height/5, width/16, width/16, false, false);
+                                }
+                            }
+                            //throw new RuntimeException("base failed");
+                        } catch (Exception e ) {
+                            e.printStackTrace();
+                        }
+                        break;
                     }
                 }
                 break;
