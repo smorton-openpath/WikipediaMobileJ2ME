@@ -17,6 +17,7 @@ import com.components.HTMLComponentItem;
 import com.Utilities;
 import com.JsonObject;
 import com.components.LinkButton;
+import javax.microedition.lcdui.Canvas;
 /**
  *
  * @author caxthelm
@@ -48,18 +49,23 @@ public class MainPage extends BasePage {
                 m_cSearchButton.setVisible(false);
             }
             if(m_cSearchTextField != null) {
+                m_cSearchTextField.setUseSoftkeys(false);
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
-                        System.out.println("test: "+ev.getKeyEvent());
                         TextField myText = (TextField)ev.getComponent();
-                        if(!Display.getInstance().editingText) {
-                            Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                        if(ev.getKeyEvent() == Canvas.LEFT) {
+                            m_cSearchButton.requestFocus();
+                        } else {
+                            if(!Display.getInstance().editingText) {
+                                Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                            }
                         }
+                        System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
                 m_cSearchTextField.setNextFocusLeft(m_cSearchButton);
                 m_cSearchTextField.setNextFocusUp(null);
-                
+
                 m_cSearchTextField.addDataChangeListener(new DataChangedListener()  {
                     public void dataChanged(int i, int i1) {
                         if(m_cSearchTextField != null) {

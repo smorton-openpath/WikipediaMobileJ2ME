@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import com.mainMIDlet;
 import com.NetworkController;
+import javax.microedition.lcdui.Canvas;
 /**
  *
  * @author caxthelm
@@ -46,9 +47,14 @@ public class SearchPage extends BasePage {
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
                         TextField myText = (TextField)ev.getComponent();
-                        if(!Display.getInstance().editingText) {
-                            Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                        if(ev.getKeyEvent() == Canvas.LEFT) {
+                            m_cSearchButton.requestFocus();
+                        } else {
+                            if(!Display.getInstance().editingText) {
+                                Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                            }
                         }
+                        System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
                 
