@@ -63,7 +63,7 @@ public class NetworkThread implements Runnable {
     }//end NetworkThread(String _sURI, String _sPostData, String _sMethod, int _iParseStyle)
     
     public void run() {
-        System.out.println("req: " + m_sURI);
+        //System.out.println("req: " + m_sURI);
         //System.out.println("!@#$% Net Mem start: "+Runtime.getRuntime().freeMemory());
         
         m_oTimeoutTask = new NetTimeoutTask();

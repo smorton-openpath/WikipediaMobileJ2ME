@@ -186,12 +186,14 @@ public class mainMIDlet extends MIDlet
                 BasePage item = (BasePage)m_vScreenStack.lastElement();
                 item.dispose();
                 m_vScreenStack.removeElement(item);
+                getBuilder().back(null);
             }
             //screenStack.removeAllElements();
         }
         m_vScreenStack.addElement(_oPage);
         _oPage.showForm();
         Thread.yield();
+        System.out.println("!@#$% page memory: "+Runtime.getRuntime().freeMemory());
         //System.out.println("checkSize: "+screenStack.size());
     }
     public static void setCurrentPage(BasePage _oPage) {
@@ -218,7 +220,7 @@ public class mainMIDlet extends MIDlet
         BasePage last = (BasePage)m_vScreenStack.lastElement();
         m_vScreenStack.removeElementAt(m_vScreenStack.size() - 1);
         last.dispose();
-        getBuilder().back();
+        getBuilder().back(((BasePage)m_vScreenStack.lastElement()).getForm());
         BasePage newLast = (BasePage)m_vScreenStack.lastElement();
         //newLast.refreshPage();
         //newLast.updateSoftkeys();

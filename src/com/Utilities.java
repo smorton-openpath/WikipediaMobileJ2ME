@@ -50,7 +50,11 @@ public class Utilities {
     public static String decodeEverything(String _sHaystack) {
         String result = null;
         result = decodeHTML(_sHaystack);
+        System.gc();
+        Thread.yield();
         result = stripSlash(result);
+        System.gc();
+        Thread.yield();
         result = decodePercent(result);
         _sHaystack = "";
         System.gc();
@@ -279,7 +283,7 @@ public class Utilities {
             iCurrentIdx = nextIdx;
         }
         return vOutput;
-    }
+    }//end tokenizeString(String _sText)
     
     public static Vector getSectionsFromJSON(JsonObject _oJson) {
         Vector vReturnVec = null;

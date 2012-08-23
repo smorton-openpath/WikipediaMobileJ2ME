@@ -75,7 +75,15 @@ public class SectionComponentItem extends ComponentItem {
             Component cTextComp = oHTMLItem.createComponent(_text);
             m_cSubContainer.addComponent(cTextComp);
         }
-    }
+    }//end addText(String _text)
+    
+    public void addText(Vector _vTags, Vector _tableVector) {
+         if(_vTags != null && _vTags.size() > 0) {
+            HTMLComponentItem oHTMLItem = new HTMLComponentItem();
+            Component cTextComp = oHTMLItem.createComponent(_vTags, _tableVector);
+            m_cSubContainer.addComponent(cTextComp);
+        }
+    }//end addText(Vector _vTags, Vector _tableVector)
     
     public int getSectionLevel() {
         return m_iSectionLevel;

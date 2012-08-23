@@ -86,12 +86,15 @@ public class ArticlePage extends BasePage {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
                     if(m_bIsFoundationPage) {
+                        m_bIsLoadingWeb = true;
                         NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, "0");
                     }else {
                         if(m_bStartWithSearch) {                        
                             //addData(m_oData, NetworkController.PARSE_SEARCH);
+                            m_bIsLoadingWeb = true;
                             NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sTitle, 0);
                         }else {
+                            m_bIsLoadingWeb = true;
                             NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle, "0");
                         }
                     }
@@ -133,6 +136,7 @@ public class ArticlePage extends BasePage {
     
     public void actionPerformed(ActionEvent ae) {
         System.err.println("Action article: " + ae.getCommand().getId());
+        System.out.println("!@#$% checking memory: "+Runtime.getRuntime().freeMemory());
         int commandId = ae.getCommand().getId();
         if(commandId == COMMAND_OK) {
             Component focusedComp = m_cForm.getFocused();
@@ -217,6 +221,19 @@ public class ArticlePage extends BasePage {
                             }else {
                                 NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), title,  "0");
                             }
+                            break;
+                        }
+                        wikiIdx = url.indexOf("#cite");
+                        if(wikiIdx >= 0) {
+                            String title = url.substring(wikiIdx);
+                            System.out.println("linkCite: "+title);
+                            m_sCurrentSections = "references";
+                            //Axthelm - On wiki foundation pages links to non-foundation pages start with <en>.wikipedia.org
+                            if(m_bIsFoundationPage && url.indexOf("wikipedia.org") < 0) {
+                                NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
+                            }else {
+                                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
+                            }
                         }
                     }
                 }
@@ -295,6 +312,7 @@ public class ArticlePage extends BasePage {
     
     public void addData(Object _results, int _iResultType) {
         //System.out.println("results: "+_iResultType +", "+_results);
+        System.out.println("!@#$% addData memory: "+Runtime.getRuntime().freeMemory());
         if(_results == null) {
             //We have nothing, make the data call.
             if(_iResultType == NetworkController.PARSE_SEARCH) {
@@ -327,9 +345,11 @@ public class ArticlePage extends BasePage {
                     }else if (titleAndSections[0].equalsIgnoreCase(m_sTitle)) {
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
                     }
+                    m_bIsLoadingWeb = false;
                     break;
                 case NetworkController.SEARCH_LANGUAGES:
                     parseLanguage(_results);
+                    m_bIsLoadingWeb = false;
                     break;
             }
             
@@ -369,9 +389,11 @@ public class ArticlePage extends BasePage {
                     sText = Utilities.decodeEverything(sText);
                     HTMLComponentItem oHTMLItem = new HTMLComponentItem();
                     Component cTextComp = oHTMLItem.createComponent(sText);
+                    sText = "";
                     if(cTextComp != null) {                   
                         m_cContentContainer.addComponent(cTextComp);
                     }
+                    sections.removeElement(oTextItem);
                 }//end if(oTextItem instanceof JsonObject)
             }
             
@@ -380,23 +402,19 @@ public class ArticlePage extends BasePage {
             //Since we can cascade through sub-sections, we are using an Array to denote which level should get the child.
             //TODO: There must be a better way to do this.
             SectionComponentItem[] aSections = new SectionComponentItem[6];
-            for(int i = 0; i < sections.size(); i++) {
-                if(!mainMIDlet.m_bUseMainSection && i == 0) {
-                    //if we are not using a main section we will show all the text above.
-                    continue;
-                }
+            int i = 0;
+            while(sections.size() > 0) {
+                System.gc();
+                Thread.yield();
+                //System.out.println("!@#$% article Mem: "+Runtime.getRuntime().freeMemory());
                 //System.out.println(sections.elementAt(i));
-                JsonObject oSection = (JsonObject)sections.elementAt(i);
+                JsonObject oSection = (JsonObject)sections.firstElement();                
+                sections.removeElement(oSection);
                 String sTitle = (String)oSection.get("line");
                 if(i == 0 && (sTitle == null || sTitle.length() <= 0)) {
                     sTitle = mainMIDlet.getString("Main");
-                }
-                sTitle = Utilities.decodeEverything(sTitle);
-                String sText = (String)oSection.get("text");
-                boolean bActive = false;
-                
-                if(sText != null) {
-                    bActive = true;
+                }else {
+                    sTitle = Utilities.decodeEverything(sTitle);
                 }
                 
                 String sTocLevel = oSection.getString("toclevel");
@@ -412,6 +430,12 @@ public class ArticlePage extends BasePage {
                 if(arrayLevel == 0 || (arrayLevel > 0 && aSections[arrayLevel - 1] != null 
                         && aSections[arrayLevel - 1].isActive())) 
                 {
+                    String sText = (String)oSection.get("text");
+                    boolean bActive = false;
+
+                    if(sText != null) {
+                        bActive = true;
+                    }
                     SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sTocLevel);
                     Component cSectionComp = sectionItem.createComponent(sTitle, bActive, Integer.parseInt(sTocLevel));
                     if(cSectionComp != null) {
@@ -430,20 +454,39 @@ public class ArticlePage extends BasePage {
 
                         //System.out.println(sText);
                         
-                        if(sText != null && !(sText.length() < 1)) {
-                            //TODO: Need to strip out the <h2> tag at the beginning
-                            sText = Utilities.decodeEverything(sText);
-                            sectionItem.addText(sText);
-                        }
-                        
                         if(arrayLevel == 0) {
                             m_cContentContainer.addComponent(cSectionComp);
                         }else {
                             aSections[arrayLevel - 1].addSubsection(sectionItem);
                         }
+                        
+                        if(sText != null && !(sText.length() < 1)) {
+                            oSection.cleanChildren();
+                            oSection = null;
+                            sText = Utilities.decodeEverything(sText);
+                            Vector tableVec = HTMLParser.takeOutTables(sText);
+                            sText = HTMLParser.takeOutTableString(sText, tableVec);
+                            Vector vTags = Utilities.tokenizeString(sText);
+                            sText = "";
+                            System.gc();
+                            Thread.yield();
+                            //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
+                            sectionItem.addText(vTags, tableVec);
+                            tableVec.removeAllElements();
+                            tableVec = null;
+                            vTags.removeAllElements();
+                            vTags = null;
+                            /*System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
+                            sectionItem.addText(sText);*/
+                        }
                     }//end if(cSectionComp != null)
                 }
-            }//end for(int i = 1; i > sections.size(); i++)
+                if(oSection != null) {
+                    oSection.cleanChildren();
+                    oSection = null;
+                }
+                i++;
+            }//end while(sections.size() > 0)
                         
             if(m_bIsFoundationPage) {
             }else {

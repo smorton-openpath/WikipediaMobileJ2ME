@@ -19,6 +19,7 @@ import com.sun.lwuit.layouts.*;
 import com.sun.lwuit.table.*;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.Button;
 
 import java.util.Vector;
 import java.util.Hashtable;
@@ -32,7 +33,7 @@ import java.util.Stack;
 public class HTMLParser {
     private static final int STYLE_BOLD = 1;
     private static final int STYLE_ITALIC = 2;
-    private static final int STYLE_HEADER = 4;
+    private static final int STYLE_ORDEREDLIST = 4;
     private static final int STYLE_LINK = 8;
     private static final int STYLE_SHOWTABLES = 16;
     private static final int STYLE_INTABLE = 32;
@@ -49,30 +50,47 @@ public class HTMLParser {
     
     public HTMLParser() {
     }
-    
     public static Component parseHtml(String _sText, boolean _bShowTables) {
-        Container cTextComp = new Container();//new HTMLRequestHandler());
-        //cTextComp.setWidth(500);
         if(_sText == null) {            
-            return cTextComp;
+            return new Container();
         }
-        _sText = Utilities.replace("&#160;", " ", _sText);
-        cTextComp.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-//        Vector vComponents = chopHTMLString(_sText);
-        int initialParams = 0;
-        Vector tags = Utilities.tokenizeString(_sText);
-        if(_bShowTables) {
-            initialParams += STYLE_SHOWTABLES;
-            
-        }else {
+        Vector tableVector = null;
+        if(!_bShowTables) {
             tableVector = takeOutTables(_sText);
         }
+//      Vector vComponents = chopHTMLString(_sText);
+        Vector tags = Utilities.tokenizeString(_sText);
         _sText = null;
+        return parseHtml(tags, tableVector, _bShowTables);
+    }//end parseHtml(String _sText, boolean _bShowTables)
+    
+    public static Component parseHtml(Vector _vTags, Vector _tableVector, boolean _bShowTables) {
+        //System.out.println("!@#$% html Mem start1: "+Runtime.getRuntime().freeMemory());
+        int initialParams = 0;
+        if(_bShowTables) {
+            initialParams += STYLE_SHOWTABLES;            
+        }else {
+            tableVector = _tableVector;
+        }
         System.gc();
-        Vector vComponents = parseHtmlTagVector(tags, initialParams);
+        Vector vComponents = parseHtmlTagVector(_vTags, initialParams);
+        _vTags.removeAllElements();
+        _vTags = null;
+        if(tableVector != null) {
+            tableVector.removeAllElements();
+            tableVector = null;
+        }
+        
+        System.gc();
+        Thread.yield();
+        
         Container cLabelContainer = null;
-        for(int i = 0; i < vComponents.size(); i++) {
-            Object oComp = vComponents.elementAt(i);
+        
+        Container cTextComp = new Container();
+        cTextComp.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        while(vComponents.size() > 0) {
+            Object oComp = vComponents.firstElement();
+            vComponents.removeElement(oComp);
             boolean addComp = true;
             
             //Failsafe to make sure all labels are in a container.
@@ -94,16 +112,16 @@ public class HTMLParser {
             if(addComp) {
                 cTextComp.addComponent((Component)oComp);
             }
-        }
+        }//end while(vComponents.size() > 0)
         
         cTextComp.getUnselectedStyle().setMargin(0, 0, 0, 0);
         cTextComp.getSelectedStyle().setMargin(0, 0, 0, 0);
-        /*cTextComp.layoutContainer();
-        cTextComp.invalidate();
-        cTextComp.layoutContainer();*/
-        tableVector = null;
+        System.gc();
+        Thread.yield();
+        
+        //System.out.println("!@#$% html Mem finish1: "+Runtime.getRuntime().freeMemory());
         return cTextComp;
-    }
+    }//end parseHtml(String _sText, boolean _bShowTables)
     
     private static String getTagID(String _sText) {
         //Get the tag identifier
@@ -139,6 +157,7 @@ public class HTMLParser {
         while(_vTags.size() > 0) {
             String tag = (String) (_vTags.elementAt(0));
             //System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
+            //System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
@@ -150,6 +169,8 @@ public class HTMLParser {
                     //System.out.println("      ...closing tag was: " + tag);
                     //System.out.println("      ...components length was " + components.size());
                     _vTags.removeElementAt(0);
+                    System.gc();
+                    Thread.yield();
                     return flattenVectors(components);
                 }
                 if( baseTag.equalsIgnoreCase("a")) {
@@ -169,7 +190,9 @@ public class HTMLParser {
                     components.addElement(parseImage(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("li")) {
                    components.addElement(parseListLine(_vTags, _iStyleMask));
-                } else if(baseTag.equalsIgnoreCase("p")) {
+                } else if(baseTag.equalsIgnoreCase("ol")) {
+                    components.addElement(parseOrderedList(_vTags, _iStyleMask));
+                }else if(baseTag.equalsIgnoreCase("p")) {
                    components.addElement(parseParagraph(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
@@ -236,7 +259,7 @@ public class HTMLParser {
             newComp.getStyle().setFont(m_oFontBoldItalic);
             newComp.getSelectedStyle().setFont(m_oFontBoldItalic);
             newComp.getPressedStyle().setFont(m_oFontBoldItalic);
-        }else if((_iStyleMask & STYLE_BOLD) != 0 || (_iStyleMask & STYLE_HEADER) != 0) {
+        }else if((_iStyleMask & STYLE_BOLD) != 0 ) {
             newComp.getStyle().setFont(m_oFontBold);
             newComp.getSelectedStyle().setFont(m_oFontBold);
             newComp.getPressedStyle().setFont(m_oFontBold);
@@ -245,9 +268,9 @@ public class HTMLParser {
             newComp.getSelectedStyle().setFont(m_oFontItalic);
             newComp.getPressedStyle().setFont(m_oFontItalic);
         }
-        newComp.getStyle().setMargin(0, 0, 1, 1);
-        newComp.getSelectedStyle().setMargin(0, 0, 1, 1);
-        newComp.getPressedStyle().setMargin(0, 0, 1, 1);
+        newComp.getStyle().setMargin(1, 1, 1, 1);
+        newComp.getSelectedStyle().setMargin(1, 1, 1, 1);
+        newComp.getPressedStyle().setMargin(1, 1, 1, 1);
         return newComp;
     }//end parseText(String _sText)
     
@@ -296,7 +319,7 @@ public class HTMLParser {
     
     //<h2>
     private static Vector parseHeader(Vector _vTags, int _iStyleMask) {
-        _iStyleMask += STYLE_HEADER;
+        _iStyleMask += STYLE_BOLD;
         return parseParagraph(_vTags, _iStyleMask);
     }//end parseHeader(Vector tags, int _iStyleMask)
     
@@ -370,16 +393,41 @@ public class HTMLParser {
         return parseParagraph(_vTags, _iStyleMask);
     }//end parseListLine(Vector tags, int _iStyleMask)
     
+    //<ol>
+    private static Vector parseOrderedList(Vector _vTags, int _iStyleMask) {
+        _vTags.removeElementAt(0);
+        _iStyleMask |= STYLE_ORDEREDLIST;
+        Vector compVec = parseHtmlTagVector(_vTags, _iStyleMask);
+        Vector returnVec = new Vector();
+        Container newContainer = new Container();
+        newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        for(int i = 0; i < compVec.size(); i++) {
+            System.out.println("para: "+compVec.elementAt(i));
+            Component pulledComp = (Component)compVec.elementAt(i);
+            
+            if(pulledComp instanceof Container && ((Container)pulledComp).getComponentCount() > 1) {
+                Component item = ((Container)pulledComp).getComponentAt(0);
+                if(item instanceof Label ) {
+                    Label textItem = (Label)item;
+                    textItem.setText(""+((i + 1)/2));
+                }
+            }
+            newContainer.addComponent(pulledComp);
+        }
+        returnVec.addElement(newContainer);
+        return returnVec;
+    }//end parseList(Vector tags, int _iStyleMask)
     //<p>
     private static Vector parseParagraph(Vector _vTags, int _iStyleMask) {
         _vTags.removeElementAt(0);
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         Vector returnVec = new Vector();
         Container newContainer = new Container();
-        newContainer.getStyle().setMargin(0, 0, 1, 1);
+        newContainer.getStyle().setMargin(1, 1, 1, 1);
+        newContainer.getStyle().setPadding(1, 1, 0, 0);
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
-            Component pulledComp = (Component)compVec.elementAt(i);
+            Component pulledComp = (Component)compVec.elementAt(i);            
             newContainer.addComponent(pulledComp);           
             
         }//end for(int i = 0; i < compVec.size(); i++)
@@ -403,7 +451,7 @@ public class HTMLParser {
             Container newContainer = new Container();
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             //newContainer.setUIID("Table");
-            //newContainer.setSnapToGrid(true);
+            newContainer.setSnapToGrid(true);
             /*if((_iStyleMask & STYLE_INTABLE) == 0) {
                 setLayout(newContainer, TABLE_WIDTH);
             }*/
@@ -418,31 +466,20 @@ public class HTMLParser {
                 tableVector.removeElementAt(0);
             }            
         }else if((_iStyleMask & STYLE_INTABLE) == 0){
-            String title = null;//
+            String title = "";//
             //System.out.println("title: "+title +", "+ compVec.firstElement());
             
             //Axthelm - This is ugly code, but I couldn't think of a better way to pull out the first item.
             //Axthelm - we expect the title to be the first item of the first row.
             if(compVec != null && compVec.size() > 0){
-                if(compVec.firstElement() instanceof Label) {//if first item is a label, use that.
-                    title = ((Label)compVec.firstElement()).getText();
-                }else if(compVec.firstElement() instanceof Container) {//else use the first row.
-                    Container trCont = (Container)compVec.firstElement();
-                    if(trCont.getComponentAt(0) instanceof Label) {//if the row contains just a label (odd), use that.
-                        title = ((Label)trCont.getComponentAt(0)).getText();
-                    }else if(trCont.getComponentAt(0) instanceof Container) {//more likely it has a group of labels
-                        Container tdCont = (Container)trCont.getComponentAt(0);
-                        title = "";
-                        // put them together and use it.
-                        for(int i = 0; i < tdCont.getComponentCount(); i++) {
-                            try{
-                                title += ((Label)tdCont.getComponentAt(i)).getText();
-                            } catch(ClassCastException cce) {
-                                // If we don't have a network connection, we throw an exception here.
-                            }
-                        }//end for(int i = 0; i < tdCont.getComponentCount(); i++)
-                    }//end if(trCont.getComponentAt(0) instanceof Label) - else
-                }//end if(compVec.firstElement() instanceof Label) - else
+                for(int i = 0; i < compVec.size(); i++) {
+                    try {
+                        if(compVec.elementAt(i) instanceof Label) {//if first item is a label, use that.
+                            title += ((Label)compVec.elementAt(i)).getText();
+                        }
+                    }catch(Exception e) {
+                    }
+                }
             }//end if(compVec != null && compVec.size() > 0)
             
             if(title == null || title.length() <= 0) {
@@ -575,7 +612,7 @@ public class HTMLParser {
                 flattened.addElement(_vToFlatten.elementAt(i));
             }
         }
-        
+        _vToFlatten.removeAllElements();
         return flattened;
     }//end flattenVectors(Vector _vToFlatten)
     
@@ -605,7 +642,7 @@ public class HTMLParser {
         return returnVec;
     }//end stripVector(Vector _vToStrip)
     
-    private static Vector takeOutTables(String _sText) {
+    public static Vector takeOutTables(String _sText) {
         Vector returnVec = new Vector();
         if(_sText == null || _sText.length() <= 0) {
             //System.out.println("takeOutTables() no string");
@@ -658,6 +695,36 @@ public class HTMLParser {
         }
         return returnVec;
     }//end takeOutTables(String _sText)
+    
+    public static String takeOutTableString(String _sText, Vector _vTableVectors) 
+    {
+        if(_vTableVectors == null || _vTableVectors.size() == 0) {
+            return _sText;
+        }
+        for(int i = 0; i < _vTableVectors.size(); i++) {
+            String tableStr = (String)_vTableVectors.elementAt(i);
+            int startIdx = _sText.indexOf(tableStr);
+            int length = tableStr.length();
+            String title = mainMIDlet.getString("Table");
+            int titleEndIdx = tableStr.indexOf("</th>");
+            if(titleEndIdx > -1) {
+                int titleStartIdx = tableStr.indexOf(">");
+                int lastIdx = titleStartIdx;
+                while(lastIdx < titleEndIdx) {
+                    titleStartIdx = lastIdx;
+                    lastIdx = tableStr.indexOf(">", lastIdx + 1);
+                }
+                title = tableStr.substring(titleStartIdx + 1, titleEndIdx);
+            }
+            String temp = _sText.substring(0, startIdx);
+            temp += "<table>";
+            temp += title;
+            temp += "</table>";
+            temp +=_sText.substring(startIdx + length);
+            _sText = temp;
+        }
+        return _sText;
+    }
     
     private static void setLayout(Component _cContainer, int _iForcedWidth) {
         

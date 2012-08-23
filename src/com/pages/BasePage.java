@@ -58,6 +58,7 @@ public class BasePage implements ActionListener {
     public boolean m_bIsDialog = false;
     
     Dialog m_cFailDialog = null;
+    public boolean m_bIsLoadingWeb = false;
     
     
     public class RefreshTimerTask extends TimerTask {
@@ -115,6 +116,9 @@ public class BasePage implements ActionListener {
             m_cForm.show();
         }
     }//end showForm()
+    public Component getForm(){
+        return m_cForm;
+    }//end getForm()
 
     public void actionPerformed(ActionEvent ae) {
     }//end actionPerformed(ActionEvent ae)
@@ -155,8 +159,8 @@ public class BasePage implements ActionListener {
                 Command commands = new Command(OkSk);
                 m_cFailDialog.addCommand(new Command(OkSk){
                     public void actionPerformed(ActionEvent ev) {
-                        m_cFailDialog.dispose();
-                        m_cForm.show();
+                            m_cFailDialog.dispose();
+                            m_cForm.show();
                         }
                     });
 
@@ -194,6 +198,11 @@ public class BasePage implements ActionListener {
         if(m_cDialog != null) {
             //mDialog.dispose();
             //System.out.println("We finished showing");
-        }        
+        }else if(m_cForm != null) {
+            
+        }
+        if(m_cContentContainer != null) {
+            m_cContentContainer.removeAll();
+        }
     }//end dispose()
 }

@@ -35,7 +35,12 @@ public class HTMLComponentItem extends ComponentItem {
     public Component createComponent(String _sText) {
         m_cComponent = HTMLParser.parseHtml(_sText, false);
         return m_cComponent;
-    }
+    }//end createComponent(String _sText)
+    
+    public Component createComponent(Vector _vTags, Vector _tableVector) {
+        m_cComponent = HTMLParser.parseHtml(_vTags, _tableVector, false);
+        return m_cComponent;
+    }//end createComponent(Vector _vTags, Vector _tableVector)
     
 }
 

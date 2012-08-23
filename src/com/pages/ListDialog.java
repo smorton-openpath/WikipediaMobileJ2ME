@@ -111,6 +111,7 @@ public class ListDialog extends BasePage
             case COMMAND_BACK:
                 m_cDialog.dispose();
                 mainMIDlet.dialogBack();
+                mainMIDlet.pageBack();//popoff the under page.
                 break;
                 
             case COMMAND_NEXT:

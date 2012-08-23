@@ -50,12 +50,15 @@ public class MainPage extends BasePage {
             if(m_cSearchTextField != null) {
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
+                        System.out.println("test: "+ev.getKeyEvent());
                         TextField myText = (TextField)ev.getComponent();
                         if(!Display.getInstance().editingText) {
                             Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
                         }
                     }
                 });
+                m_cSearchTextField.setNextFocusLeft(m_cSearchButton);
+                m_cSearchTextField.setNextFocusUp(null);
                 
                 m_cSearchTextField.addDataChangeListener(new DataChangedListener()  {
                     public void dataChanged(int i, int i1) {
@@ -72,7 +75,7 @@ public class MainPage extends BasePage {
                         m_cForm.repaint();
                     }
                 });
-            }
+            }//end if(m_cSearchTextField != null)
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
@@ -83,7 +86,7 @@ public class MainPage extends BasePage {
             m_cForm.setCyclicFocus(false);
             m_cForm.setFocusScrolling(false);
             m_cForm.addCommandListener(this);
-            mainMIDlet.getBuilder().setHomeForm("MainPageForm");
+            //mainMIDlet.getBuilder().setHomeForm("MainPageForm");
             //mForm.repaint();
         }catch(Exception e) {
             e.printStackTrace();
