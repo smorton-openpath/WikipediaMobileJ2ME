@@ -47,9 +47,13 @@ public class SearchPage extends BasePage {
             if(m_cSearchTextField != null) {
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
-                        TextField myText = (TextField)ev.getComponent();
-                            if(!Display.getInstance().editingText) {
-                                Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                        if(ev.getKeyEvent() == Canvas.FIRE) {
+                            performSearch();
+                        } else {
+                            TextField myText = (TextField)ev.getComponent();
+                                if(!Display.getInstance().editingText) {
+                                    Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                            }
                         }
                     }
                 });

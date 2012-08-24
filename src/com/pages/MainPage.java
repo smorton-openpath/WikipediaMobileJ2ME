@@ -55,11 +55,14 @@ public class MainPage extends BasePage {
                 m_cSearchTextField.setUseSoftkeys(false);
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
-                        TextField myText = (TextField)ev.getComponent();
-                        if(!Display.getInstance().editingText) {
-                            Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                        if(ev.getKeyEvent() == Canvas.FIRE) {
+                            performSearch();
+                        } else {
+                            TextField myText = (TextField)ev.getComponent();
+                            if(!Display.getInstance().editingText) {
+                                Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
+                            }
                         }
-                        System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
                 
