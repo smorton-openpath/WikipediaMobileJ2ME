@@ -396,7 +396,7 @@ public class HTMLParser {
         Container newContainer = new Container();
         newContainer.getStyle().setMargin(1, 1, 1, 1);
         newContainer.getStyle().setPadding(1, 1, 0, 0);
-        int heightToSet = 0;
+        int heightToSet = 20;
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
         for(int i = 0; i < compVec.size(); i++) {
