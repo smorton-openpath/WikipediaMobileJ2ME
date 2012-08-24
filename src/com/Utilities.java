@@ -273,7 +273,7 @@ public class Utilities {
                 }
             }
             if(nextIdx <= iCurrentIdx) {
-                System.out.println("failed at: "+iCurrentIdx+", "+nextIdx);
+                //System.out.println("failed at: "+iCurrentIdx+", "+nextIdx);
                 done = true;
             }
             if(text.length() > 0) {

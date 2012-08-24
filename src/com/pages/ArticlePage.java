@@ -158,7 +158,7 @@ public class ArticlePage extends BasePage {
                         //Axthelm: removing the top of the stack (it is the current page).
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1); 
                         String[] titleAndSections = (String[])m_vArticleStack.lastElement();
-                        System.out.println("popping: "+titleAndSections[0]);
+                        //System.out.println("popping: "+titleAndSections[0]);
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
                         
                         if(m_bIsFoundationPage) {
@@ -200,7 +200,7 @@ public class ArticlePage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = "http:"+((LinkButton)oComp).getLink();
-                        System.out.println("url: "+url);
+                        //System.out.println("url: "+url);
                         mainMIDlet.setCurrentPage(new ImageDialog(
                                 ((LinkButton)oComp).getOtherInfo(), ((LinkButton)oComp).getText(), url));
                     }
@@ -211,7 +211,7 @@ public class ArticlePage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = ((LinkButton)oComp).getLink();
-                        System.out.println("link: "+url);
+                        //System.out.println("link: "+url);
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);

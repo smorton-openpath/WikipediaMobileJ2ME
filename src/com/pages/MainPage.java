@@ -59,7 +59,7 @@ public class MainPage extends BasePage {
                         if(!Display.getInstance().editingText) {
                             Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
                         }
-                        System.out.println("test: "+ev.getKeyEvent());
+                        //System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
                 
@@ -170,7 +170,7 @@ public class MainPage extends BasePage {
                         String url = "http:"+((LinkButton)oComp).getLink();
                         int sizeIdx = url.indexOf("px");//TODO: make this work better without giving errors.
                         
-                        System.out.println("url: "+url);
+                        //System.out.println("url: "+url);
                         mainMIDlet.setCurrentPage(new ImageDialog(
                                 ((LinkButton)oComp).getOtherInfo(), ((LinkButton)oComp).getText(), url));
                     }

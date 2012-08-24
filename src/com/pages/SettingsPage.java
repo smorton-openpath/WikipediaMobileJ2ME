@@ -133,7 +133,7 @@ public class SettingsPage extends BasePage {
                     String text = comp.getTag();
                     String lang = text.substring(0, text.indexOf(" ")).trim();
                     text = text.substring(text.indexOf(" - ") + 3);
-                    System.out.println("requesting article: "+lang);
+                    //System.out.println("requesting article: "+lang);
                     mainMIDlet.setLanguage(lang);
                     //Dialog
                     String netTitle = mainMIDlet.getString("LangDialogTitle");
