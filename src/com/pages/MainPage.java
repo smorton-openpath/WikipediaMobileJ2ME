@@ -29,6 +29,7 @@ public class MainPage extends BasePage {
     private final int COMMAND_STOREDPAGES = COMMAND_CENTER;
     private final int COMMAND_SETTINGS = COMMAND_LEFT;
     
+    
     //Lwuit Commands:   
     
     TextField m_cSearchTextField = null;
@@ -50,15 +51,21 @@ public class MainPage extends BasePage {
             m_cSearchButton = (Button)mainMIDlet.getBuilder().findByName("SearchIconButton", m_cHeaderContainer);            
             if(m_cSearchButton != null) {
                 m_cSearchButton.setVisible(false);
+                m_cForm.addGameKeyListener(Canvas.LEFT, new ActionListener() {
+
+                    public void actionPerformed(ActionEvent ae) {
+                        m_cSearchButton.requestFocus();
+                    }
+                });
             }
             if(m_cSearchTextField != null) {
                 m_cSearchTextField.setUseSoftkeys(false);
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
-                        if(ev.getKeyEvent() == Canvas.FIRE) {
-                            performSearch();
+                        TextField myText = (TextField)ev.getComponent();
+                        if(ev.getKeyEvent() == Canvas.LEFT) {
+                            m_cSearchButton.requestFocus();
                         } else {
-                            TextField myText = (TextField)ev.getComponent();
                             if(!Display.getInstance().editingText) {
                                 Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
                             }
