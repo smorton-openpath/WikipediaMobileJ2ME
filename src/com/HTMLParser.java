@@ -390,7 +390,38 @@ public class HTMLParser {
     //<li>
     private static Vector parseListLine(Vector _vTags, int _iStyleMask) {       
         //Just do what paragraph does.
-        return parseParagraph(_vTags, _iStyleMask);
+        _vTags.removeElementAt(0);
+        Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
+        Vector returnVec = new Vector();
+        Container newContainer = new Container();
+        newContainer.getStyle().setMargin(1, 1, 1, 1);
+        newContainer.getStyle().setPadding(1, 1, 0, 0);
+        int heightToSet = 0;
+        int thisLineWidth = 0;
+        int tallestHeightThisLine = 0;
+        for(int i = 0; i < compVec.size(); i++) {
+            //System.out.println("para: "+compVec.elementAt(i));
+            Component pulledComp = (Component)compVec.elementAt(i);            
+            newContainer.addComponent(pulledComp);
+            
+            if (pulledComp.getPreferredH() + 8 > tallestHeightThisLine) {
+                tallestHeightThisLine = pulledComp.getPreferredH() + 8;
+            }
+            
+            thisLineWidth += pulledComp.getPreferredW();
+            if(thisLineWidth + pulledComp.getPreferredW() > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
+                thisLineWidth = 0;
+                heightToSet += tallestHeightThisLine;
+                tallestHeightThisLine = 0;
+            }
+        }//end for(int i = 0; i < compVec.size(); i++)
+        
+        newContainer.layoutContainer();
+        newContainer.invalidate();
+        newContainer.layoutContainer();
+        newContainer.setPreferredH(heightToSet - 10);
+        returnVec.addElement(newContainer);
+        return returnVec;
     }//end parseListLine(Vector tags, int _iStyleMask)
     
     //<ol>
@@ -401,6 +432,10 @@ public class HTMLParser {
         Vector returnVec = new Vector();
         Container newContainer = new Container();
         newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        
+        int heightToSet = 0;
+        int thisLineWidth = 0;
+        int tallestHeightThisLine = 0;
         for(int i = 0; i < compVec.size(); i++) {
             System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);
@@ -413,7 +448,19 @@ public class HTMLParser {
                 }
             }
             newContainer.addComponent(pulledComp);
+            
+            if (pulledComp.getPreferredH() + 8 > tallestHeightThisLine) {
+                tallestHeightThisLine = pulledComp.getPreferredH() + 8;
+            }
+            
+            thisLineWidth += pulledComp.getPreferredW();
+            if(thisLineWidth + pulledComp.getPreferredW() > com.sun.lwuit.Display.getInstance().getDisplayWidth()) {
+                thisLineWidth = 0;
+                heightToSet += tallestHeightThisLine;
+                tallestHeightThisLine = 0;
+            }
         }
+        newContainer.setPreferredH(heightToSet - 10);
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseList(Vector tags, int _iStyleMask)
@@ -434,7 +481,6 @@ public class HTMLParser {
         newContainer.layoutContainer();
         newContainer.invalidate();
         newContainer.layoutContainer();
-        
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseParagraph(Vector tags, int _iStyleMask)
