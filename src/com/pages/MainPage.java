@@ -17,6 +17,7 @@ import com.components.HTMLComponentItem;
 import com.Utilities;
 import com.JsonObject;
 import com.components.LinkButton;
+import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Canvas;
 /**
  *
@@ -41,9 +42,11 @@ public class MainPage extends BasePage {
             return;
         }
         try {
+            
             //Create dynamic components here.
                      
             m_cSearchTextField = (TextField)mainMIDlet.getBuilder().findByName("SearchTextField", m_cHeaderContainer);
+            m_cSearchTextField.setHandlesInput(true);
             m_cSearchButton = (Button)mainMIDlet.getBuilder().findByName("SearchIconButton", m_cHeaderContainer);            
             if(m_cSearchButton != null) {
                 m_cSearchButton.setVisible(false);
@@ -53,16 +56,21 @@ public class MainPage extends BasePage {
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
                         TextField myText = (TextField)ev.getComponent();
-                        if(ev.getKeyEvent() == Canvas.LEFT) {
-                            m_cSearchButton.requestFocus();
-                        } else {
-                            if(!Display.getInstance().editingText) {
-                                Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
-                            }
+                        if(!Display.getInstance().editingText) {
+                            Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
                         }
                         System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
+                
+                m_cSearchTextField.addDataChangeListener(new DataChangedListener() {
+                    public void dataChanged(int i, int i1) {
+                        if(m_cSearchTextField.getText().indexOf('\n') > -1) {
+                            performSearch();
+                        }
+                    }
+                });
+                
                 m_cSearchTextField.setNextFocusLeft(m_cSearchButton);
                 m_cSearchTextField.setNextFocusUp(null);
 
@@ -152,13 +160,7 @@ public class MainPage extends BasePage {
             case COMMAND_SEARCHBUTTON:
                 //TODO: Network connection to get "did you mean" items.
                 if(m_cSearchButton != null && m_cSearchButton.isVisible()) {
-                    String text = "";
-                    if(m_cSearchTextField != null) {
-                        text = m_cSearchTextField.getText();
-                    }
-                    if(text.length() > 0) {
-                        mainMIDlet.setCurrentPage(new ArticlePage(text, true));
-                    }
+            performSearch();
                 }
                 break;
             case COMMAND_IMAGE:
@@ -192,6 +194,16 @@ public class MainPage extends BasePage {
                 break;
         }
     } //end actionPerformed(ActionEvent ae)
+
+    private void performSearch() {
+        String text = "";
+        if(m_cSearchTextField != null) {
+            text = m_cSearchTextField.getText();
+        }
+        if(text.length() > 0) {
+            mainMIDlet.setCurrentPage(new ArticlePage(text, true));
+        }
+    }
     
     public void refreshPage() {        
         m_cForm.addShowListener(new ActionListener() {

@@ -39,6 +39,7 @@ public class SearchPage extends BasePage {
             //Create dynamic components here.
             
             m_cSearchTextField = (TextField)mainMIDlet.getBuilder().findByName("SearchTextField", m_cHeaderContainer);
+            m_cSearchTextField.setHandlesInput(true);
             m_cSearchButton = (Button)mainMIDlet.getBuilder().findByName("SearchIconButton", m_cHeaderContainer);            
             if(m_cSearchButton != null) {
                 m_cSearchButton.setVisible(false);
@@ -47,19 +48,19 @@ public class SearchPage extends BasePage {
                 m_cSearchTextField.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ev) {
                         TextField myText = (TextField)ev.getComponent();
-                        if(ev.getKeyEvent() == Canvas.LEFT) {
-                            m_cSearchButton.requestFocus();
-                        } else {
                             if(!Display.getInstance().editingText) {
                                 Display.getInstance().editString(ev.getComponent(), myText.getMaxSize(), myText.getConstraint(), myText.getText());
-                            }
                         }
-                        System.out.println("test: "+ev.getKeyEvent());
                     }
                 });
                 
                 m_cSearchTextField.addDataChangeListener(new DataChangedListener()  {
                     public void dataChanged(int i, int i1) {
+                        
+                        if(m_cSearchTextField.getText().indexOf('\n') > -1) {
+                            performSearch();
+                        }
+                        
                         if(m_cSearchTextField != null) {
                             String message = m_cSearchTextField.getText();
                             if(m_cSearchButton != null) {
@@ -145,16 +146,7 @@ public class SearchPage extends BasePage {
                 }
                 break;                
             case COMMAND_SEARCHBUTTON:
-                //TODO: Network connection to get "did you mean" items. 
-                if(m_cSearchButton != null && m_cSearchButton.isVisible()) {
-                    String text = "";
-                    if(m_cSearchTextField != null) {
-                        text = m_cSearchTextField.getText();
-                    }
-                    if(text.length() > 0) {
-                        mainMIDlet.setCurrentPage(new ArticlePage(text, true));
-                    }
-                }
+        performSearch();
                 break;
             default:
                 if(commandId >= m_iFirstBookmarkNum){
@@ -167,6 +159,19 @@ public class SearchPage extends BasePage {
                 break;
         }
     }//end actionPerformed(ActionEvent ae)
+
+    private void performSearch() {
+        //TODO: Network connection to get "did you mean" items. 
+        if(m_cSearchButton != null && m_cSearchButton.isVisible()) {
+            String text = "";
+            if(m_cSearchTextField != null) {
+                text = m_cSearchTextField.getText();
+            }
+            if(text.length() > 0) {
+                mainMIDlet.setCurrentPage(new ArticlePage(text, true));
+            }
+        }
+    }
     
     public void refreshPage() {        
         m_cForm.addShowListener(new ActionListener() {
