@@ -136,7 +136,7 @@ public class LanguageDialog extends BasePage
                     String text = comp.getTag();
                     String lang = text.substring(0, text.indexOf(" ")).trim();
                     text = text.substring(text.indexOf(" - ") + 3);
-                    System.out.println("requesting article: "+text);
+                    //System.out.println("requesting article: "+text);
                     m_cDialog.dispose();
                     mainMIDlet.dialogBack();
                     Thread.yield();

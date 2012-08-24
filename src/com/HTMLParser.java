@@ -437,7 +437,7 @@ public class HTMLParser {
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
         for(int i = 0; i < compVec.size(); i++) {
-            System.out.println("para: "+compVec.elementAt(i));
+            //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);
             
             if(pulledComp instanceof Container && ((Container)pulledComp).getComponentCount() > 1) {
@@ -565,7 +565,7 @@ public class HTMLParser {
         }
         setLayout(newContainer, -1);
         
-        System.out.println("row width, height: "+newContainer.getPreferredW()+", "+newContainer.getPreferredH()+" = "+newContainer.getHeight());
+        //System.out.println("row width, height: "+newContainer.getPreferredW()+", "+newContainer.getPreferredH()+" = "+newContainer.getHeight());
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseTableRow(Vector tags, int _iStyleMask)

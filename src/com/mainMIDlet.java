@@ -212,7 +212,7 @@ public class mainMIDlet extends MIDlet
     
     public static void pageBack() {
         if(m_vScreenStack.size() < 2) {//Don't go back if we have nothing to go back to.
-            System.out.println("nothing to go back to");
+            //System.out.println("nothing to go back to");
             return;
         }
         //System.out.println("wanting to show: " +newLast.getType());
@@ -260,7 +260,7 @@ public class mainMIDlet extends MIDlet
                 textArea.setText(finalText);
                 about.show(10, 10, 10, 10, false);
             }else{
-                System.out.println("failed: "+textArea+", "+about);
+                //System.out.println("failed: "+textArea+", "+about);
             }
         }catch (Exception e ) {
             e.printStackTrace();

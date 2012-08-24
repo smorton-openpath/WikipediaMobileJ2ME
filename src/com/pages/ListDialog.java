@@ -137,7 +137,7 @@ public class ListDialog extends BasePage
                     if(comp == null)
                         break;
                     String text = comp.getTag();
-                    System.out.println("requesting article: "+text);
+                    //System.out.println("requesting article: "+text);
                     m_cDialog.dispose();
                     mainMIDlet.dialogBack();
                     Thread.yield();
@@ -196,7 +196,7 @@ public class ListDialog extends BasePage
                  }
                      
             }
-            System.out.println("checking numbs: "+m_iMaxResults+", "+vItems.size()+", "+m_iCurrentOffset);
+            //System.out.println("checking numbs: "+m_iMaxResults+", "+vItems.size()+", "+m_iCurrentOffset);
             if(m_iCurrentOffset + vItems.size() < m_iMaxResults) {
                 Button nextButton = new Button();
                 nextButton.setUIID("Button");

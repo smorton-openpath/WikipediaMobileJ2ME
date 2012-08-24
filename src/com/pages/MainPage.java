@@ -173,7 +173,7 @@ public class MainPage extends BasePage {
                         String url = "http:"+((LinkButton)oComp).getLink();
                         int sizeIdx = url.indexOf("px");//TODO: make this work better without giving errors.
                         
-                        System.out.println("url: "+url);
+                        //System.out.println("url: "+url);
                         mainMIDlet.setCurrentPage(new ImageDialog(
                                 ((LinkButton)oComp).getOtherInfo(), ((LinkButton)oComp).getText(), url));
                     }
