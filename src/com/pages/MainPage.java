@@ -94,7 +94,11 @@ public class MainPage extends BasePage {
                                     m_cSearchButton.setVisible(true);
                                 }else 
                                     m_cSearchButton.setVisible(false);
-                            }                            
+                            }
+                            if(message.indexOf('\n') > -1) {
+                                m_cSearchTextField.setText(message.trim());
+                                performSearch();
+                            }
                         }
                         m_cForm.repaint();
                     }
