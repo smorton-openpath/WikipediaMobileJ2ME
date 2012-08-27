@@ -243,14 +243,14 @@ public class Utilities {
         int iFullLength = _sText.length();
         while (!done && iCurrentIdx < iFullLength) {
             int nextIdx = 0;
-            String text = "";
+            StringBuffer text = new StringBuffer();
             if(_sText.charAt(iCurrentIdx) == '<') {//parse tags
                 int tagIdx = _sText.indexOf(' ', iCurrentIdx);
                 nextIdx = _sText.indexOf('>', iCurrentIdx) + 1;
                 if(nextIdx == -1) {//Something went massively wrong if we have no end >
                     return vOutput;
                 }
-                text += _sText.substring(iCurrentIdx, nextIdx);
+                text.append(_sText.substring(iCurrentIdx, nextIdx));
             }else {//parse text
                 int breakItem = 0;
                 for(int i = 0; i < breakItems.length; i++) {
@@ -266,9 +266,9 @@ public class Utilities {
                     nextIdx++;
                 }
                 if(nextIdx > 0) {
-                    text += _sText.substring(iCurrentIdx, nextIdx);
+                    text.append(_sText.substring(iCurrentIdx, nextIdx));
                 }else {
-                    text += _sText;
+                    text.append(_sText);
                     nextIdx = _sText.length() - 1;
                 }
             }
@@ -278,7 +278,7 @@ public class Utilities {
             }
             if(text.length() > 0) {
                 //System.out.println("adding: "+text);
-                vOutput.addElement(text);
+                vOutput.addElement(text.toString());
             }
             iCurrentIdx = nextIdx;
         }
