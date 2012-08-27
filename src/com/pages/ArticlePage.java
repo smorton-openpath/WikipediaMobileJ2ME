@@ -240,7 +240,7 @@ public class ArticlePage extends BasePage {
                         try {
                             m_cFailDialog = new Dialog();
                             if(m_cFailDialog != null) {
-                                String OkSk = mainMIDlet.getString("ok");
+                                String OkSk = mainMIDlet.getString("OKLabel");
                                 Command commands = new Command(OkSk);
                                 m_cFailDialog.addCommand(new Command(OkSk){
                                     public void actionPerformed(ActionEvent ev) {

@@ -152,6 +152,8 @@ public class mainMIDlet extends MIDlet
         Object item = m_hMainLocale.get(_sKey);
         if(item != null) {
             text = item.toString();
+        }else {
+            System.out.println("missing string: "+_sKey);
         }
         return text;
     }//end getString(String _sKey)
@@ -159,10 +161,8 @@ public class mainMIDlet extends MIDlet
     private static void pullL10N(String _sLangCode) {
         
         try {
-        //throws an exception if all of the strings aren't present
-            if(_sLangCode.equalsIgnoreCase("en")) {
-                m_hMainLocale = getResources().getL10N("WikiLoc","en");
-            }
+            //throws an exception if all of the strings aren't present
+            m_hMainLocale = getResources().getL10N("WikiLoc",_sLangCode);
         }catch(Exception e) {
             m_hMainLocale = getResources().getL10N("WikiLoc","en");
         }
@@ -248,7 +248,7 @@ public class mainMIDlet extends MIDlet
             Dialog about = (Dialog)getBuilder().createContainer(getResources(), "AboutDialog");
             about.setScrollableY(true);
             TextArea textArea = (TextArea)getBuilder().findByName("AboutText", about);
-            String OkSk = mainMIDlet.getString("ok");
+            String OkSk = mainMIDlet.getString("OKLabel");
             about.addCommand(new Command(OkSk));
             
             String title = mainMIDlet.getString("AppTitle");
