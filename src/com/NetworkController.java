@@ -171,7 +171,8 @@ public class NetworkController {
         url.append("prop=text%7Csections%7Cnormalizedtitle");
         url.append("&");
         url.append("sectionprop=toclevel%7Cline%7Cnumber");
-
+        
+        url.append("&devicememory=" + Runtime.getRuntime().totalMemory());
         
         if(_sSection == null || _sSection.length() == 0) {
             _sSection = "0";
