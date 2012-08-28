@@ -20,6 +20,8 @@ public class NetworkController {
     private static NetworkThread m_tNetThread = null;
     public static final int SEARCH_LIMIT = 10;
     
+//    static MemoryDisplayer md;
+    
     public static final int PARSE_SEARCH = 0;
     public static final int FETCH_ARTICLE = 1;
     public static final int SEARCH_LANGUAGES = 2;
@@ -53,12 +55,47 @@ public class NetworkController {
             } else {
                 m_cLoadingDialog.show(height/3, height/3, width/4, width/4, false, false);
             }
+            
+//            md = new MemoryDisplayer(m_cLoadingDialog);
+//            Display.getInstance().callSerially(md);
 
             Thread.yield();
             
         }
+        
         //System.out.println("finished showing loading");
     }//end showLoadingDialog()
+    
+//    private static class MemoryDisplayer extends Thread {
+//
+//        Dialog dia;
+//        public boolean shouldRun = false;
+//        String memString;
+//        Runtime runtime = Runtime.getRuntime();
+//        
+//        public void run() {
+//            System.out.println("   ***   in MemoryDisplayer.run()");
+//            shouldRun = true;
+//            while(shouldRun) {
+//                memString = " " + runtime.totalMemory() + " used / " + runtime.freeMemory() + " free.";
+//                System.out.println("   ***   in MemoryDisplayer.run() loop : " + memString);
+//                Label l = (Label)mainMIDlet.getBuilder().findByName("memlabel", dia);
+//                l.setText(memString);
+//                dia.repaint();
+//                try {
+//                    System.out.println("   ***   in MemoryDisplayer.run() try/catch");
+//                    Thread.yield();
+//                } catch(Exception e) {
+//                    System.out.println("   ***   in MemoryDisplayer.run() CATCH!!!");
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        
+//        public MemoryDisplayer(Dialog d) {
+//            dia = d;
+//        }        
+//    }
     
     public static void hideLoadingDialog() {
         if(m_cLoadingDialog != null && m_cLoadingDialog.isVisible()) {
@@ -66,6 +103,7 @@ public class NetworkController {
             m_cLoadingDialog.dispose();
             m_cLoadingDialog = null;
             m_cLoadingSlider = null;
+//            md.shouldRun = false;
             Thread.yield();
         }
         //System.out.println("finished disposing loading");

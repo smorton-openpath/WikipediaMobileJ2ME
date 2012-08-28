@@ -38,6 +38,7 @@ public class HTMLParser {
     private static final int STYLE_SHOWTABLES = 16;
     private static final int STYLE_INTABLE = 32;
     
+    private static boolean lowOnMemory = false;
     
     private static int TABLE_WIDTH = 240;
     private static final int TABLE_WIDTH_MODIFIER = 2;
@@ -61,6 +62,7 @@ public class HTMLParser {
 //      Vector vComponents = chopHTMLString(_sText);
         Vector tags = Utilities.tokenizeString(_sText);
         _sText = null;
+        System.gc();
         return parseHtml(tags, tableVector, _bShowTables);
     }//end parseHtml(String _sText, boolean _bShowTables)
     
@@ -99,7 +101,16 @@ public class HTMLParser {
                     cLabelContainer = new Container();
                     cTextComp.addComponent(cLabelContainer);
                 }
+//                try {
                 cLabelContainer.addComponent((Component)oComp);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    if(oComp instanceof Label) {
+//                        System.out.println(" 000 and the label was " + ((Label) oComp).getText());
+//                    } else {
+//                        System.out.println(" 000 " + oComp.toString());
+//                    }
+//                }
                 addComp = false;
             }else {
                 cLabelContainer = null;
@@ -150,6 +161,8 @@ public class HTMLParser {
     static int thisWordCount = 0;
     private static Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
         
+        System.gc();
+        
         nestedDepth++;
         //System.out.println("   ...depth: "+nestedDepth);
         Vector components = new Vector();
@@ -178,7 +191,6 @@ public class HTMLParser {
                 } else if( baseTag.equalsIgnoreCase("b")) {
                     components.addElement(parseBold(_vTags, _iStyleMask));
                 } else if( baseTag.equalsIgnoreCase("br") || baseTag.equalsIgnoreCase("hr")) {
-                    
                     components.addElement(parseText(" \n", _iStyleMask));
                     _vTags.removeElementAt(0);
                 } else if(baseTag.equalsIgnoreCase("h2")) {
@@ -193,7 +205,16 @@ public class HTMLParser {
                 } else if(baseTag.equalsIgnoreCase("ol")) {
                     components.addElement(parseOrderedList(_vTags, _iStyleMask));
                 }else if(baseTag.equalsIgnoreCase("p")) {
-                   components.addElement(parseParagraph(_vTags, _iStyleMask));
+                    System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
+                    System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
+                    if(Runtime.getRuntime().freeMemory() > 100000) {
+                        components.addElement(parseParagraph(_vTags, _iStyleMask));
+                    } else {
+                        lowOnMemory = false;
+                        Label ellipsis = new Label();
+                        ellipsis.setText("...");
+                        components.addElement(ellipsis);
+                    }
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
                     components.addElement(parseTable(_vTags, _iStyleMask));

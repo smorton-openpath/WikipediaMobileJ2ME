@@ -495,21 +495,22 @@ public class ArticlePage extends BasePage {
                         if(sText != null && !(sText.length() < 1)) {
                             oSection.cleanChildren();
                             oSection = null;
-                            sText = Utilities.decodeEverything(sText);
-                            Vector tableVec = HTMLParser.takeOutTables(sText);
-                            sText = HTMLParser.takeOutTableString(sText, tableVec);
-                            Vector vTags = Utilities.tokenizeString(sText);
-                            sText = "";
-                            System.gc();
-                            Thread.yield();
+                            //sText = Utilities.decodeEverything(sText);
+                            sText = Utilities.stripSlash(sText);
+//                            Vector tableVec = HTMLParser.takeOutTables(sText);
+//                            sText = HTMLParser.takeOutTableString(sText, tableVec);
+//                            Vector vTags = Utilities.tokenizeString(sText);
+//                            sText = "";
+//                            System.gc();
+//                            Thread.yield();
+//                            //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
+//                            sectionItem.addText(vTags, tableVec);
+//                            tableVec.removeAllElements();
+//                            tableVec = null;
+//                            vTags.removeAllElements();
+//                            vTags = null;
                             //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
-                            sectionItem.addText(vTags, tableVec);
-                            tableVec.removeAllElements();
-                            tableVec = null;
-                            vTags.removeAllElements();
-                            vTags = null;
-                            /*System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
-                            sectionItem.addText(sText);*/
+                            sectionItem.addText(sText);
                         }
                     }//end if(cSectionComp != null)
                 }
