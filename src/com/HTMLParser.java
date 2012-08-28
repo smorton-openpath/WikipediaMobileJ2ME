@@ -208,12 +208,16 @@ public class HTMLParser {
                     System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
                     System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
                     if(Runtime.getRuntime().freeMemory() > 100000) {
+                        System.out.println("  --- Memory is good!");
                         components.addElement(parseParagraph(_vTags, _iStyleMask));
                     } else {
-                        lowOnMemory = false;
+                        lowOnMemory = true;
+                        thisWordCount = 61;
+                        System.out.println("  --- Memory is low...");
                         Label ellipsis = new Label();
                         ellipsis.setText("...");
                         components.addElement(ellipsis);
+                        _vTags.removeElementAt(0);
                     }
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
@@ -238,7 +242,7 @@ public class HTMLParser {
                 Component text = parseText(tag, _iStyleMask);
                 if(text != null) {
                     thisWordCount++;
-                    if(mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
+                    if(lowOnMemory || mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
                         if(thisWordCount < 60) {
                             components.addElement(text);
                         } else if(thisWordCount == 60) {
