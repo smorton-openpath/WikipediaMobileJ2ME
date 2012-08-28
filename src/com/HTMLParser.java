@@ -48,10 +48,21 @@ public class HTMLParser {
     private static Font m_oFontBold = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD , Font.SIZE_MEDIUM);
     private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_SMALL);
     private static Font m_oFontBoldItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD | Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
+
+    private static void checkMemory() {
+        if(Runtime.getRuntime().freeMemory() > 600000) {
+            //System.out.println("   ---   in checkMemory() and setting false");
+            lowOnMemory = false;
+        } else {
+            //System.out.println("   ---   in checkMemory() and setting true");
+            lowOnMemory = true;
+        }
+    }
     
     public HTMLParser() {
     }
     public static Component parseHtml(String _sText, boolean _bShowTables) {
+        checkMemory();
         if(_sText == null) {            
             return new Container();
         }
@@ -205,19 +216,20 @@ public class HTMLParser {
                 } else if(baseTag.equalsIgnoreCase("ol")) {
                     components.addElement(parseOrderedList(_vTags, _iStyleMask));
                 }else if(baseTag.equalsIgnoreCase("p")) {
-                    System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
-                    System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
-                    if(Runtime.getRuntime().freeMemory() > 100000) {
-                        System.out.println("  --- Memory is good!");
+                    checkMemory();
+                    //System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
+                    //System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
+                    if(!lowOnMemory) {
+                        //System.out.println("  --- Memory is good!");
                         components.addElement(parseParagraph(_vTags, _iStyleMask));
                     } else {
-                        lowOnMemory = true;
                         thisWordCount = 61;
-                        System.out.println("  --- Memory is low...");
+                        //System.out.println("  --- Memory is low...");
                         Label ellipsis = new Label();
                         ellipsis.setText("...");
                         components.addElement(ellipsis);
                         _vTags.removeElementAt(0);
+                        System.gc();
                     }
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
@@ -243,12 +255,22 @@ public class HTMLParser {
                 if(text != null) {
                     thisWordCount++;
                     if(lowOnMemory || mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
+                        if(lowOnMemory) {
+                            //System.out.println("text mem bad");
+                        } else {
+                            //System.out.println("must be over sixty");
+                        }
                         if(thisWordCount < 60) {
                             components.addElement(text);
+                            //System.out.println("text mem bad, one");
                         } else if(thisWordCount == 60) {
+                            //System.out.println("text mem bad, two");
                             components.addElement(new Label("..."));
+                        } else {
+                            //System.out.println("text mem bad, three");
                         }
                     } else {
+                        //System.out.println("text mem good");
                         components.addElement(text);
                     }
                 }
