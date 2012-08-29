@@ -94,7 +94,11 @@ public class MainPage extends BasePage {
                                     m_cSearchButton.setVisible(true);
                                 }else 
                                     m_cSearchButton.setVisible(false);
-                            }                            
+                            }
+                            if(message.indexOf('\n') > -1) {
+                                m_cSearchTextField.setText(message.trim());
+                                performSearch();
+                            }
                         }
                         m_cForm.repaint();
                     }
@@ -120,13 +124,6 @@ public class MainPage extends BasePage {
     public void updateSoftkeys() {
         int i = 0;m_cForm.removeAllCommands();
         String  str = "";
-        /*if(!mainMIDlet.isTouchEnabled()) {
-            str = mainMIDlet.getString("SearchSK");
-            m_cForm.addCommand(new Command(str, Command_Search), i++);
-            str = mainMIDlet.getString("OkSK");
-            m_cForm.addCommand(new Command(str, COMMAND_OK), i++);
-        }else {
-        }*/
         str = mainMIDlet.getString("StoredPagesSK");
         m_cForm.addCommand(new Command(str, COMMAND_STOREDPAGES), i++);
         str = mainMIDlet.getString("SettingsSK");

@@ -49,7 +49,7 @@ public class SplashPage extends BasePage
                             text.setEditable(false);
                             dialog.addComponent(text);
 
-                            String OkSk = mainMIDlet.getString("ok");
+                            String OkSk = mainMIDlet.getString("OKLabel");
                             Command commands = new Command(OkSk);
                             dialog.addCommand(commands);
                             dialog.show(10, 10, 10, 10, false);

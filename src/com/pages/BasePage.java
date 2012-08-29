@@ -155,7 +155,7 @@ public class BasePage implements ActionListener {
             String netErrorTitle = mainMIDlet.getString("NetErrorTitle");
             m_cFailDialog = new Dialog(netErrorTitle);
             if(m_cFailDialog != null) {
-                String OkSk = mainMIDlet.getString("ok");
+                String OkSk = mainMIDlet.getString("OKLabel");
                 Command commands = new Command(OkSk);
                 m_cFailDialog.addCommand(new Command(OkSk){
                     public void actionPerformed(ActionEvent ev) {

@@ -58,7 +58,7 @@ public class LanguageDialog extends BasePage
             
             //Add softkeys here.
             if(!mainMIDlet.isTouchEnabled()) {
-                String  str = mainMIDlet.getString("OkSK");
+                String  str = mainMIDlet.getString("OKLabel");
                 //mForm.addCommand(new Command(str, Command_Back), Command_Back);
                 m_cDialog.addCommand(new Command(str, COMMAND_OK));
                 

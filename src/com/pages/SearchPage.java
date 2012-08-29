@@ -68,9 +68,6 @@ public class SearchPage extends BasePage {
                 m_cSearchTextField.addDataChangeListener(new DataChangedListener()  {
                     public void dataChanged(int i, int i1) {
                         
-                        if(m_cSearchTextField.getText().indexOf('\n') > -1) {
-                            performSearch();
-                        }
                         
                         if(m_cSearchTextField != null) {
                             String message = m_cSearchTextField.getText();
@@ -80,7 +77,11 @@ public class SearchPage extends BasePage {
                                     m_cSearchButton.setVisible(true);
                                 }else 
                                     m_cSearchButton.setVisible(false);
-                            }                            
+                            }
+                            if(message.indexOf('\n') > -1) {
+                                m_cSearchTextField.setText(message.trim());
+                                performSearch();
+                            }
                         }
                         m_cForm.repaint();
                     }
