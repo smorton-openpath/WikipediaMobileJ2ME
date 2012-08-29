@@ -189,9 +189,9 @@ public class HTMLParser {
                 if(tag.indexOf("/") == 1) {
                     //It's a close tag
                     nestedDepth--;
-                    //System.out.println("   ...depth2: "+nestedDepth);
-                    //System.out.println("      ...closing tag was: " + tag);
-                    //System.out.println("      ...components length was " + components.size());
+                    System.out.println("   ...depth2: "+nestedDepth);
+                    System.out.println("      ...closing tag was: " + tag);
+                    System.out.println("      ...components length was " + components.size());
                     _vTags.removeElementAt(0);
                     System.gc();
                     Thread.yield();
@@ -446,13 +446,20 @@ public class HTMLParser {
         int heightToSet = 20;
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
+        //System.out.println("   ---   got a li, compVec.size is " + compVec.size());
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);            
             newContainer.addComponent(pulledComp);
+            try {
+                //String txt = ((LinkButton) pulledComp).getText();
+                //System.out.println("   ---   ---   " + pulledComp);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             
-            if (pulledComp.getPreferredH() + 8 > tallestHeightThisLine) {
-                tallestHeightThisLine = pulledComp.getPreferredH() + 8;
+            if (pulledComp.getPreferredH() + 12 > tallestHeightThisLine) {
+                tallestHeightThisLine = pulledComp.getPreferredH() + 12;
             }
             
             thisLineWidth += pulledComp.getPreferredW();
@@ -462,11 +469,10 @@ public class HTMLParser {
                 tallestHeightThisLine = 0;
             }
         }//end for(int i = 0; i < compVec.size(); i++)
-        
         newContainer.layoutContainer();
         newContainer.invalidate();
         newContainer.layoutContainer();
-        newContainer.setPreferredH(heightToSet - 10);
+        newContainer.setPreferredH(heightToSet + 15);
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseListLine(Vector tags, int _iStyleMask)
