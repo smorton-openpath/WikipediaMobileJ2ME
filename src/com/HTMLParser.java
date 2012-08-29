@@ -180,8 +180,8 @@ public class HTMLParser {
         
         while(_vTags.size() > 0) {
             String tag = (String) (_vTags.elementAt(0));
-            //System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
-            //System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
+//            System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
+//            System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
@@ -212,6 +212,7 @@ public class HTMLParser {
                 } else if(baseTag.equalsIgnoreCase("img")) {
                     components.addElement(parseImage(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("li")) {
+                    checkMemory();
                    components.addElement(parseListLine(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("ol")) {
                     components.addElement(parseOrderedList(_vTags, _iStyleMask));
