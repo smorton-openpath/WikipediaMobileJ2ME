@@ -75,20 +75,6 @@ public class mainMIDlet extends MIDlet
         if(getResources() == null || getBuilder() == null) {
             //TODO: Something went wrong.  Deal with this.
         }
-        try {
-            String sBaseURL = getString("BaseURL");
-            String sBaseAPI = getString("BaseAPI");
-            if(sBaseURL.length() > 0) {
-                NetworkController.BASE_URL = sBaseURL;
-            }
-            if(sBaseAPI.length() > 0) {
-                NetworkController.WEBAPI = sBaseAPI;
-            }
-            
-        } catch (Exception e)        
-        {
-            e.printStackTrace();
-        }
         //Even if something goes wrong we should still display the splash screen.
         //It is needed as a background for any error messages.
         setCurrentPage(new SplashPage(bHaveNetwork));        

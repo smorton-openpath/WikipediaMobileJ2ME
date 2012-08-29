@@ -10,7 +10,7 @@ import javax.microedition.io.HttpConnection;
  */ 
 public class NetworkController {
     
-    public static String BASE_URL = "http://en.wikipedia.org";
+    public static String BASE_URL = ".wikipedia.org";
     public static String WEBAPI = "/w/api.php";
     public static String APIVERSION = "";
     
