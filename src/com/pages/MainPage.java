@@ -17,6 +17,7 @@ import com.components.HTMLComponentItem;
 import com.Utilities;
 import com.JsonObject;
 import com.components.LinkButton;
+import com.sun.lwuit.util.Resources;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Canvas;
 /**

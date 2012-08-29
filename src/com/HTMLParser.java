@@ -189,9 +189,9 @@ public class HTMLParser {
                 if(tag.indexOf("/") == 1) {
                     //It's a close tag
                     nestedDepth--;
-                    System.out.println("   ...depth2: "+nestedDepth);
-                    System.out.println("      ...closing tag was: " + tag);
-                    System.out.println("      ...components length was " + components.size());
+//                    System.out.println("   ...depth2: "+nestedDepth);
+//                    System.out.println("      ...closing tag was: " + tag);
+//                    System.out.println("      ...components length was " + components.size());
                     _vTags.removeElementAt(0);
                     System.gc();
                     Thread.yield();

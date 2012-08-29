@@ -100,7 +100,8 @@ public class SettingsPage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
-                mainMIDlet.pageBack();
+                //mainMIDlet.pageBack();
+                mainMIDlet.setCurrentPage(new MainPage());
                 break;
             case COMMAND_TERMS:
                 mainMIDlet.setCurrentPage(new ArticlePage("Terms of Use", false, true));
