@@ -48,10 +48,21 @@ public class HTMLParser {
     private static Font m_oFontBold = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD , Font.SIZE_MEDIUM);
     private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_SMALL);
     private static Font m_oFontBoldItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD | Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
+
+    private static void checkMemory() {
+        if(Runtime.getRuntime().freeMemory() > 600000) {
+            //System.out.println("   ---   in checkMemory() and setting false");
+            lowOnMemory = false;
+        } else {
+            //System.out.println("   ---   in checkMemory() and setting true");
+            lowOnMemory = true;
+        }
+    }
     
     public HTMLParser() {
     }
     public static Component parseHtml(String _sText, boolean _bShowTables) {
+        checkMemory();
         if(_sText == null) {            
             return new Container();
         }
@@ -169,8 +180,8 @@ public class HTMLParser {
         
         while(_vTags.size() > 0) {
             String tag = (String) (_vTags.elementAt(0));
-            //System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
-            //System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
+//            System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
+//            System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
@@ -178,9 +189,9 @@ public class HTMLParser {
                 if(tag.indexOf("/") == 1) {
                     //It's a close tag
                     nestedDepth--;
-                    //System.out.println("   ...depth2: "+nestedDepth);
-                    //System.out.println("      ...closing tag was: " + tag);
-                    //System.out.println("      ...components length was " + components.size());
+//                    System.out.println("   ...depth2: "+nestedDepth);
+//                    System.out.println("      ...closing tag was: " + tag);
+//                    System.out.println("      ...components length was " + components.size());
                     _vTags.removeElementAt(0);
                     System.gc();
                     Thread.yield();
@@ -201,19 +212,25 @@ public class HTMLParser {
                 } else if(baseTag.equalsIgnoreCase("img")) {
                     components.addElement(parseImage(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("li")) {
+                    checkMemory();
                    components.addElement(parseListLine(_vTags, _iStyleMask));
                 } else if(baseTag.equalsIgnoreCase("ol")) {
                     components.addElement(parseOrderedList(_vTags, _iStyleMask));
                 }else if(baseTag.equalsIgnoreCase("p")) {
-                    System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
-                    System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
-                    if(Runtime.getRuntime().freeMemory() > 100000) {
+                    checkMemory();
+                    //System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
+                    //System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
+                    if(!lowOnMemory) {
+                        //System.out.println("  --- Memory is good!");
                         components.addElement(parseParagraph(_vTags, _iStyleMask));
                     } else {
-                        lowOnMemory = false;
+                        thisWordCount = 61;
+                        //System.out.println("  --- Memory is low...");
                         Label ellipsis = new Label();
                         ellipsis.setText("...");
                         components.addElement(ellipsis);
+                        _vTags.removeElementAt(0);
+                        System.gc();
                     }
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
@@ -238,13 +255,23 @@ public class HTMLParser {
                 Component text = parseText(tag, _iStyleMask);
                 if(text != null) {
                     thisWordCount++;
-                    if(mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
+                    if(lowOnMemory || mainMIDlet.getCurrentPage().getType() == BasePage.PAGE_MAIN) {
+                        if(lowOnMemory) {
+                            //System.out.println("text mem bad");
+                        } else {
+                            //System.out.println("must be over sixty");
+                        }
                         if(thisWordCount < 60) {
                             components.addElement(text);
+                            //System.out.println("text mem bad, one");
                         } else if(thisWordCount == 60) {
+                            //System.out.println("text mem bad, two");
                             components.addElement(new Label("..."));
+                        } else {
+                            //System.out.println("text mem bad, three");
                         }
                     } else {
+                        //System.out.println("text mem good");
                         components.addElement(text);
                     }
                 }
@@ -420,13 +447,20 @@ public class HTMLParser {
         int heightToSet = 20;
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
+        //System.out.println("   ---   got a li, compVec.size is " + compVec.size());
         for(int i = 0; i < compVec.size(); i++) {
             //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.elementAt(i);            
             newContainer.addComponent(pulledComp);
+            try {
+                //String txt = ((LinkButton) pulledComp).getText();
+                //System.out.println("   ---   ---   " + pulledComp);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             
-            if (pulledComp.getPreferredH() + 8 > tallestHeightThisLine) {
-                tallestHeightThisLine = pulledComp.getPreferredH() + 8;
+            if (pulledComp.getPreferredH() + 12 > tallestHeightThisLine) {
+                tallestHeightThisLine = pulledComp.getPreferredH() + 12;
             }
             
             thisLineWidth += pulledComp.getPreferredW();
@@ -436,11 +470,10 @@ public class HTMLParser {
                 tallestHeightThisLine = 0;
             }
         }//end for(int i = 0; i < compVec.size(); i++)
-        
         newContainer.layoutContainer();
         newContainer.invalidate();
         newContainer.layoutContainer();
-        newContainer.setPreferredH(heightToSet - 10);
+        newContainer.setPreferredH(heightToSet + 15);
         returnVec.addElement(newContainer);
         return returnVec;
     }//end parseListLine(Vector tags, int _iStyleMask)

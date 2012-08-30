@@ -100,7 +100,8 @@ public class SettingsPage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
-                mainMIDlet.pageBack();
+                //mainMIDlet.pageBack();
+                mainMIDlet.setCurrentPage(new MainPage());
                 break;
             case COMMAND_TERMS:
                 mainMIDlet.setCurrentPage(new ArticlePage("Terms of Use", false, true));
@@ -192,7 +193,7 @@ public class SettingsPage extends BasePage {
     }//end checkRefresh()
     
     public void addData(Object _results, int _iResultType) {
-        //System.out.println("results: "+_results);
+        System.out.println("results: "+_results);
         if(m_cContentContainer != null && m_cLanguageContainer == null) {
             m_cLanguageContainer = (Container)mainMIDlet.getBuilder().findByName("LanguageContainer", m_cContentContainer);
         }
@@ -251,10 +252,14 @@ public class SettingsPage extends BasePage {
                 }
                 JsonObject item = (JsonObject)vItems.get(""+i);
                 ListComponentItem listItem = new ListComponentItem(40+i);
-                Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));
-                if(comp != null) {
-                    m_cLanguageContainer.addComponent(comp);
-                    m_hListObjects.put(new Integer(40+i), listItem);
+                try {
+                    Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));
+                    if(comp != null) {
+                        m_cLanguageContainer.addComponent(comp);
+                        m_hListObjects.put(new Integer(40+i), listItem);
+                    }
+                } catch (ClassCastException e) {
+                    continue;
                 }
             }//end for(Enumeration en = vItems.keys(); en.hasMoreElements();i++)
             
