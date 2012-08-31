@@ -329,12 +329,14 @@ public class HTMLParser {
         _iStyleMask += STYLE_LINK;
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         
-        int startImgIdx = tag.indexOf("title=\"")+7;
-        int endImgIdx = tag.indexOf("\"", startImgIdx);
+        int[] indices = getBeginAndEndIndices("title=", tag);
+        int startImgIdx = indices[0];
+        int endImgIdx = indices[1];
         String titleText = tag.substring(startImgIdx, endImgIdx);
 
-        startImgIdx = tag.indexOf("href=\"")+6;
-        endImgIdx = tag.indexOf("\"", startImgIdx);
+        indices = getBeginAndEndIndices("href=", tag);
+        startImgIdx = indices[0];
+        endImgIdx = indices[1];
         String linkText = tag.substring(startImgIdx, endImgIdx);
 
         for(int i = 0; i < compVec.size(); i++) {
@@ -383,13 +385,15 @@ public class HTMLParser {
         String tag = (String) (_vTags.firstElement());
         _vTags.removeElementAt(0);
         //pull out src parameter
-        int startImgIdx = tag.indexOf("src=\"")+5;
-        int endImgIdx = tag.indexOf("\"", startImgIdx);
+        int[] indices = getBeginAndEndIndices("src=", tag);
+        int startImgIdx = indices[0];
+        int endImgIdx = indices[1];
         String srcText = tag.substring(startImgIdx, endImgIdx);
         
         //Pull out alt parameter
-        startImgIdx = tag.indexOf("alt=\"")+5;
-        endImgIdx = tag.indexOf("\"", startImgIdx);
+        indices = getBeginAndEndIndices("alt=", tag);
+        startImgIdx = indices[0];
+        endImgIdx = indices[1];
         String altText = tag.substring(startImgIdx, endImgIdx);
         
         //double check alt text
@@ -401,16 +405,25 @@ public class HTMLParser {
         //pull out height and width
         int width = -1;
         int height = -1;
-        startImgIdx = tag.indexOf("width=\"")+7;
-        if(startImgIdx > -1) {
-            endImgIdx = tag.indexOf("\"", startImgIdx);
-            width = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
-        }
+        
+        try {
+            indices = getBeginAndEndIndices("width=", tag);
+            startImgIdx = indices[0];
+            endImgIdx = indices[1];
+            System.out.println(" parsing image width stuff.  startidx is " + startImgIdx + ", endimgidx is " + endImgIdx);
+            if(startImgIdx > -1) {
+                width = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
+            }
 
-        startImgIdx = tag.indexOf("height=\"")+8;
-        if(startImgIdx > -1) {
-            endImgIdx = tag.indexOf("\"", startImgIdx);
-            height = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
+            indices = getBeginAndEndIndices("height=", tag);
+            startImgIdx = indices[0];
+            endImgIdx = indices[1];
+            if(startImgIdx > -1) {
+                height = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
+            }
+            
+        } catch (NumberFormatException nfe) {
+            width = 100;
         }
         Vector returnVec = new Vector();
         
@@ -878,5 +891,15 @@ public class HTMLParser {
         }
         setLayout(_cComp, -1);
     }//end resetAllTable(Component _cComp)
+    
+    static private int[] getBeginAndEndIndices(String attributeString, String tagString) {
+        int startIdx = tagString.indexOf(attributeString)+(attributeString.length()+1);
+        char which = tagString.charAt(startIdx - 1);
+        int endIdx = tagString.indexOf(which, startIdx);
+        int[] toReturn = new int[2];
+        toReturn[0] = startIdx;
+        toReturn[1] = endIdx;
+        return toReturn;
+    }
 }
 
