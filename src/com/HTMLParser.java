@@ -81,6 +81,8 @@ public class HTMLParser {
     public static Component parseHtml(Vector _vTags, Vector _tableVector, boolean _bShowTables) {
         //System.out.println("!@#$% html Mem start1: "+Runtime.getRuntime().freeMemory());
         int initialParams = 0;
+        
+        thisWordCount = 0;
         if(_bShowTables) {
             initialParams += STYLE_SHOWTABLES;            
         }else {
@@ -283,6 +285,8 @@ public class HTMLParser {
                         } else {
                             //System.out.println("must be over sixty");
                         }
+                        
+                        //System.out.println("text: "+((Label)text).getText());
                         if(thisWordCount < 60) {
                             components.addElement(text);
                             //System.out.println("text mem bad, one");
@@ -294,6 +298,7 @@ public class HTMLParser {
                         }
                     } else {
                         //System.out.println("text mem good");
+                        //System.out.println("text2: "+((Label)text).getText());
                         components.addElement(text);
                     }
                 }
@@ -571,6 +576,7 @@ public class HTMLParser {
         Container newContainer = new Container();
         newContainer.getStyle().setMargin(1, 1, 1, 1);
         newContainer.getStyle().setPadding(1, 1, 0, 0);
+        //System.out.println("in para with: "+compVec.size());
         while(!compVec.isEmpty()) {
             //System.out.println("para: "+compVec.elementAt(i));
             Component pulledComp = (Component)compVec.firstElement();
