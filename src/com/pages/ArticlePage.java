@@ -175,7 +175,7 @@ public class ArticlePage extends BasePage {
                 NetworkController.getInstance().searchArticleLanguages(mainMIDlet.getLanguage(), m_sTitle, null);
                 break;
             case COMMAND_SEARCH:
-                    mainMIDlet.setCurrentPage(new SearchPage());
+                    mainMIDlet.setCurrentPage(new SearchPage(), true);
                 break;
             case COMMAND_SAVEPAGE:
                     //mainMIDlet.setCurrentPage(new SearchPage());
