@@ -274,6 +274,7 @@ public class ArticlePage extends BasePage {
                 {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
+                        clearArticle();
                         //System.out.println("tableButton: "+((LinkButton)oComp).getLink());
                         mainMIDlet.setCurrentPage(new TablePage(((LinkButton)oComp).getText(), ((LinkButton)oComp).getLink()));
                     }
@@ -324,7 +325,8 @@ public class ArticlePage extends BasePage {
         }
     } //end actionPerformed(ActionEvent ae)
     
-    public void refreshPage() {        
+    public void refreshPage() {
+        
         m_cForm.addShowListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 //Putting the refresh in a show listener to make sure the page is ready to refresh.
@@ -339,12 +341,19 @@ public class ArticlePage extends BasePage {
         //addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
+        if(m_cContentContainer == null || m_cContentContainer.getComponentCount() <= 0) {
+            if(m_bIsFoundationPage) {
+                NetworkController.getInstance().fetchTermsOfUse(mainMIDlet.getLanguage(), m_sTitle, m_sCurrentSections);
+            }else {
+                NetworkController.getInstance().fetchArticle(mainMIDlet.getLanguage(), m_sTitle,  m_sCurrentSections);
+            }
+        }
         super.refreshPage();
     }//end checkRefresh()
     
     public void addData(Object _results, int _iResultType) {
         //System.out.println("results: "+_iResultType +", "+_results);
-        System.out.println("!@#$% addData memory: "+Runtime.getRuntime().freeMemory());
+        //System.out.println("!@#$% addData memory: "+Runtime.getRuntime().freeMemory());
         if(_results == null) {
             //We have nothing, make the data call.
             if(_iResultType == NetworkController.PARSE_SEARCH) {
@@ -373,7 +382,7 @@ public class ArticlePage extends BasePage {
                         toAdd[0] = m_sTitle;
                         toAdd[1] = m_sCurrentSections;
                         m_vArticleStack.addElement(toAdd);
-                        System.out.println("pushing: "+toAdd[0]);
+                        //System.out.println("pushing: "+toAdd[0]);
                     }else if (titleAndSections[0].equalsIgnoreCase(m_sTitle)) {
                         m_vArticleStack.removeElementAt(m_vArticleStack.size() - 1);
                     }
@@ -405,9 +414,8 @@ public class ArticlePage extends BasePage {
         Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
         if(m_cContentContainer != null && sections != null && sections.size() > 0)
         {
-            m_cContentContainer.removeAll();
-            m_cContentContainer.invalidate();
-            m_cContentContainer.repaint();
+            clearArticle();
+            
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -495,8 +503,8 @@ public class ArticlePage extends BasePage {
                         if(sText != null && !(sText.length() < 1)) {
                             oSection.cleanChildren();
                             oSection = null;
-                            //sText = Utilities.decodeEverything(sText);
-                            sText = Utilities.stripSlash(sText);
+                            sText = Utilities.decodeEverything(sText);
+                            //sText = Utilities.stripSlash(sText);
                             Vector tableVec = HTMLParser.takeOutTables(sText);
                             sText = HTMLParser.takeOutTableString(sText, tableVec);
                             Vector vTags = Utilities.tokenizeString(sText);
@@ -509,8 +517,8 @@ public class ArticlePage extends BasePage {
                             tableVec = null;
                             vTags.removeAllElements();
                             vTags = null;
-                            //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
-                            sectionItem.addText(sText);
+                            //System.out.println("!@#$% article Mem3: "+Runtime.getRuntime().freeMemory());
+                            //sectionItem.addText(sText);
                         }
                     }//end if(cSectionComp != null)
                 }
@@ -545,7 +553,15 @@ public class ArticlePage extends BasePage {
     public void parseLanguage(Object _results) {
         String realTitle = m_sTitle.replace('_', ' ');
         mainMIDlet.setCurrentPage(new LanguageDialog(realTitle, _results, 0));
-    }//end parseSearch(Object _results)
+    }//end parseSearch(Object _results) 
     
+    public void clearArticle() {
+        //System.out.println("!@#$% clear Mem1: "+Runtime.getRuntime().freeMemory());
+        m_cContentContainer.removeAll();
+        //System.out.println("!@#$% clear Mem2: "+Runtime.getRuntime().freeMemory());
+        m_oComponentList.clear();
+        System.gc();
+        Thread.yield();
+    }//end clearArticle()
     
 }

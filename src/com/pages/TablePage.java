@@ -61,7 +61,9 @@ public class TablePage extends BasePage {
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
+                    //NetworkController.showLoadingDialog();
                     addData(m_sTableText, -1);
+                    //NetworkController.hideLoadingDialog();
                 }
             });
             updateSoftkeys();

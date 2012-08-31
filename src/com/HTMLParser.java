@@ -183,7 +183,7 @@ public class HTMLParser {
         while(_vTags.size() > 0) {
             String tag = (String) (_vTags.elementAt(0));
 //            System.out.println("in parseHtmlTagVector, head tag is " + _vTags.firstElement().toString());
-//            System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
+            //System.out.println("!@#$% html Mem tag: "+tag+", mem: "+Runtime.getRuntime().freeMemory());
             String baseTag = getTagID(tag);
             if( tag.charAt(0) == '<') {
                 // It's a tag!  Parse it as one!
@@ -195,9 +195,10 @@ public class HTMLParser {
 //                    System.out.println("      ...closing tag was: " + tag);
 //                    System.out.println("      ...components length was " + components.size());
                     _vTags.removeElementAt(0);
+                    Vector returnList = flattenVectors(components);
                     System.gc();
                     Thread.yield();
-                    return flattenVectors(components);
+                    return returnList;
                 }
                 if( baseTag.equalsIgnoreCase("a")) {
                     components.addElement(parseLink(_vTags, _iStyleMask));
@@ -398,6 +399,7 @@ public class HTMLParser {
         startImgIdx = indices[0];
         endImgIdx = indices[1];
         String altText = tag.substring(startImgIdx, endImgIdx);
+        System.out.println("image name: "+startImgIdx);
         
         //double check alt text
         if(altText.length() <= 0) {
@@ -463,9 +465,10 @@ public class HTMLParser {
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
         //System.out.println("   ---   got a li, compVec.size is " + compVec.size());
-        for(int i = 0; i < compVec.size(); i++) {
+        while(!compVec.isEmpty()) {
             //System.out.println("para: "+compVec.elementAt(i));
-            Component pulledComp = (Component)compVec.elementAt(i);            
+            Component pulledComp = (Component)compVec.firstElement();
+            compVec.removeElementAt(0);
             newContainer.addComponent(pulledComp);
             try {
                 //String txt = ((LinkButton) pulledComp).getText();
@@ -505,9 +508,12 @@ public class HTMLParser {
         int heightToSet = 0;
         int thisLineWidth = 0;
         int tallestHeightThisLine = 0;
-        for(int i = 0; i < compVec.size(); i++) {
+        int i = -1;
+        while(!compVec.isEmpty()) {
+            i++;
             //System.out.println("para: "+compVec.elementAt(i));
-            Component pulledComp = (Component)compVec.elementAt(i);
+            Component pulledComp = (Component)compVec.firstElement();
+            compVec.removeElementAt(0);
             
             if(pulledComp instanceof Container && ((Container)pulledComp).getComponentCount() > 1) {
                 Component item = ((Container)pulledComp).getComponentAt(0);
@@ -541,9 +547,10 @@ public class HTMLParser {
         Container newContainer = new Container();
         newContainer.getStyle().setMargin(1, 1, 1, 1);
         newContainer.getStyle().setPadding(1, 1, 0, 0);
-        for(int i = 0; i < compVec.size(); i++) {
+        while(!compVec.isEmpty()) {
             //System.out.println("para: "+compVec.elementAt(i));
-            Component pulledComp = (Component)compVec.elementAt(i);            
+            Component pulledComp = (Component)compVec.firstElement();
+            compVec.removeElementAt(0);
             newContainer.addComponent(pulledComp);           
             
         }//end for(int i = 0; i < compVec.size(); i++)
@@ -567,8 +574,9 @@ public class HTMLParser {
             newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             newContainer.setUIID("Table");
             newContainer.setSnapToGrid(true);
-            for(int i = 0; i < compVec.size(); i++) {
-                newContainer.addComponent((Component)compVec.elementAt(i));
+            while(!compVec.isEmpty())  {
+                newContainer.addComponent((Component)compVec.firstElement());
+                compVec.removeElementAt(0);
             }
             newContainer.setWidth(TABLE_WIDTH);
             
@@ -578,18 +586,20 @@ public class HTMLParser {
             }            
         }else if((_iStyleMask & STYLE_INTABLE) == 0){
             String title = "";//
-            //System.out.println("title: "+title +", "+ compVec.firstElement());
             
             //Axthelm - This is ugly code, but I couldn't think of a better way to pull out the first item.
             //Axthelm - we expect the title to be the first item of the first row.
             if(compVec != null && compVec.size() > 0){
-                for(int i = 0; i < compVec.size(); i++) {
+                //System.out.println("title: "+title +", "+ compVec.firstElement());
+                while(!compVec.isEmpty())  {
                     try {
-                        if(compVec.elementAt(i) instanceof Label) {//if first item is a label, use that.
-                            title += ((Label)compVec.elementAt(i)).getText();
+                        if(compVec.firstElement() instanceof Label) {//if first item is a label, use that.
+                            title += ((Label)compVec.firstElement()).getText();
                         }
                     }catch(Exception e) {
+                        break;
                     }
+                    compVec.removeElementAt(0);
                 }
             }//end if(compVec != null && compVec.size() > 0)
             
@@ -627,10 +637,12 @@ public class HTMLParser {
             newContainer.addComponent(pulledComp);
             setLayout(pulledComp, TABLE_WIDTH);
         }else {
-            for(int i = 0; i < compVec.size(); i++) {
-                Component pulledComp = (Component)compVec.elementAt(i);                
+            int size = compVec.size();
+            while(!compVec.isEmpty()) {
+                Component pulledComp = (Component)compVec.firstElement();
+                compVec.removeElementAt(0);
                 newContainer.addComponent( pulledComp);                
-                setLayout(pulledComp, TABLE_WIDTH / compVec.size());              
+                setLayout(pulledComp, TABLE_WIDTH / size);              
             }
         }
         setLayout(newContainer, -1);
@@ -650,8 +662,9 @@ public class HTMLParser {
         compVec = stripVector(compVec);
         
         newContainer.setUIID("TableCell");
-        for(int i = 0; i < compVec.size(); i++) {
-            newContainer.addComponent((Component)compVec.elementAt(i));
+        while(!compVec.isEmpty()) {
+            newContainer.addComponent((Component)compVec.firstElement());
+            compVec.removeElementAt(0);
         }
         setLayout(newContainer, -1);
         returnVec.addElement(newContainer);
@@ -676,9 +689,10 @@ public class HTMLParser {
             newContainer.addComponent(BorderLayout.CENTER, (Component)compVec.elementAt(0));
             //newContainer.addComponent((Component)compVec.elementAt(0));
         }else {
-            for(int i = 0; i < compVec.size(); i++) {
+            while(!compVec.isEmpty()) {
                 //System.out.println("cell: "+compVec.elementAt(i));
-                Component pulledComp = (Component)compVec.elementAt(i);
+                Component pulledComp = (Component)compVec.firstElement();
+                compVec.removeElementAt(0);
                 newContainer.addComponent(pulledComp);
             }
             Label spacer = new Label(" ");
@@ -703,9 +717,10 @@ public class HTMLParser {
         Vector returnVec = new Vector();
         Container newContainer = new Container();
         newContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        for(int i = 0; i < compVec.size(); i++) {
+        while(!compVec.isEmpty()) {
             //System.out.println("para: "+compVec.elementAt(i));
-            newContainer.addComponent((Component)compVec.elementAt(i));
+            newContainer.addComponent((Component)compVec.firstElement());
+            compVec.removeElementAt(0);
         }
         returnVec.addElement(newContainer);
         return returnVec;
@@ -714,15 +729,17 @@ public class HTMLParser {
     private static Vector flattenVectors(Vector _vToFlatten) {
        Vector flattened = new Vector();
         
-        for(int i=0; i<_vToFlatten.size(); i++) {
-            if(_vToFlatten.elementAt(i) instanceof Vector) {
-                Vector innerVec = (Vector) _vToFlatten.elementAt(i);
-                for(int j=0; j<innerVec.size(); j++) {
-                    flattened.addElement(innerVec.elementAt(j));
+        while(!_vToFlatten.isEmpty()) {
+            if(_vToFlatten.firstElement() instanceof Vector) {
+                Vector innerVec = (Vector) _vToFlatten.firstElement();
+                while(!innerVec.isEmpty()) {
+                    flattened.addElement(innerVec.firstElement());
+                    innerVec.removeElementAt(0);
                 }
             } else {
-                flattened.addElement(_vToFlatten.elementAt(i));
+                flattened.addElement(_vToFlatten.firstElement());
             }
+            _vToFlatten.removeElementAt(0);
         }
         _vToFlatten.removeAllElements();
         return flattened;
@@ -734,8 +751,9 @@ public class HTMLParser {
             return returnVec;
         }
         
-        for(int i = 0; i < _vToStrip.size(); i++) {
-            Object element = _vToStrip.elementAt(i);
+        while(!_vToStrip.isEmpty()) {
+            Object element = _vToStrip.firstElement();
+            _vToStrip.removeElementAt(0);
             if(element instanceof Label) {
                 Label labelElement = (Label)element;
                 String text = labelElement.getText();
@@ -750,6 +768,7 @@ public class HTMLParser {
                 returnVec.addElement(element);
             }
         }
+        _vToStrip.removeAllElements();
         
         return returnVec;
     }//end stripVector(Vector _vToStrip)

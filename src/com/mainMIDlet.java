@@ -206,9 +206,9 @@ public class mainMIDlet extends MIDlet
         BasePage last = (BasePage)m_vScreenStack.lastElement();
         m_vScreenStack.removeElementAt(m_vScreenStack.size() - 1);
         last.dispose();
-        getBuilder().back(((BasePage)m_vScreenStack.lastElement()).getForm());
+        getBuilder().back();
         BasePage newLast = (BasePage)m_vScreenStack.lastElement();
-        //newLast.refreshPage();
+        newLast.refreshPage();
         //newLast.updateSoftkeys();
         newLast.showForm();
         Thread.yield();
