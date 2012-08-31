@@ -201,7 +201,25 @@ public class HTMLParser {
                     return returnList;
                 }
                 if( baseTag.equalsIgnoreCase("a")) {
-                    components.addElement(parseLink(_vTags, _iStyleMask));
+                    
+                    checkMemory();
+                    //System.out.println(" --- in p case, memory is " + Runtime.getRuntime().freeMemory());
+                    //System.out.println("  --- (and the nested depth is " + nestedDepth + ")");
+                    if(!lowOnMemory) {
+                        //System.out.println("  --- Memory is good!");
+                        components.addElement(parseLink(_vTags, _iStyleMask));
+                    } else {
+                        thisWordCount = 61;
+                        //System.out.println("  --- Memory is low...");
+                        Label ellipsis = new Label();
+                        ellipsis.setText("...");
+                        components.addElement(ellipsis);
+                        _vTags.removeElementAt(0);
+                        System.gc();
+                        Thread.yield();
+                    }
+                    
+                    
                 } else if( baseTag.equalsIgnoreCase("b")) {
                     components.addElement(parseBold(_vTags, _iStyleMask));
                 } else if( baseTag.equalsIgnoreCase("br") || baseTag.equalsIgnoreCase("hr")) {
