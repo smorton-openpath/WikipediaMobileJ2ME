@@ -336,7 +336,13 @@ public class HTMLParser {
         int[] indices = getBeginAndEndIndices(" title=", tag);
         int startImgIdx = indices[0];
         int endImgIdx = indices[1];
-        String titleText = tag.substring(startImgIdx, endImgIdx);
+        System.out.println("   ---   " + tag);
+        String titleText = new String();
+        try {
+           titleText = tag.substring(startImgIdx, endImgIdx);
+        } catch (Exception e) {
+            titleText = "Link";
+        }
 
         indices = getBeginAndEndIndices(" href=", tag);
         startImgIdx = indices[0];
@@ -473,6 +479,10 @@ public class HTMLParser {
             try {
                 //String txt = ((LinkButton) pulledComp).getText();
                 //System.out.println("   ---   ---   " + pulledComp);
+                if(pulledComp.getName() != null) {
+                    System.out.println(" it's not null! adding 100!");
+                    heightToSet += 100;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
