@@ -74,6 +74,7 @@ public class HTMLParser {
         Vector tags = Utilities.tokenizeString(_sText);
         _sText = null;
         System.gc();
+        Thread.yield();
         return parseHtml(tags, tableVector, _bShowTables);
     }//end parseHtml(String _sText, boolean _bShowTables)
     
@@ -86,6 +87,7 @@ public class HTMLParser {
             tableVector = _tableVector;
         }
         System.gc();
+        Thread.yield();
         Vector vComponents = parseHtmlTagVector(_vTags, initialParams);
         _vTags.removeAllElements();
         _vTags = null;
@@ -171,8 +173,8 @@ public class HTMLParser {
     static int nestedDepth = 0;
     static int thisWordCount = 0;
     private static Vector parseHtmlTagVector(Vector _vTags, int _iStyleMask) {
-        
         System.gc();
+        Thread.yield();
         
         nestedDepth++;
         //System.out.println("   ...depth: "+nestedDepth);
@@ -231,6 +233,7 @@ public class HTMLParser {
                         components.addElement(ellipsis);
                         _vTags.removeElementAt(0);
                         System.gc();
+                        Thread.yield();
                     }
                 } else if(baseTag.equalsIgnoreCase("table")) {
                     //System.out.println("   ---   in parseHtmlTagVector, found a table");
@@ -410,7 +413,6 @@ public class HTMLParser {
             indices = getBeginAndEndIndices("width=", tag);
             startImgIdx = indices[0];
             endImgIdx = indices[1];
-            System.out.println(" parsing image width stuff.  startidx is " + startImgIdx + ", endimgidx is " + endImgIdx);
             if(startImgIdx > -1) {
                 width = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
             }
@@ -601,6 +603,7 @@ public class HTMLParser {
             }
             compVec.removeAllElements();
             System.gc();
+            Thread.yield();
         }
         return returnVec;
     }//end parseTable(Vector tags, int _iStyleMask)
