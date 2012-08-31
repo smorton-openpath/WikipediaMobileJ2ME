@@ -336,7 +336,7 @@ public class HTMLParser {
         int[] indices = getBeginAndEndIndices(" title=", tag);
         int startImgIdx = indices[0];
         int endImgIdx = indices[1];
-        System.out.println("   ---   " + tag);
+        //System.out.println("   ---   " + tag);
         String titleText = new String();
         try {
            titleText = tag.substring(startImgIdx, endImgIdx);
@@ -405,7 +405,7 @@ public class HTMLParser {
         startImgIdx = indices[0];
         endImgIdx = indices[1];
         String altText = tag.substring(startImgIdx, endImgIdx);
-        System.out.println("image name: "+startImgIdx);
+        //System.out.println("image name: "+startImgIdx);
         
         //double check alt text
         if(altText.length() <= 0) {
@@ -476,16 +476,12 @@ public class HTMLParser {
             Component pulledComp = (Component)compVec.firstElement();
             compVec.removeElementAt(0);
             newContainer.addComponent(pulledComp);
-            try {
-                //String txt = ((LinkButton) pulledComp).getText();
-                //System.out.println("   ---   ---   " + pulledComp);
-                if(pulledComp.getName() != null) {
-                    System.out.println(" it's not null! adding 100!");
-                    heightToSet += 100;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                String txt = ((LinkButton) pulledComp).getText();
+//                System.out.println("   ---   ---   " + pulledComp);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
             
             if (pulledComp.getPreferredH() + 12 > tallestHeightThisLine) {
                 tallestHeightThisLine = pulledComp.getPreferredH() + 12;
