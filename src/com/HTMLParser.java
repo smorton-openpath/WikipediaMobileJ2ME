@@ -333,12 +333,12 @@ public class HTMLParser {
         _iStyleMask += STYLE_LINK;
         Vector compVec = flattenVectors(parseHtmlTagVector(_vTags, _iStyleMask));
         
-        int[] indices = getBeginAndEndIndices("title=", tag);
+        int[] indices = getBeginAndEndIndices(" title=", tag);
         int startImgIdx = indices[0];
         int endImgIdx = indices[1];
         String titleText = tag.substring(startImgIdx, endImgIdx);
 
-        indices = getBeginAndEndIndices("href=", tag);
+        indices = getBeginAndEndIndices(" href=", tag);
         startImgIdx = indices[0];
         endImgIdx = indices[1];
         String linkText = tag.substring(startImgIdx, endImgIdx);
@@ -389,13 +389,13 @@ public class HTMLParser {
         String tag = (String) (_vTags.firstElement());
         _vTags.removeElementAt(0);
         //pull out src parameter
-        int[] indices = getBeginAndEndIndices("src=", tag);
+        int[] indices = getBeginAndEndIndices(" src=", tag);
         int startImgIdx = indices[0];
         int endImgIdx = indices[1];
         String srcText = tag.substring(startImgIdx, endImgIdx);
         
         //Pull out alt parameter
-        indices = getBeginAndEndIndices("alt=", tag);
+        indices = getBeginAndEndIndices(" alt=", tag);
         startImgIdx = indices[0];
         endImgIdx = indices[1];
         String altText = tag.substring(startImgIdx, endImgIdx);
@@ -412,14 +412,14 @@ public class HTMLParser {
         int height = -1;
         
         try {
-            indices = getBeginAndEndIndices("width=", tag);
+            indices = getBeginAndEndIndices(" width=", tag);
             startImgIdx = indices[0];
             endImgIdx = indices[1];
             if(startImgIdx > -1) {
                 width = Integer.parseInt(tag.substring(startImgIdx, endImgIdx));
             }
 
-            indices = getBeginAndEndIndices("height=", tag);
+            indices = getBeginAndEndIndices(" height=", tag);
             startImgIdx = indices[0];
             endImgIdx = indices[1];
             if(startImgIdx > -1) {
