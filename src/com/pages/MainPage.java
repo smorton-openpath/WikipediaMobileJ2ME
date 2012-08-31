@@ -160,7 +160,7 @@ public class MainPage extends BasePage {
                 mainMIDlet.getMIDlet().notifyDestroyed();
                 break;
             case COMMAND_STOREDPAGES:
-                mainMIDlet.setCurrentPage(new SearchPage());
+                mainMIDlet.setCurrentPage(new SearchPage(), true);
                 break;
             case COMMAND_SETTINGS:
                 mainMIDlet.setCurrentPage(new SettingsPage());

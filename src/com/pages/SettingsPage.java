@@ -35,6 +35,7 @@ public class SettingsPage extends BasePage {
     Container m_cLanguageContainer = null;
     private int m_iCurrentOffset = 0;
     private String m_sContinue = "";
+    private Vector m_vPrevious = new Vector();
     Hashtable m_hListObjects = new Hashtable();
     public SettingsPage() {
         super("SettingsPageForm", PAGE_SETTINGS);
@@ -114,13 +115,23 @@ public class SettingsPage extends BasePage {
                 mainMIDlet.showAboutDialog();
                 break;
             case COMMAND_NEXT:
-                m_iCurrentOffset += NetworkController.SEARCH_LIMIT;                    
+                m_iCurrentOffset += NetworkController.SEARCH_LIMIT;
                 NetworkController.getInstance().searchLanguages(mainMIDlet.getLanguage(), m_sContinue);
                 break;
             case COMMAND_PREV:
                 if(m_iCurrentOffset >= NetworkController.SEARCH_LIMIT) {
                     m_iCurrentOffset -= NetworkController.SEARCH_LIMIT;
-                    //NetworkController.getInstance().performSearch(mainMIDlet.getLanguage(), m_sSearchText, m_iCurrentOffset);
+                    String next = "";
+                    int iSize = m_vPrevious.size() - 2;
+                    if(iSize >= 0) {
+                        next = (String)m_vPrevious.elementAt(iSize);
+                        while(m_vPrevious.size() > iSize) {
+                            m_vPrevious.removeElement(m_vPrevious.lastElement());
+                        }
+                    }
+                    if(next.length() > 0) {
+                        NetworkController.getInstance().searchLanguages(mainMIDlet.getLanguage(), next);
+                    }
                 }
                 break;
                 
@@ -193,7 +204,7 @@ public class SettingsPage extends BasePage {
     }//end checkRefresh()
     
     public void addData(Object _results, int _iResultType) {
-        System.out.println("results: "+_results);
+        //System.out.println("results: "+_results);
         if(m_cContentContainer != null && m_cLanguageContainer == null) {
             m_cLanguageContainer = (Container)mainMIDlet.getBuilder().findByName("LanguageContainer", m_cContentContainer);
         }
@@ -251,6 +262,9 @@ public class SettingsPage extends BasePage {
                     continue;
                 }
                 JsonObject item = (JsonObject)vItems.get(""+i);
+                if(i == 0) {
+                    m_vPrevious.addElement("language|"+(String)item.get("code"));
+                }
                 ListComponentItem listItem = new ListComponentItem(40+i);
                 try {
                     Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));

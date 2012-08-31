@@ -126,8 +126,8 @@ public class SearchPage extends BasePage {
         String  str = "";
         str = mainMIDlet.getString("HomeSK");
         m_cForm.addCommand(new Command(str, COMMAND_HOME), i++);
-        str = mainMIDlet.getString("BackSK");
-        m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
+        //str = mainMIDlet.getString("BackSK");
+        //m_cForm.addCommand(new Command(str, COMMAND_BACK), i++);
         
     }//end updateSoftkeys()
     
@@ -150,7 +150,8 @@ public class SearchPage extends BasePage {
         switch(commandId) {                
             //Softkeys
             case COMMAND_BACK:
-                mainMIDlet.pageBack();
+                //mainMIDlet.pageBack();
+                mainMIDlet.setCurrentPage(new MainPage(), true);
                 break;
             case COMMAND_HOME:
                 {
