@@ -197,7 +197,7 @@ public class SettingsPage extends BasePage {
     
     private void checkRefresh() {
         NetworkController.hideLoadingDialog();
-        addData(null, NetworkController.PARSE_SEARCH);
+        //addData(null, NetworkController.PARSE_SEARCH);
         Thread.yield();
         
         super.refreshPage();
@@ -208,7 +208,7 @@ public class SettingsPage extends BasePage {
         if(m_cContentContainer != null && m_cLanguageContainer == null) {
             m_cLanguageContainer = (Container)mainMIDlet.getBuilder().findByName("LanguageContainer", m_cContentContainer);
         }
-        if(m_cLanguageContainer == null) {
+        if(m_cLanguageContainer == null || _results == null) {
             return;
         }
         
