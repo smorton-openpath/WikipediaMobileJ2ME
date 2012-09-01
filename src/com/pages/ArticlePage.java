@@ -211,7 +211,7 @@ public class ArticlePage extends BasePage {
                     Component oComp = ae.getComponent();
                     if(oComp instanceof LinkButton) {
                         String url = ((LinkButton)oComp).getLink();
-                        //System.out.println("link: "+url);
+                        System.out.println("link: "+url);
                         int wikiIdx = url.indexOf("/wiki/");
                         if(wikiIdx >= 0) {
                             String title = url.substring(wikiIdx + 6);
