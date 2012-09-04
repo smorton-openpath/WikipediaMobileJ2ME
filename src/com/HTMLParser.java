@@ -24,6 +24,7 @@ import com.sun.lwuit.Button;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Stack;
+import javax.microedition.midlet.MIDlet;
 
 /**
  *
@@ -44,13 +45,14 @@ public class HTMLParser {
     private static final int TABLE_WIDTH_MODIFIER = 2;
     
     private static Vector tableVector = null;
+    private static int minMem = Integer.parseInt(mainMIDlet.getMIDlet().getAppProperty("min-memory"));
     
     private static Font m_oFontBold = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD , Font.SIZE_MEDIUM);
     private static Font m_oFontItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_SMALL);
     private static Font m_oFontBoldItalic = Font.createSystemFont(Font.FACE_SYSTEM, Font.STYLE_BOLD | Font.STYLE_ITALIC, Font.SIZE_MEDIUM);
 
     private static void checkMemory() {
-        if(Runtime.getRuntime().freeMemory() > 600000) {
+        if(Runtime.getRuntime().freeMemory() > minMem) {
             //System.out.println("   ---   in checkMemory() and setting false");
             lowOnMemory = false;
         } else {
