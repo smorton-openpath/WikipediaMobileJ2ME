@@ -43,6 +43,24 @@ Christopher Axthelm (original creator),
 William Knight,
 Eric Honour
 
+---------
+
+BUILDING AND TESTING
+
+* on Windows 7 or 8
+* Install 32-bit JDK 7 from http://www.oracle.com/technetwork/java/javase/downloads/index.html
+** Nokia SDK needs a 32-bit JDK or JRE. 64-bit JDK doesn't currently install on Windows 8.
+* Install NetBeans 7.2 with all options from: http://www.netbeans.org/
+** If you already have NetBeans, you will need to install the Mobility plugin.
+* Install Nokia 1.1 for Java SDK from http://www.developer.nokia.com/Develop/Java/Tools/
+* Open the project in NetBeans.
+* Ff necessary, right-click project and "Resolve Reference Errors"
+** Add J2ME MIDP emulator -> point at Nokia SDK
+* Run application.
+
+The app will run in a Nokia emulator. It seems to include a touchscreen in the
+profile, but note it's a bit tricky to use with the mouse.s
+
 ------------
 
 Copyright (c) 2010-2011 Wikimedia Foundation
