@@ -4,7 +4,6 @@
  */
 package com.pages;
 
-import com.JsonObject;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.*;
 import com.sun.lwuit.Display;
@@ -18,6 +17,8 @@ import com.Utilities;
 import com.components.ListComponentItem;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
+import org.json.me.JSONObject;
 /**
  *
  * @author caxthelm
@@ -102,7 +103,7 @@ public class SettingsPage extends BasePage {
             //Softkeys
             case COMMAND_BACK:
                 //mainMIDlet.pageBack();
-                mainMIDlet.setCurrentPage(new MainPage());
+                mainMIDlet.setCurrentPage(new MainPage(), true);
                 break;
             case COMMAND_TERMS:
                 mainMIDlet.setCurrentPage(new ArticlePage("Terms of Use", false, true));
@@ -215,86 +216,90 @@ public class SettingsPage extends BasePage {
         m_cLanguageContainer.removeAll();
         m_hListObjects.clear();
         m_sContinue = null;
-        Object oQuery = ((JsonObject)_results).get("query-continue");
-        if(oQuery != null && oQuery instanceof JsonObject) {
-            Object oSearchInfo = ((JsonObject)oQuery).get("sitematrix");
-            if(oSearchInfo != null && oSearchInfo instanceof JsonObject) {
-                JsonObject searchObj = (JsonObject)oSearchInfo;
-                m_sContinue = (String)searchObj.get("smcontinue");
+        try {
+            Object oQuery = ((JSONObject)_results).get("query-continue");
+            if(oQuery != null && oQuery instanceof JSONObject) {
+                Object oSearchInfo = ((JSONObject)oQuery).get("sitematrix");
+                if(oSearchInfo != null && oSearchInfo instanceof JSONObject) {
+                    JSONObject searchObj = (JSONObject)oSearchInfo;
+                    m_sContinue = (String)searchObj.get("smcontinue");
+                }
             }
-        }
-        //Previous Button
-        if(m_iCurrentOffset > 0) {
-            Button prevButton = new Button();
-            prevButton.setUIID("Button");
-            String text = mainMIDlet.getString("PrevPage");
-            Command nextPage = new Command(text, COMMAND_PREV);
-            prevButton.setCommand(nextPage);
-            m_cLanguageContainer.addComponent(prevButton);
-        }
+            //Previous Button
+            if(m_iCurrentOffset > 0) {
+                Button prevButton = new Button();
+                prevButton.setUIID("Button");
+                String text = mainMIDlet.getString("PrevPage");
+                Command nextPage = new Command(text, COMMAND_PREV);
+                prevButton.setCommand(nextPage);
+                m_cLanguageContainer.addComponent(prevButton);
+            }
 
-        //List Items
-        //Vector vItems = Utilities.getLanguagesFromJSON((JsonObject)_results);
-        Hashtable vItems = null;
-        oQuery = ((JsonObject)_results).get("sitematrix");
-        //System.out.println("results: "+oQuery);
-        if(oQuery != null && oQuery instanceof Hashtable) {
-            vItems = (Hashtable)oQuery;
-            //int i = 0;
-            int offset = -1;
-            for(Enumeration en = vItems.keys(); en.hasMoreElements();){
-                int tryer = -1;
-                try {//Try-catch to catch any non-numeric objects.  We don't want those.
-                    tryer = Integer.parseInt((String)en.nextElement());
-                }catch(Exception e){
-                    continue;
-                }
-                if(offset == -1 || tryer < offset) {
-                    offset = tryer;
-                }
-            }
-            if(offset < 0) {//if we have nothing valid, just fail out.
-                m_cForm.repaint();
-                return;
-            }
-            for(int i = 0 + offset; i - offset < vItems.size() ; i++) {
-                if(!vItems.containsKey(""+i)) {
-                    continue;
-                }
-                JsonObject item = (JsonObject)vItems.get(""+i);
-                if(i == 0) {
-                    m_vPrevious.addElement("language|"+(String)item.get("code"));
-                }
-                ListComponentItem listItem = new ListComponentItem(40+i);
-                try {
-                    Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));
-                    if(comp != null) {
-                        m_cLanguageContainer.addComponent(comp);
-                        m_hListObjects.put(new Integer(40+i), listItem);
+            //List Items
+            //Vector vItems = Utilities.getLanguagesFromJSON((JsonObject)_results);
+            Hashtable vItems = null;
+            oQuery = ((JSONObject)_results).get("sitematrix");
+            //System.out.println("results: "+oQuery);
+            if(oQuery != null && oQuery instanceof Hashtable) {
+                vItems = (Hashtable)oQuery;
+                //int i = 0;
+                int offset = -1;
+                for(Enumeration en = vItems.keys(); en.hasMoreElements();){
+                    int tryer = -1;
+                    try {//Try-catch to catch any non-numeric objects.  We don't want those.
+                        tryer = Integer.parseInt((String)en.nextElement());
+                    }catch(Exception e){
+                        continue;
                     }
-                } catch (ClassCastException e) {
-                    continue;
+                    if(offset == -1 || tryer < offset) {
+                        offset = tryer;
+                    }
                 }
-            }//end for(Enumeration en = vItems.keys(); en.hasMoreElements();i++)
-            
-        }
+                if(offset < 0) {//if we have nothing valid, just fail out.
+                    m_cForm.repaint();
+                    return;
+                }
+                for(int i = 0 + offset; i - offset < vItems.size() ; i++) {
+                    if(!vItems.containsKey(""+i)) {
+                        continue;
+                    }
+                JSONObject item = (JSONObject)vItems.get(""+i);
+                    if(i == 0) {
+                        m_vPrevious.addElement("language|"+(String)item.get("code"));
+                    }
+                    ListComponentItem listItem = new ListComponentItem(40+i);
+                    try {
+                        Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("code")+" - "+(String)item.get("name")));
+                        if(comp != null) {
+                            m_cLanguageContainer.addComponent(comp);
+                            m_hListObjects.put(new Integer(40+i), listItem);
+                        }
+                    } catch (ClassCastException e) {
+                        continue;
+                    }
+                }//end for(Enumeration en = vItems.keys(); en.hasMoreElements();i++)
 
-        //Next Button
-        if(vItems != null && vItems.size() >= NetworkController.SEARCH_LIMIT 
-                && (m_sContinue != null && m_sContinue.length() > 0))
-        {
-            Button nextButton = new Button();
-            nextButton.setUIID("Button");
-            String text = mainMIDlet.getString("NextPage");
-            Command nextPage = new Command(text, COMMAND_NEXT);
-            nextButton.setCommand(nextPage);
-            m_cLanguageContainer.addComponent(nextButton);
+            }
+
+            //Next Button
+            if(vItems != null && vItems.size() >= NetworkController.SEARCH_LIMIT 
+                    && (m_sContinue != null && m_sContinue.length() > 0))
+            {
+                Button nextButton = new Button();
+                nextButton.setUIID("Button");
+                String text = mainMIDlet.getString("NextPage");
+                Command nextPage = new Command(text, COMMAND_NEXT);
+                nextButton.setCommand(nextPage);
+                m_cLanguageContainer.addComponent(nextButton);
+            }
+            Component first = m_cLanguageContainer.findFirstFocusable();
+            if(first != null) {
+                first.setFocus(true);
+                first.requestFocus();
+            }
         }
-        Component first = m_cLanguageContainer.findFirstFocusable();
-        if(first != null) {
-            first.setFocus(true);
-            first.requestFocus();
-        }
+        catch (Exception e) {
+        }   
         
         m_cForm.repaint();
     }//end addData(Object _results)

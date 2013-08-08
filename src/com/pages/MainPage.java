@@ -15,11 +15,14 @@ import com.mainMIDlet;
 import com.NetworkController;
 import com.components.HTMLComponentItem;
 import com.Utilities;
-import com.JsonObject;
 import com.components.LinkButton;
 import com.sun.lwuit.util.Resources;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Canvas;
+
+import org.json.me.JSONObject;
+import org.json.me.JSONArray;
+
 /**
  *
  * @author caxthelm
@@ -241,8 +244,8 @@ public class MainPage extends BasePage {
     
     public void addData(Object _results, int _iResultType) {
         
-        Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
-        if(m_cContentContainer != null && sections != null && sections.size() > 0)
+        JSONArray sections = Utilities.getSectionsFromJSON((JSONObject)_results);
+        if(m_cContentContainer != null && sections != null && sections.length() > 0)
         {
             Container articleCont = (Container)mainMIDlet.getBuilder().findByName("ArticleBodyTextItem", m_cContentContainer);
             if(articleCont == null) {
@@ -250,15 +253,19 @@ public class MainPage extends BasePage {
                 return;
             }
             articleCont.removeAll();
-            Object oTextItem = sections.firstElement();
-            if(oTextItem instanceof JsonObject) {
-                String sText = (String)((JsonObject)oTextItem).get("text");
-                sText = Utilities.decodeEverything(sText);
-                HTMLComponentItem oHTMLItem = new HTMLComponentItem();                
-                Component cTextComp = oHTMLItem.createComponent(sText);
-                if(cTextComp != null) {
-                    articleCont.addComponent(cTextComp);
+            try {
+                Object oTextItem = sections.get(0);
+                if (oTextItem instanceof JSONObject) {
+                    String sText = (String) ((JSONObject) oTextItem).get("text");
+                    HTMLComponentItem oHTMLItem = new HTMLComponentItem();                
+                    Component cTextComp = oHTMLItem.createComponent(sText);
+                    if(cTextComp != null) {
+                        articleCont.addComponent(cTextComp);
+                    }
                 }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return;
             }
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
         m_cForm.repaint();

@@ -4,6 +4,7 @@
  */
 package com;
 
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
@@ -11,9 +12,12 @@ import java.util.*;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import org.xml.sax.SAXParseException;
+//import javax.xml.parsers.SAXParser;
+//import javax.xml.parsers.SAXParserFactory;
+//import org.xml.sax.SAXParseException;
+
+import org.json.me.JSONObject;
+import org.json.me.JSONException;
 /**
  *
  * @author caxthelm
@@ -30,8 +34,8 @@ public class NetworkThread implements Runnable {
     private String m_sPostData = "";
     private String m_sMethod;
     private int m_iParseStyle;
-    private SAXParser m_oSaxParser = null;
-    private JsonObject m_oResponseJSON = null;
+    //private SAXParser m_oSaxParser = null;
+    private JSONObject m_oResponseJSON = null;
     
     private class NetTimeoutTask extends TimerTask {
         public NetTimeoutTask() {
@@ -71,9 +75,10 @@ public class NetworkThread implements Runnable {
         m_oTimeoutTimer.schedule(m_oTimeoutTask, 45000);
         m_bIsNetDone = false;
         
+        try {
         if(!m_bIsNetDone) {
-            m_oResponseJSON = doConnection(m_sURI, m_sPostData, m_sMethod);
-        
+            doConnection(m_sURI, m_sPostData, m_sMethod);
+            //System.out.println("!@#$% received Json: "+Runtime.getRuntime().freeMemory());
         }    
         if(m_bIsNetDone) {
             m_oTimeoutTimer.cancel();
@@ -83,11 +88,16 @@ public class NetworkThread implements Runnable {
         }
         boolean hasError = false;
         if(m_oResponseJSON != null) {
-            Object error = m_oResponseJSON.get("error");
-            if(error != null) {
-                hasError = true;
+            try {
+                Object error = m_oResponseJSON.get("error");
+                if(error != null) {
+                    hasError = true;
+                }
             }
-        }else {
+            catch (JSONException e) {
+                // It's ok if we don't find this.
+            }
+        } else {
             hasError = true;
         }
         if(hasError){
@@ -104,22 +114,27 @@ public class NetworkThread implements Runnable {
         m_oTimeoutTimer.cancel();
         cleanResponse();
         m_bIsNetDone = true;
-        //System.out.println("!@#$% Net Mem finish3: "+Runtime.getRuntime().freeMemory());        
+        //System.out.println("!@#$% Net Mem finish3: "+Runtime.getRuntime().freeMemory());
+        }
+	    catch (Exception ex) {
+	        ex.printStackTrace();
+	    }
     }//end run()
     
-    public JsonObject doConnection(String _sURL, String _sPostData, String _sMethod) {
+    public JSONObject doConnection(String _sURL, String _sPostData, String _sMethod) {
         OutputStream output = null;
-        InputStream input = null;
+        DataInputStream input = null;
         HttpConnection connector = null;
         long currTime = System.currentTimeMillis();
         long endTime = 0;
         try {
-            try {
-                connector = (HttpConnection) Connector.open(_sURL);
-            }catch (Exception ex) {
-                //System.err.print(ex.toString());
-                ex.printStackTrace();
-            }
+            connector = (HttpConnection) Connector.open(_sURL);
+        }catch (Exception ex) {
+            //System.err.print(ex.toString());
+            ex.printStackTrace();
+        }
+        
+        try {
             if(connector == null) {
                 System.out.println("connector is null");
                 return null;
@@ -142,7 +157,7 @@ public class NetworkThread implements Runnable {
                 //System.err.print("Timeout");
             }
             
-            input = connector.openInputStream();
+            input = connector.openDataInputStream();
             
             /*xmlHandler handler = new xmlHandler();
             try {
@@ -158,8 +173,10 @@ public class NetworkThread implements Runnable {
                 inputStr.append(s);
                 size = input.read(buffer);
             }
-            JsonObject outputJson = (JsonObject)Json.parse(inputStr.toString());
-            return outputJson;
+            m_oResponseJSON = null;
+            m_oResponseJSON = new JSONObject(inputStr.toString());
+            inputStr = null;
+            return m_oResponseJSON;
             //return handler.getNodes();
 
         } 
@@ -172,18 +189,21 @@ public class NetworkThread implements Runnable {
                 try {
                     input.close();
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
             if (output != null) {
                 try {
                     output.close();
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
             if (connector != null) {
                 try {
                     connector.close();
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
         }//end finally
@@ -197,7 +217,7 @@ public class NetworkThread implements Runnable {
     private void cleanResponse() {
         try {
             if(m_oResponseJSON != null) {
-                m_oResponseJSON.cleanChildren();
+                m_oResponseJSON = null;
             }
             System.gc();
         }catch(Exception e) {

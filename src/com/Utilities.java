@@ -15,6 +15,9 @@ import com.sun.lwuit.Label;
 import com.sun.lwuit.Container;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.events.ActionListener;
+
+import org.json.me.JSONObject;
+import org.json.me.JSONArray;
 /**
  *
  * @author caxthelm
@@ -278,94 +281,132 @@ public class Utilities {
             }
             if(text.length() > 0) {
                 //System.out.println("adding: "+text);
-                vOutput.addElement(text.toString());
+                vOutput.addElement(decodeEverything(text.toString()));
             }
             iCurrentIdx = nextIdx;
         }
         return vOutput;
     }//end tokenizeString(String _sText)
     
-    public static Vector getSectionsFromJSON(JsonObject _oJson) {
-        Vector vReturnVec = null;
-        if(_oJson == null)
+    public static JSONArray getSectionsFromJSON(JSONObject _oJson) {
+        JSONArray vReturnVec = null;
+        if(_oJson == null) {
             return null;
+        }
         
-        Object oMobileView = _oJson.get("mobileview");
-        if(oMobileView != null && oMobileView instanceof JsonObject) {
-            Object oSections = ((JsonObject)oMobileView).get("sections");
-            if(oSections != null && oSections instanceof Vector) {
-                vReturnVec = (Vector)oSections;
+        try {
+            Object oMobileView = _oJson.get("mobileview");
+            if(oMobileView != null && oMobileView instanceof JSONObject) {
+                Object oSections = ((JSONObject)oMobileView).get("sections");
+                if(oSections != null && oSections instanceof JSONArray) {
+                    vReturnVec = (JSONArray)oSections;
+                }
             }
         }
+        catch (Exception e) {
+            return null;
+        }
+        
         return vReturnVec;
     }//end getSectionsFromJSON(JsonObject _oJson)
     
-    public static Vector getQueryResultsFromJSON(JsonObject _oJson) {
-        Vector vReturnVec = null;
-        if(_oJson == null)
+    public static JSONArray getQueryResultsFromJSON(JSONObject _oJson) {
+        JSONArray vReturnVec = null;
+        if(_oJson == null) {
             return null;
+        }
         
-        Object oQuery = _oJson.get("query");
-        if(oQuery != null && oQuery instanceof JsonObject) {
-            Object oSearch = ((JsonObject)oQuery).get("search");
-            if(oSearch != null && oSearch instanceof Vector) {
-                vReturnVec = (Vector)oSearch;
+        try {
+            Object oQuery = _oJson.get("query");
+            if(oQuery != null && oQuery instanceof JSONObject) {
+                Object oSearch = ((JSONObject)oQuery).get("search");
+                if(oSearch != null && oSearch instanceof JSONArray) {
+                    vReturnVec = (JSONArray)oSearch;
+                }
             }
         }
+        catch (Exception e) {
+            return null;
+        }
+        
         return vReturnVec;
     }//end getQueryResultsFromJSON(JsonObject _oJson)
     
-    public static Vector getLanguagesFromJSON(JsonObject _oJson) {
-        /*This structure is a little weird. it has base object -> query->pages
-         * 
-         */
-        Vector vReturnVec = null;
-        if(_oJson == null)
+    public static JSONArray getLanguagesFromJSON(JSONObject _oJson) {
+        //This structure is a little weird. it has base object -> query->pages
+
+        JSONArray vReturnVec = null;
+        if(_oJson == null) {
             return null;
+        }
         
-        Object oQuery = _oJson.get("query");
-        if(oQuery != null && oQuery instanceof JsonObject) {
-            Object oPages = ((JsonObject)oQuery).get("pages");
-            if(oPages != null && oPages instanceof JsonObject) {
-                Enumeration pages = ((JsonObject)oPages).elements();
-                while (pages.hasMoreElements()) {
-                    JsonObject page = (JsonObject) pages.nextElement();
-                    if(page.isEmpty()) {
-                        continue;
+        try {
+            Object oQuery = _oJson.get("query");
+            if(oQuery != null && oQuery instanceof JSONObject) {
+                JSONArray oPages = ((JSONObject)oQuery).getJSONArray("pages");
+                if(oPages != null && oPages instanceof JSONArray) {
+                    for (int i = 0; i < oPages.length(); i++) {
+                        JSONObject page = (JSONObject) oPages.getJSONObject(i);
+                        if(page.length() == 0) {
+                            continue;
+                        }
+                        vReturnVec = (JSONArray)page.get("langlinks");
                     }
-                    vReturnVec = (Vector)page.get("langlinks");
                 }
             }
         }
+        catch (Exception e) {
+            return null;
+        }
+        
         return vReturnVec;
-    }//end getSectionsFromJSON(JsonObject _oJson)
+    }//end getLanguagesFromJSON(JsonObject _oJson)
     
-    public static Vector getMainLanguagesFromJSON(JsonObject _oJson) {
-        /*This structure is a little weird. it has base object -> query->pages
-         * 
-         */
-        Vector vReturnVec = null;
+    public static JSONArray getMainLanguagesFromJSON(JSONObject _oJson) {
+        //This structure is a little weird. it has base object -> query->pages
+
+        JSONArray vReturnVec = null;
         if(_oJson == null)
             return null;
         
-        Object oQuery = _oJson.get("sitematrix");
-        if(oQuery != null && oQuery instanceof JsonObject) {
-            Object oPages = ((JsonObject)oQuery).get("pages");
-            if(oPages != null && oPages instanceof JsonObject) {
-                Enumeration pages = ((JsonObject)oPages).elements();
-                while (pages.hasMoreElements()) {
-                    JsonObject page = (JsonObject) pages.nextElement();
-                    if(page.isEmpty()) {
-                        continue;
+        try {
+            Object oQuery = _oJson.get("sitematrix");
+            if(oQuery != null && oQuery instanceof JSONObject) {
+                JSONArray oPages = ((JSONObject)oQuery).getJSONArray("pages");
+                if(oPages != null && oPages instanceof JSONArray) {
+                    for (int i = 0; i < oPages.length(); i++) {
+                        JSONObject page = (JSONObject) oPages.get(i);
+                        if(page.length() == 0) {
+                            continue;
+                        }
+                        vReturnVec = page.getJSONArray("sitematrix");
                     }
-                    vReturnVec = (Vector)page.get("sitematrix");
                 }
             }
         }
+        catch (Exception e) {
+            return null;
+        }
+        
         return vReturnVec;
-    }//end getSectionsFromJSON(JsonObject _oJson)
+    }//end getMainLanguagesFromJSON(JsonObject _oJson)
     
-    public static String getNormalizedTitleFromJSON(JsonObject _oJson) {
-        return ((JsonObject)((JsonObject)_oJson).get("mobileview")).getString("normalizedtitle");
-    }//end getNormalizedTitleFromJSON(JsonObject _oJson)
+    public static String getNormalizedTitleFromJSON(JSONObject _oJson) {
+        try {
+            return ((JSONObject)((JSONObject)_oJson).get("mobileview")).getString("normalizedtitle");
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }//end getNormalizedTitleFromNewJSON(JsonObject _oJson)
+    
+    public static int getContentOffsetFromJSON(JSONObject _oJson) {
+        try {
+            System.out.println("getContentOffsetFromJSON");
+            return Integer.parseInt(((JSONObject)((JSONObject)_oJson).get("mobileview")).getString("continue-offset"));
+        }
+        catch (Exception e) {
+            return 0;
+        }
+    }
 }

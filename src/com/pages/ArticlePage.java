@@ -20,6 +20,8 @@ import java.util.Vector;
 import java.util.Stack;
 import java.util.Hashtable;
 
+import org.json.me.JSONObject;
+import org.json.me.JSONArray;
 /**
  *
  * @author caxthelm
@@ -404,15 +406,15 @@ public class ArticlePage extends BasePage {
     
     public void parseArticle(Object _results) {
         
-        m_sTitle = Utilities.getNormalizedTitleFromJSON((JsonObject)_results);
+        m_sTitle = Utilities.getNormalizedTitleFromJSON((JSONObject)_results);
         if(m_cTitleLabel != null) {
             String realTitle = m_sTitle.replace('_', ' ');
             m_cTitleLabel.setText(realTitle);
         }
         
-
-        Vector sections = Utilities.getSectionsFromJSON((JsonObject)_results);
-        if(m_cContentContainer != null && sections != null && sections.size() > 0)
+        int index = 0;
+        JSONArray sections = Utilities.getSectionsFromJSON((JSONObject)_results);
+        if(m_cContentContainer != null && sections != null && sections.length() > 0)
         {
             clearArticle();
             
@@ -421,132 +423,147 @@ public class ArticlePage extends BasePage {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //Deal with the main article text first.
-            if(!mainMIDlet.m_bUseMainSection) {
-                Object oTextItem = sections.firstElement();
-                if(oTextItem instanceof JsonObject) {
-                    String sText = (String)((JsonObject)oTextItem).get("text");
-                    sText = Utilities.decodeEverything(sText);
-                    HTMLComponentItem oHTMLItem = new HTMLComponentItem();
-                    Component cTextComp = oHTMLItem.createComponent(sText);
-                    sText = "";
-                    if(cTextComp != null) {                   
-                        m_cContentContainer.addComponent(cTextComp);
+
+            try {
+                //Deal with the main article text first.
+                if(!mainMIDlet.m_bUseMainSection) {
+                    Object oTextItem = sections.get(index);
+                    if(oTextItem instanceof JSONObject) {
+                        String sText = (String)((JSONObject)oTextItem).getString("text");
+                        HTMLComponentItem oHTMLItem = new HTMLComponentItem();
+                        Component cTextComp = oHTMLItem.createComponent(sText);
+                        sText = "";
+                        if(cTextComp != null) {                   
+                            m_cContentContainer.addComponent(cTextComp);
+                        }
+                        index++;
+                    }//end if(oTextItem instanceof JsonObject)
+                }
+
+
+                //Add in the other sections
+                //Since we can cascade through sub-sections, we are using an Array to denote which level should get the child.
+                //TODO: There must be a better way to do this.
+                SectionComponentItem[] aSections = new SectionComponentItem[6];
+                int i = 0;
+                while(sections.length() > index) {
+                    System.gc();
+                    Thread.yield();
+                    //System.out.println("!@#$% article Mem: "+Runtime.getRuntime().freeMemory());
+                    //System.out.println(((JSONObject)sections.get(index)).toString());
+                    JSONObject oSection = (JSONObject)sections.get(index);   
+                    index++;
+
+                    String sTitle;
+                    try {
+                        sTitle = (String)oSection.get("line");
                     }
-                    sections.removeElement(oTextItem);
-                }//end if(oTextItem instanceof JsonObject)
-            }
-            
-            
-            //Add in the other sections
-            //Since we can cascade through sub-sections, we are using an Array to denote which level should get the child.
-            //TODO: There must be a better way to do this.
-            SectionComponentItem[] aSections = new SectionComponentItem[6];
-            int i = 0;
-            while(sections.size() > 0) {
-                System.gc();
-                Thread.yield();
-                //System.out.println("!@#$% article Mem: "+Runtime.getRuntime().freeMemory());
-                //System.out.println(sections.elementAt(i));
-                JsonObject oSection = (JsonObject)sections.firstElement();                
-                sections.removeElement(oSection);
-                String sTitle = (String)oSection.get("line");
-                if(i == 0 && (sTitle == null || sTitle.length() <= 0)) {
-                    sTitle = mainMIDlet.getString("Main");
+                    catch (Exception e) {
+                        sTitle = mainMIDlet.getString("Main");
+                    }
+
+                    String sTocLevel;
+                    try {
+                        sTocLevel = oSection.getString("toclevel");
+                    }
+                    catch (Exception e) {
+                        sTocLevel = "1";
+                    }
+
+                    String sNumber = null;
+                    try {
+                        sNumber = oSection.getString("number");
+                    }
+                    catch (Exception e) {
+                    }
+
+                    //String sLevel = oSection.getString("level");
+                    String sID = oSection.getString("id");
+
+                    int arrayLevel = Integer.parseInt(sTocLevel) - 1;//TocLevels begin at 1;
+                    if(arrayLevel == 0 || (arrayLevel > 0 && aSections[arrayLevel - 1] != null 
+                            && aSections[arrayLevel - 1].isActive())) 
+                    {
+                        boolean bActive = false;
+                        String sText = null;
+                        try {
+                            sText = (String)oSection.get("text");
+                            bActive = true;
+                        }
+                        catch (Exception e) {
+                        }
+
+                        SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sTocLevel);
+                        Component cSectionComp = sectionItem.createComponent(sTitle, bActive, Integer.parseInt(sTocLevel));
+                        if(cSectionComp != null) {
+                            if(bActive) {
+                                cSectionComp.requestFocus();
+                                cSectionComp.setFocus(true);
+                            }
+                            m_oComponentList.put(new Integer(40 + i), sectionItem);
+                                //Whatever level we are at we shouldn't have any more sub-levels yet.
+                            for(int j = arrayLevel; j < 5; j++)
+                            {
+                                aSections[j] = null;
+                            }
+                            //set this item into the array and set it to the child of the parent.
+                            aSections[arrayLevel] = sectionItem;
+
+                            //System.out.println(sText);
+
+                            if(arrayLevel == 0) {
+                                m_cContentContainer.addComponent(cSectionComp);
+                            }else {
+                                aSections[arrayLevel - 1].addSubsection(sectionItem);
+                            }
+
+                            if(sText != null && !(sText.length() < 1)) {
+                                oSection = null;
+                                Vector tableVec = HTMLParser.takeOutTables(sText);
+                                sText = HTMLParser.takeOutTableString(sText, tableVec);
+                                Vector vTags = Utilities.tokenizeString(sText);
+                                sText = "";
+                                System.gc();
+                                Thread.yield();
+                                //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
+                                sectionItem.addText(vTags, tableVec);
+                                tableVec.removeAllElements();
+                                tableVec = null;
+                                vTags.removeAllElements();
+                                vTags = null;
+                                //System.out.println("!@#$% article Mem3: "+Runtime.getRuntime().freeMemory());
+                                //sectionItem.addText(sText);
+                            }
+                        }//end if(cSectionComp != null)
+                    }//end if(arrayLevel == 0 || (arrayLevel > 0 && aSections[arrayLevel - 1] != null && aSections[arrayLevel - 1].isActive()))
+                    if(oSection != null) {
+                        oSection = null;
+                    }
+                    i++;
+                }//end while(sections.size() > 0)
+
+                if(m_bIsFoundationPage) {
                 }else {
-                    sTitle = Utilities.decodeEverything(sTitle);
+                    //Button contributors = new Button();
+                    //String contribStr = mainMIDlet.getString("Contributors");
+                    //Command comm = new Command(contribStr, COMMAND_CONTRIBUTORS);
+                    //contributors.setCommand(comm);
+                    //m_cContentContainer.addComponent(contributors);
+                    //TODO: Add contributor section.
                 }
-                
-                String sTocLevel = oSection.getString("toclevel");
-                
-                if(sTocLevel == null || sTocLevel.length() <= 0) {
-                    sTocLevel = "1";
-                }
-                String sNumber = oSection.getString("number");
-                //String sLevel = oSection.getString("level");
-                String sID = oSection.getString("id");
-                
-                int arrayLevel = Integer.parseInt(sTocLevel) - 1;//TocLevels begin at 1;
-                if(arrayLevel == 0 || (arrayLevel > 0 && aSections[arrayLevel - 1] != null 
-                        && aSections[arrayLevel - 1].isActive())) 
-                {
-                    String sText = (String)oSection.get("text");
-                    boolean bActive = false;
-
-                    if(sText != null) {
-                        bActive = true;
-                    }
-                    SectionComponentItem sectionItem = new SectionComponentItem(sTitle, 40 + i, sTocLevel);
-                    Component cSectionComp = sectionItem.createComponent(sTitle, bActive, Integer.parseInt(sTocLevel));
-                    if(cSectionComp != null) {
-                        if(bActive) {
-                            cSectionComp.requestFocus();
-                            cSectionComp.setFocus(true);
-                        }
-                        m_oComponentList.put(new Integer(40 + i), sectionItem);
-                            //Whatever level we are at we shouldn't have any more sub-levels yet.
-                        for(int j = arrayLevel; j < 5; j++)
-                        {
-                            aSections[j] = null;
-                        }
-                        //set this item into the array and set it to the child of the parent.
-                        aSections[arrayLevel] = sectionItem;
-
-                        //System.out.println(sText);
-                        
-                        if(arrayLevel == 0) {
-                            m_cContentContainer.addComponent(cSectionComp);
-                        }else {
-                            aSections[arrayLevel - 1].addSubsection(sectionItem);
-                        }
-                        
-                        if(sText != null && !(sText.length() < 1)) {
-                            oSection.cleanChildren();
-                            oSection = null;
-                            sText = Utilities.decodeEverything(sText);
-                            //sText = Utilities.stripSlash(sText);
-                            Vector tableVec = HTMLParser.takeOutTables(sText);
-                            sText = HTMLParser.takeOutTableString(sText, tableVec);
-                            Vector vTags = Utilities.tokenizeString(sText);
-                            sText = "";
-                            System.gc();
-                            Thread.yield();
-                            //System.out.println("!@#$% article Mem2: "+Runtime.getRuntime().freeMemory());
-                            sectionItem.addText(vTags, tableVec);
-                            tableVec.removeAllElements();
-                            tableVec = null;
-                            vTags.removeAllElements();
-                            vTags = null;
-                            //System.out.println("!@#$% article Mem3: "+Runtime.getRuntime().freeMemory());
-                            //sectionItem.addText(sText);
-                        }
-                    }//end if(cSectionComp != null)
-                }
-                if(oSection != null) {
-                    oSection.cleanChildren();
-                    oSection = null;
-                }
-                i++;
-            }//end while(sections.size() > 0)
-                        
-            if(m_bIsFoundationPage) {
-            }else {
-                /*Button contributors = new Button();
-                String contribStr = mainMIDlet.getString("Contributors");
-                Command comm = new Command(contribStr, COMMAND_CONTRIBUTORS);
-                contributors.setCommand(comm);
-                m_cContentContainer.addComponent(contributors);*/
-                //TODO: Add contributor section.
-            }
-            //if(m_sCurrentSections.equalsIgnoreCase("0")){            
+                //if(m_sCurrentSections.equalsIgnoreCase("0")){            
                 Component first = m_cContentContainer.findFirstFocusable();
                 if(first != null)
                 {
                     first.setFocus(true);
                     first.requestFocus();
                 }
-            //}
+            }
+            catch (Exception e) {
+                return;
+            }
         }//end if(m_cContentContainer != null && sections != null && sections.size() > 0)
+        
         m_cForm.repaint();
     }//end parseArticle(Object _results)
     

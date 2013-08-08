@@ -17,10 +17,12 @@ import java.util.Vector;
 
 import com.Utilities;
 import com.mainMIDlet;
-import com.JsonObject;
 import com.NetworkController;
 import com.components.ComponentItem;
 import com.components.ListComponentItem;
+
+import org.json.me.JSONObject;
+import org.json.me.JSONArray;
 /**
  *
  * @author caxthelm
@@ -154,7 +156,7 @@ public class ListDialog extends BasePage
     
     public void addData(Object _results, int _iResultType) {
         //System.out.println("results: "+_iResultType+", "+_results);
-        if(!(_results instanceof JsonObject)) {
+        if(!(_results instanceof JSONObject)) {
             return;//TODO: do something with the dialog.
         }
         
@@ -170,45 +172,51 @@ public class ListDialog extends BasePage
                 prevButton.setCommand(nextPage);
                 m_cContentContainer.addComponent(prevButton);
             }
-            Object oQuery = ((JsonObject)_results).get("query");
-            if(oQuery != null && oQuery instanceof JsonObject) {
-                Object oSearchInfo = ((JsonObject)oQuery).get("searchinfo");
-                if(oSearchInfo != null && oSearchInfo instanceof JsonObject) {
-                    JsonObject searchObj = (JsonObject)oSearchInfo;
-                    m_iMaxResults = ((Integer)searchObj.get("totalhits")).intValue();
+            
+            try {
+                Object oQuery = ((JSONObject)_results).get("query");
+                if(oQuery != null && oQuery instanceof JSONObject) {
+                    Object oSearchInfo = ((JSONObject)oQuery).get("searchinfo");
+                    if(oSearchInfo != null && oSearchInfo instanceof JSONObject) {
+                        JSONObject searchObj = (JSONObject)oSearchInfo;
+                        m_iMaxResults = ((Integer)searchObj.get("totalhits")).intValue();
+                    }
+                }
+                JSONArray vItems = Utilities.getQueryResultsFromJSON((JSONObject)_results);
+                for(int i = 0; 
+                        i < vItems.length() && i < NetworkController.SEARCH_LIMIT ; i++)
+                {
+                     JSONObject item = (JSONObject)vItems.get(i);
+                     ListComponentItem listItem = new ListComponentItem(40+i);
+
+                     String title = (String)item.get("title");
+                     String text = Utilities.decodeEverything(title);
+                     //System.out.println("test: "+(String)item.get("title")+", "+text);
+
+                     Component comp = listItem.createComponent(text);
+                     if(comp != null) {
+
+                         m_cContentContainer.addComponent(comp);
+                         m_hListObjects.put(new Integer(40+i), listItem);
+                     }
+
+                }
+                //System.out.println("checking numbs: "+m_iMaxResults+", "+vItems.size()+", "+m_iCurrentOffset);
+                if(m_iCurrentOffset + vItems.length() < m_iMaxResults) {
+                    Button nextButton = new Button();
+                    nextButton.setUIID("Button");
+                    String text = mainMIDlet.getString("NextPage");
+                    Command nextPage = new Command(text, COMMAND_NEXT);
+                    nextButton.setCommand(nextPage);
+                    m_cContentContainer.addComponent(nextButton);
+                }
+                Component first = m_cContentContainer.findFirstFocusable();
+                if(first != null) {
+                    first.setFocus(true);
+                    first.requestFocus();
                 }
             }
-            Vector vItems = Utilities.getQueryResultsFromJSON((JsonObject)_results);
-            for(int i = 0; 
-                    i < vItems.size() && i < NetworkController.SEARCH_LIMIT ; i++)
-            {
-                 JsonObject item = (JsonObject)vItems.elementAt(i);
-                 ListComponentItem listItem = new ListComponentItem(40+i);
-                 
-                 String text = Utilities.decodeEverything((String)item.get("title"));
-                 //System.out.println("test: "+(String)item.get("title")+", "+text);
-                 
-                 Component comp = listItem.createComponent(text);
-                 if(comp != null) {
-                     
-                     m_cContentContainer.addComponent(comp);
-                     m_hListObjects.put(new Integer(40+i), listItem);
-                 }
-                     
-            }
-            //System.out.println("checking numbs: "+m_iMaxResults+", "+vItems.size()+", "+m_iCurrentOffset);
-            if(m_iCurrentOffset + vItems.size() < m_iMaxResults) {
-                Button nextButton = new Button();
-                nextButton.setUIID("Button");
-                String text = mainMIDlet.getString("NextPage");
-                Command nextPage = new Command(text, COMMAND_NEXT);
-                nextButton.setCommand(nextPage);
-                m_cContentContainer.addComponent(nextButton);
-            }
-            Component first = m_cContentContainer.findFirstFocusable();
-            if(first != null) {
-                first.setFocus(true);
-                first.requestFocus();
+            catch (Exception e) {
             }
         }//end if(mContentContainer != null)
         m_cDialog.repaint();

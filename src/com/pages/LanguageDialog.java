@@ -17,10 +17,12 @@ import java.util.Vector;
 
 import com.Utilities;
 import com.mainMIDlet;
-import com.JsonObject;
 import com.NetworkController;
 import com.components.ComponentItem;
 import com.components.ListComponentItem;
+
+import org.json.me.JSONObject;
+import org.json.me.JSONArray;
 /**
  *
  * @author caxthelm
@@ -153,66 +155,72 @@ public class LanguageDialog extends BasePage
     
     public void addData(Object _results, int _iResultType) {
         //System.out.println("results: "+_iResultType+", "+_results);
-        if(!(_results instanceof JsonObject)) {
+        if(!(_results instanceof JSONObject)) {
             return;//TODO: do something with the dialog.
         }
-        
+
         if(m_cContentContainer != null) {
             m_cContentContainer.removeAll();
             m_hListObjects.clear();
             m_sContinue = null;
-            Object oQuery = ((JsonObject)_results).get("query-continue");
-            if(oQuery != null && oQuery instanceof JsonObject) {
-                Object oSearchInfo = ((JsonObject)oQuery).get("langlinks");
-                if(oSearchInfo != null && oSearchInfo instanceof JsonObject) {
-                    JsonObject searchObj = (JsonObject)oSearchInfo;
-                    m_sContinue = (String)searchObj.get("llcontinue");
-                }
+            try {
+                    Object oQuery = ((JSONObject)_results).get("query-continue");
+                    if(oQuery != null && oQuery instanceof JSONObject) {
+                        Object oSearchInfo = ((JSONObject)oQuery).get("langlinks");
+                        if(oSearchInfo != null && oSearchInfo instanceof JSONObject) {
+                            JSONObject searchObj = (JSONObject)oSearchInfo;
+                            m_sContinue = (String)searchObj.getString("llcontinue");
+                        }
+                    }
+                    //Previous Button
+                    if(m_iCurrentOffset > 0) {
+                        Button prevButton = new Button();
+                        prevButton.setUIID("Button");
+                        String text = mainMIDlet.getString("PrevPage");
+                        Command nextPage = new Command(text, COMMAND_PREV);
+                        prevButton.setCommand(nextPage);
+                        m_cContentContainer.addComponent(prevButton);
+                    }
+
+                    //List Items
+                    JSONArray vItems = Utilities.getLanguagesFromJSON((JSONObject)_results);
+                    if(vItems == null) {
+                        System.out.println("no resutls: "+_results);
+                        return;
+                    }
+                    for(int i = 0; 
+                            i < vItems.length() && i < NetworkController.SEARCH_LIMIT ; i++)
+                    {
+                         JSONObject item = (JSONObject)vItems.get(i);
+                         ListComponentItem listItem = new ListComponentItem(40+i);
+                         Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("lang")+" - "+(String)item.get("*")));
+                         if(comp != null) {
+
+                             m_cContentContainer.addComponent(comp);
+                             m_hListObjects.put(new Integer(40+i), listItem);
+                         }
+                    }
+
+                    //Next Button
+                    if(vItems.length() >= NetworkController.SEARCH_LIMIT 
+                            && (m_sContinue != null && m_sContinue.length() > 0))
+                    {
+                        Button nextButton = new Button();
+                        nextButton.setUIID("Button");
+                        String text = mainMIDlet.getString("NextPage");
+                        Command nextPage = new Command(text, COMMAND_NEXT);
+                        nextButton.setCommand(nextPage);
+                        m_cContentContainer.addComponent(nextButton);
+                    }
+                    Component first = m_cContentContainer.findFirstFocusable();
+                    if(first != null) {
+                        first.setFocus(true);
+                        first.requestFocus();
+                    }
+
             }
-            //Previous Button
-            if(m_iCurrentOffset > 0) {
-                Button prevButton = new Button();
-                prevButton.setUIID("Button");
-                String text = mainMIDlet.getString("PrevPage");
-                Command nextPage = new Command(text, COMMAND_PREV);
-                prevButton.setCommand(nextPage);
-                m_cContentContainer.addComponent(prevButton);
-            }
-            
-            //List Items
-            Vector vItems = Utilities.getLanguagesFromJSON((JsonObject)_results);
-            if(vItems == null) {
-                System.out.println("no resutls: "+_results);
-                return;
-            }
-            for(int i = 0; 
-                    i < vItems.size() && i < NetworkController.SEARCH_LIMIT ; i++)
-            {
-                 JsonObject item = (JsonObject)vItems.elementAt(i);
-                 ListComponentItem listItem = new ListComponentItem(40+i);
-                 Component comp = listItem.createComponent(Utilities.decodeEverything((String)item.get("lang")+" - "+(String)item.get("*")));
-                 if(comp != null) {
-                     
-                     m_cContentContainer.addComponent(comp);
-                     m_hListObjects.put(new Integer(40+i), listItem);
-                 }
-            }
-            
-            //Next Button
-            if(vItems.size() >= NetworkController.SEARCH_LIMIT 
-                    && (m_sContinue != null && m_sContinue.length() > 0))
-            {
-                Button nextButton = new Button();
-                nextButton.setUIID("Button");
-                String text = mainMIDlet.getString("NextPage");
-                Command nextPage = new Command(text, COMMAND_NEXT);
-                nextButton.setCommand(nextPage);
-                m_cContentContainer.addComponent(nextButton);
-            }
-            Component first = m_cContentContainer.findFirstFocusable();
-            if(first != null) {
-                first.setFocus(true);
-                first.requestFocus();
+            catch (Exception e) {
+
             }
         }//end if(mContentContainer != null)
         m_cDialog.repaint();
