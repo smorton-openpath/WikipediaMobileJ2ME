@@ -49,6 +49,7 @@ public class MainPage extends BasePage {
                      
             m_cSearchTextField = (TextField)mainMIDlet.getBuilder().findByName("SearchTextField", m_cHeaderContainer);
             m_cSearchTextField.setHandlesInput(true);
+            m_cSearchTextField.setHint(mainMIDlet.getString(m_cSearchTextField.getHint()));
             m_cSearchButton = (Button)mainMIDlet.getBuilder().findByName("SearchIconButton", m_cHeaderContainer);            
             if(m_cSearchButton != null) {
                 m_cSearchButton.setVisible(false);
@@ -93,8 +94,9 @@ public class MainPage extends BasePage {
                                 if(message != null && !message.equalsIgnoreCase(""))
                                 {
                                     m_cSearchButton.setVisible(true);
-                                }else 
+                                }else {
                                     m_cSearchButton.setVisible(false);
+                                }
                             }
                             if(message.indexOf('\n') > -1) {
                                 m_cSearchTextField.setText(message.trim());
@@ -105,6 +107,11 @@ public class MainPage extends BasePage {
                     }
                 });
             }//end if(m_cSearchTextField != null)
+            
+            // Set the localized Featured Article title.
+            Label titleLabel = (Label)mainMIDlet.getBuilder().findByName("SubjectTitleLabel", m_cHeaderContainer);
+            titleLabel.setText(mainMIDlet.getString(titleLabel.getText()));
+            
             m_cForm.addShowListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     m_cForm.removeShowListener(this);
@@ -123,8 +130,9 @@ public class MainPage extends BasePage {
     }//end SearchPage()
     
     public void updateSoftkeys() {
-        int i = 0;m_cForm.removeAllCommands();
-        String  str = "";
+        int i = 0;
+        m_cForm.removeAllCommands();
+        String str = "";
         str = mainMIDlet.getString("StoredPagesSK");
         m_cForm.addCommand(new Command(str, COMMAND_STOREDPAGES), i++);
         str = mainMIDlet.getString("SettingsSK");
@@ -168,7 +176,7 @@ public class MainPage extends BasePage {
             case COMMAND_SEARCHBUTTON:
                 //TODO: Network connection to get "did you mean" items.
                 if(m_cSearchButton != null && m_cSearchButton.isVisible()) {
-            performSearch();
+                    performSearch();
                 }
                 break;
             case COMMAND_IMAGE:
