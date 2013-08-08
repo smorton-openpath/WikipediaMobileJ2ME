@@ -6,7 +6,6 @@ package com.components;
 
 import com.Utilities;
 import com.mainMIDlet;
-import com.JsonObject;
 
 import com.sun.lwuit.*;
 
@@ -87,7 +86,7 @@ public class ComponentItem{
     
     public void cleanChildren() {
         m_cComponent = null;
-        JsonObject.cleanChild(m_oAttachedObject);
+        m_oAttachedObject = null;
         m_oAttachedObject = null;
     }//end cleanChildren()
 }
