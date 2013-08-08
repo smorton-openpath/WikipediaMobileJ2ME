@@ -10,6 +10,7 @@ import com.sun.lwuit.io.NetworkManager;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
 import com.sun.lwuit.util.UIBuilder;
+import java.io.InputStreamReader;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -112,7 +113,8 @@ public class mainMIDlet extends MIDlet
             m_rMainBuilder = new UIBuilder();
             m_rMainBuilder.setHomeForm("SearchPageForm");
             m_rMainBuilder.setKeepResourcesInRam(false);
-            m_rMainBuilder.registerCustomComponent("WebBrowser", com.sun.lwuit.io.ui.WebBrowser.class);
+            // Removing the WebBrowser registration to conserve memory.
+            //m_rMainBuilder.registerCustomComponent("WebBrowser", com.sun.lwuit.io.ui.WebBrowser.class);
         }
         return m_rMainBuilder;
     }//end getBuilder()
@@ -222,6 +224,7 @@ public class mainMIDlet extends MIDlet
         }
         m_vScreenStack.addElement(_oPage);
         _oPage.showForm();
+        System.gc();
         Thread.yield();
         System.out.println("!@#$% page memory: "+Runtime.getRuntime().freeMemory());
         //System.out.println("checkSize: "+screenStack.size());
