@@ -143,15 +143,59 @@ public class mainMIDlet extends MIDlet
         }
         return text;
     }//end getString(String _sKey)
+
+    private static StringBuffer getStringsByLangCode(String _sLangCode) {
+        InputStreamReader in = null;
+        StringBuffer temp = new StringBuffer(1024);
+        try {
+            String fName = "/strings/" + _sLangCode + ".properties";
+            in = new InputStreamReader(mainMIDlet.getMIDlet().getClass().getResourceAsStream(fName), "UTF-8");
+            char[] buffer = new char[1024];
+            int read;
+            while ((read = in.read(buffer, 0, buffer.length)) != -1) {
+                temp.append(buffer, 0, read);
+            }
+            //System.out.println(temp.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return temp;
+    }
     
     private static void pullL10N(String _sLangCode) {
         
-        try {
+        System.out.println("_sLangCode=" + _sLangCode);
+        StringBuffer temp = getStringsByLangCode(_sLangCode);
+        if(temp.length() == 0) {
+            temp = getStringsByLangCode("en");
+        }
+        
+        //parse into hashtable
+        m_hMainLocale = new Hashtable();
+        String all[] = Utilities.split(temp.toString(), "\n");
+        temp = null;
+
+        for (int i = 0; i < all.length; i++) {
+            String each[] = Utilities.split(all[i], "=");
+            //System.out.println(each[0] + " " + each[1]);
+            m_hMainLocale.put(each[0], each[1]);
+        }
+        all = null;
+        
+        /*try {
             //throws an exception if all of the strings aren't present
             m_hMainLocale = getResources().getL10N("WikiLoc",_sLangCode);
         }catch(Exception e) {
             m_hMainLocale = getResources().getL10N("WikiLoc","en");
-        }
+        }*/
     }//end pullL10N(String _sLangCode)
     
     public static String getLanguage() {
